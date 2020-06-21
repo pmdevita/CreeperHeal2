@@ -1,0 +1,5 @@
+name: CreeperHeal2
+main: net.pdevita.creeperheal2.CreeperHeal2
+version: 1.0
+api-version: 1.15
+author: pmdevita
