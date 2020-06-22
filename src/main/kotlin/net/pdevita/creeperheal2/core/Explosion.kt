@@ -6,6 +6,7 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
+import org.bukkit.block.Chest
 import org.bukkit.block.Container
 import org.bukkit.scheduler.BukkitTask
 import java.util.*
@@ -41,17 +42,19 @@ class Explosion() {
             // Even though we are destroying the container block, this is still necessary for some reason
             if (state is Container) {
                 plugin.logger.info("Container destroyed")
-                state.inventory.clear()
+                if (state is Chest) {
+                    state.blockInventory.clear()
+                } else {
+                    state.inventory.clear()
+                }
             }
         }
 
-        // Link dependent blocks to their parents
+        // Second pass, link dependent blocks to their parents
         for (block in blockList) {
-//            plugin.logger.info(block.state.blockData.material.toString())
             // Block isn't dependent, can be replaced normally
             if (block.dependent == DependentType.NOT_DEPENDENT) {
                 replaceList.add(block)
-//                plugin.logger.info("Independent")
             } else {
                 val parentLocation = block.getParentBlockLocation()
                 val parentBlock = parentLocation?.let { locations[parentLocation] }
@@ -59,13 +62,10 @@ class Explosion() {
                     // Parent is not part of explosion, this means it must already exist and block can be
                     // added at any point
                     replaceList.add(block)
-//                    plugin.logger.info("Dependent, parent is not part of explosion")
                 } else {
                     // Add block to it's parent's dependency list. Once the parent is added, it's dependencies will
                     // be added to the replaceList
                     parentBlock.dependencies.add(block)
-//                    plugin.logger.info("Dependent")
-//                    plugin.logger.info("${block.state.blockData.material} (${block.state.location}) is dependent on ${parentBlock.state.blockData.material} (${parentLocation})")
                 }
             }
         }
@@ -75,16 +75,18 @@ class Explosion() {
         // Third pass, prepare blocks around the exploded blocks
         // While we still have blocks to check
         while (blockList.isNotEmpty()) {
+            // Check them
             for (explodedBlock in blockList) {
                 val block = explodedBlock.state
+                // A few different kinds of blocks could be above, check that first
                 val upBlock = block.block.getRelative(BlockFace.UP)
-                // First, check that this block is not already accounted for in the explosion
+                // First, check that the above block is not already accounted for in the explosion
                 if (!locations.containsKey(upBlock.location)) {
                     // If the above block is a gravity block, freeze it in place
                     if (plugin.constants.gravityBlocks.contains(upBlock.blockData.material)) {
                         gravityBlocks.add(upBlock.location)
                         locations[upBlock.location] = ExplodedBlock(this, block)
-                        // Else, check if it is a top dependent block
+                    // Else, check if it is a top dependent block, add it to the bottom's dependencies
                     } else if (plugin.constants.dependentBlocks.topBlocks.contains(upBlock.blockData.material)) {
                         val dependentBlock = ExplodedBlock(this, upBlock.state)
                         this.plugin.debugLogger("Found extra top dependent block ${dependentBlock.state.blockData.material}")
@@ -94,7 +96,7 @@ class Explosion() {
                     }
                 }
 
-                // Check side blocks
+                // Check for side-dependent blocks and add them to our dependencies
                 val dependentBlocks = this.checkSides(explodedBlock)
                 if (dependentBlocks.isNotEmpty()) {
                     for (dependentBlock in dependentBlocks) {
@@ -111,11 +113,11 @@ class Explosion() {
             secondaryList.clear()
         }
 
-        var blockstring = ""
-        for (block in blockList) {
-            blockstring += block.state.blockData.material.toString() + " "
-        }
-        plugin.logger.info(blockstring)
+//        var blockstring = ""
+//        for (block in blockList) {
+//            blockstring += block.state.blockData.material.toString() + " "
+//        }
+//        plugin.logger.info(blockstring)
 
         // Ready to go, delete all the blocks
         deleteBlocks(replaceList)
@@ -161,11 +163,11 @@ class Explosion() {
 
     private fun replaceBlocks() {
         if (cancelReplace.get()) {
-            plugin.logger.info("Canceling replacing (probably for warp)")
+            plugin.debugLogger("Canceling replacing (probably for warp)")
             return
         }
 
-        plugin.logger.info("Replacing block")
+        plugin.debugLogger("Replacing block")
         val currentBlock: Block
 
         if (replaceList.isNotEmpty()) {

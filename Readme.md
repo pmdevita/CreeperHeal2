@@ -16,12 +16,13 @@ far more complicated than needed so I rewrote it.
 - [x] Support for side-dependent blocks
 - [x] Support for unaffected dependent blocks whose parent block is affected by the explosion
 - [x] Shutdown/reload safety
+- [ ] Polish (Configuration options, replacing from bottom up, move entities out of the way, popping sound)
 
 ## Edge cases
 - [x] Vines depend from top up/direction facing
+- [x] Double chests
 - [ ] Paintings have multiple dependent blocks
 - [ ] Item frames
 - [ ] Chorus plants need to be rescanned to build their dependency tree
 - [ ] Scaffolding need to be rescanned to build its dependency tree
 - [ ] Minecart rails don't maintain orientation when replaced
-- [ ] Double chest
