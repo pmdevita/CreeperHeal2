@@ -1,13 +1,17 @@
 package net.pdevita.creeperheal2.core
 
-import javafx.geometry.Side
 import net.pdevita.creeperheal2.CreeperHeal2
-import org.bukkit.Bukkit
+import net.pdevita.creeperheal2.utils.sync
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.Container
+import org.bukkit.scheduler.BukkitTask
+import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 private object SideFaces {
     val faces = ArrayList<BlockFace>(listOf(BlockFace.UP, BlockFace.DOWN, BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH))
@@ -15,19 +19,16 @@ private object SideFaces {
 
 class Explosion() {
     lateinit var plugin: CreeperHeal2
-    val blockList = ArrayList<ExplodedBlock>()
-    val replaceList = ArrayList<ExplodedBlock>()
-    val gravityBlocks = ArrayList<Location>()
-    val locations = HashMap<Location, ExplodedBlock>()
+    private val blockList = ArrayList<ExplodedBlock>()
+    private val replaceList = LinkedList<ExplodedBlock>()
+    private val gravityBlocks = ArrayList<Location>()
+    private val locations = HashMap<Location, ExplodedBlock>()
+    private var replaceJob: BukkitTask? = null
+    private var cancelReplace = AtomicBoolean(false)
+
 
     constructor(plugin: CreeperHeal2, initialBlockList: List<Block>) : this() {
         this.plugin = plugin
-        // Version extracting test, just here for convenience/testing
-        var version = Bukkit.getBukkitVersion()
-        version = version.substringBefore("-")
-        val splitVersion = version.split(".")
-        version = splitVersion[1]
-        plugin.logger.info(version)
 
         val blockList = ArrayList<ExplodedBlock>()
         // First pass, get blocks and make changes to them individually
@@ -52,8 +53,8 @@ class Explosion() {
                 replaceList.add(block)
 //                plugin.logger.info("Independent")
             } else {
-                var parentLocation = block.getParentBlockLocation()
-                var parentBlock = parentLocation?.let { locations[parentLocation] }
+                val parentLocation = block.getParentBlockLocation()
+                val parentBlock = parentLocation?.let { locations[parentLocation] }
                 if (parentBlock == null) {
                     // Parent is not part of explosion, this means it must already exist and block can be
                     // added at any point
@@ -121,8 +122,10 @@ class Explosion() {
 
         // Hand off the gravity blocks to be blocked
         plugin.gravity.addBlocks(gravityBlocks)
-//        plugin.server.scheduler.runTaskLater(plugin, TestReplaceLater(this), 100)
-        plugin.server.scheduler.runTaskLater(plugin, ReplaceLater(this), 100)
+//        plugin.server.scheduler.runTaskLater(plugin, ReplaceLater(this), 100)
+        replaceJob = sync(plugin, delayTicks = 100) {
+            this.replaceBlocks()
+        }
     }
 
     private fun checkSides(block: ExplodedBlock): ArrayList<ExplodedBlock> {
@@ -145,7 +148,7 @@ class Explosion() {
         return foundBlocks
     }
 
-    private fun deleteBlocks(blockList: ArrayList<ExplodedBlock>) {
+    private fun deleteBlocks(blockList: Collection<ExplodedBlock>) {
         // Delete blocks, accounting for dependencies first
         for (block in blockList) {
             if (block.dependencies.isNotEmpty()) {
@@ -156,61 +159,75 @@ class Explosion() {
         }
     }
 
-    fun replaceBlocks() {
-        plugin.logger.info("Replacing blocks")
-        var currentBlock: Block
-//        val iterator = replaceList.listIterator()
-//        while (iterator.hasNext()) {
+    private fun replaceBlocks() {
+        if (cancelReplace.get()) {
+            plugin.logger.info("Canceling replacing (probably for warp)")
+            return
+        }
+
+        plugin.logger.info("Replacing block")
+        val currentBlock: Block
+
         if (replaceList.isNotEmpty()) {
-            val block = replaceList[0]
-            replaceList.removeAt(0)
+            val block = replaceList.peek()
             currentBlock = block.state.location.block
             if (currentBlock.blockData.material != Material.AIR) {
                 currentBlock.breakNaturally()
             }
             block.state.update(true)
-//            for (dependency in block.dependencies) {
-//                iterator.add(dependency)
-//            }
             replaceList.addAll(block.dependencies)
+            replaceList.remove()
         }
-//        for (block in blockList) {
-//            block.update(true)
-//        }
+
         if (replaceList.isEmpty()) {
             // Clean up
             plugin.gravity.removeBlocks(gravityBlocks)
             // Remove reference to self to be deleted
             plugin.removeExplosion(this)
         } else {
-            plugin.server.scheduler.runTaskLater(plugin, ReplaceLater(this), 5)
-        }
-    }
-
-    fun testReplaceBlocks() {
-        plugin.logger.info("Test Replacing blocks")
-        var currentBlock: Block
-        for (block in blockList) {
-            if (block.state.blockData.material == Material.WHEAT) {
-                currentBlock = block.state.location.block
-                if (currentBlock.blockData.material != Material.AIR) {
-                    currentBlock.breakNaturally()
+            // If this gets set to null, it's probably because we are warping the rest
+            // Only continue if not null
+            if (!cancelReplace.get()) {
+                this.replaceJob = sync(plugin, delayTicks = 5) {
+                    this.replaceBlocks()
                 }
-                block.state.update(true, false)
+            } else {
+                plugin.debugLogger("Cancelling normal replacement")
             }
         }
     }
 
+    // Replace blocks ASAP (used to finish repairs if plugin is being disabled)
+    fun warpReplaceBlocks(removeThis: Boolean = false) {
+        plugin.debugLogger("Warp replacing...")
+        cancelReplace.set(true)
+        replaceJob?.cancel()
+
+        while (replaceList.isNotEmpty()) {
+            var block = replaceList.poll()
+            plugin.debugLogger(block.state.blockData.material.toString())
+            var currentBlock = block.state.location.block
+            // If block isn't air, it's likely a player put it there. Just break it off normally to give it back to them
+            if (currentBlock.blockData.material != Material.AIR) {
+                currentBlock.breakNaturally()
+            }
+            block.state.update(true)
+            replaceList.addAll(block.dependencies)
+        }
+
+//        var blockstring = ""
+//        for (block in replaceList) {
+//            blockstring += block.state.blockData.material.toString() + " "
+//        }
+//        plugin.logger.info(blockstring)
+
+        // Clean up
+        plugin.gravity.removeBlocks(gravityBlocks)
+        // Remove reference to self to be deleted
+        if (removeThis) {
+            plugin.removeExplosion(this)
+        }
+    }
+
 }
 
-class TestReplaceLater(private var explosion: Explosion): Runnable {
-    override fun run() {
-        explosion.testReplaceBlocks()
-    }
-}
-
-class ReplaceLater(private var explosion: Explosion): Runnable {
-    override fun run() {
-        explosion.replaceBlocks()
-    }
-}

@@ -32,7 +32,7 @@ class Gravity(val plugin: CreeperHeal2) {
             registered = BlockFall(plugin)
             plugin.server.pluginManager.registerEvents(registered!!, plugin)
         }
-        // If we have no blocks to watch and we are registered, deregister
+        // If we have no blocks to watch and we are registered, unregister
         if (blocks.isEmpty() and (registered != null)) {
             plugin.logger.info("Unregistered BlockFall")
             registered?.let { HandlerList.unregisterAll(it) }

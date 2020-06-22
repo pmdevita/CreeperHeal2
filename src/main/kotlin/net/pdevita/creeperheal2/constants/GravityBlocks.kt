@@ -8,8 +8,8 @@ import kotlin.collections.HashSet
 
 // List of blocks that are affected by gravity in this version of MC
 
-class GravityBlocks {
-    var blocks13 = ArrayList<Material>(listOf(
+class GravityBlocks() {
+    private var blocks13 = ArrayList<Material>(listOf(
             Material.ANVIL,
             Material.CHIPPED_ANVIL,
             Material.DAMAGED_ANVIL,
@@ -18,11 +18,11 @@ class GravityBlocks {
             Material.RED_SAND,
             Material.SAND
     ))
-    var blocks14 = ArrayList<Material>(listOf(
+    private var blocks14 = ArrayList<Material>(listOf(
             Material.SCAFFOLDING
     ))
-    var blocks15 = ArrayList<Material>()
-    var concrete = ArrayList<Material>(listOf(
+    private var blocks15 = ArrayList<Material>()
+    private var concrete = ArrayList<Material>(listOf(
             Material.BLACK_CONCRETE_POWDER,
             Material.BLUE_CONCRETE_POWDER,
             Material.BROWN_CONCRETE_POWDER,
@@ -40,10 +40,8 @@ class GravityBlocks {
             Material.WHITE_CONCRETE_POWDER,
             Material.YELLOW_CONCRETE_POWDER
             ))
-    constructor() {
-    }
 
-    fun getBlocks(): HashSet<Material> {
+    fun getBlocks(version: String): HashSet<Material> {
 
         var materials = HashSet<Material>()
         materials.addAll(blocks13)

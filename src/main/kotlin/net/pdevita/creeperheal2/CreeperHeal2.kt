@@ -1,18 +1,18 @@
 package net.pdevita.creeperheal2
 
+import net.pdevita.creeperheal2.commands.Commands
 import net.pdevita.creeperheal2.constants.ConstantsManager
 import net.pdevita.creeperheal2.core.Explosion
 import net.pdevita.creeperheal2.core.Gravity
 import net.pdevita.creeperheal2.events.EntityExplode
-import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.plugin.java.JavaPlugin
 
 class CreeperHeal2 : JavaPlugin {
     private val explosions: MutableList<Explosion> = ArrayList()
     val gravity = Gravity(this)
-    var debug = false
-    lateinit var constants: ConstantsManager
+    private var debug = false
+    val constants = ConstantsManager()
 
     constructor() : super()
 
@@ -23,8 +23,8 @@ class CreeperHeal2 : JavaPlugin {
         reloadConfig()
         debug = config.getBoolean("debug")
 
-        constants = ConstantsManager()
         registerEvents()
+        getCommand("ch")!!.setExecutor(Commands(this))
     }
 
     private fun registerEvents() {
@@ -45,5 +45,17 @@ class CreeperHeal2 : JavaPlugin {
         }
     }
 
+    fun warpExplosions() {
+        for (explosion in explosions) {
+            explosion.warpReplaceBlocks()
+        }
+        explosions.clear()
+    }
+
+    override fun onDisable() {
+        super.onDisable()
+        // Quickly replace all blocks before shutdown
+        this.warpExplosions()
+    }
 }
 

@@ -1,6 +1,11 @@
-# CreeperHeal2
+# CreeperHeal2 (TBD)
 
 All the fun of explosions with none of the cleanup!
+
+This plugin is meant to be a spiritual successor to the original CreeperHeal plugin https://github.com/nitnelave/CreeperHeal. 
+Unfortunately, it has not been updated in 3 years. Initially I was going to just fork it but the implementation seems 
+far more complicated than needed so I rewrote it.
+
 
 # Current Progress
 
@@ -10,6 +15,7 @@ All the fun of explosions with none of the cleanup!
 - [x] Support for top-dependent blocks
 - [x] Support for side-dependent blocks
 - [x] Support for unaffected dependent blocks whose parent block is affected by the explosion
+- [x] Shutdown/reload safety
 
 ## Edge cases
 - [x] Vines depend from top up/direction facing
