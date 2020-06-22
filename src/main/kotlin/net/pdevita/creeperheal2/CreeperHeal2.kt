@@ -11,20 +11,20 @@ import org.bukkit.plugin.java.JavaPlugin
 class CreeperHeal2 : JavaPlugin {
     private val explosions: MutableList<Explosion> = ArrayList()
     val gravity = Gravity(this)
+    var debug = false
     lateinit var constants: ConstantsManager
 
     constructor() : super()
 
     override fun onEnable() {
         super.onEnable()
+        // Init config file
+        saveDefaultConfig()
+        reloadConfig()
+        debug = config.getBoolean("debug")
+
         constants = ConstantsManager()
         registerEvents()
-        logger.info("CreeperHeal2 Enabled")
-        if (constants.dependentBlocks.topBlocks.contains(Material.WHEAT)) {
-            logger.info("hell yeah dude")
-        } else {
-            logger.info("aww hell naw dude")
-        }
     }
 
     private fun registerEvents() {
@@ -37,6 +37,12 @@ class CreeperHeal2 : JavaPlugin {
 
     fun removeExplosion(explosion: Explosion) {
         explosions.remove(explosion)
+    }
+
+    fun debugLogger(message: String) {
+        if (this.debug) {
+            this.logger.info(message)
+        }
     }
 
 }

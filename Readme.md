@@ -9,7 +9,7 @@ All the fun of explosions with none of the cleanup!
 - [x] Support for gravity-affected blocks
 - [x] Support for top-dependent blocks
 - [x] Support for side-dependent blocks
-- [ ] Support for unaffected dependent blocks whose parent block is affected by the explosion
+- [x] Support for unaffected dependent blocks whose parent block is affected by the explosion
 
 ## Edge cases
 - [x] Vines depend from top up/direction facing

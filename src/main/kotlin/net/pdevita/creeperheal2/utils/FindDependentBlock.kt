@@ -5,7 +5,9 @@ import org.bukkit.Material
 import org.bukkit.block.BlockFace
 import org.bukkit.block.BlockState
 import org.bukkit.block.data.Directional
+import org.bukkit.block.data.FaceAttachable
 import org.bukkit.block.data.MultipleFacing
+import org.bukkit.block.data.type.Switch
 
 interface FindDependentBlock {
     fun reorient(state: BlockState): Location?
@@ -45,4 +47,16 @@ object Vine: FindDependentBlock {
         return null
     }
 }
+
+object FaceAttachable: FindDependentBlock {
+    override fun reorient(state: BlockState): Location? {
+        val faceAttachable = state.blockData as FaceAttachable
+        return when (faceAttachable.attachedFace) {
+            FaceAttachable.AttachedFace.CEILING -> state.block.getRelative(BlockFace.UP).location
+            FaceAttachable.AttachedFace.FLOOR -> state.block.getRelative(BlockFace.DOWN).location
+            FaceAttachable.AttachedFace.WALL -> Behind.reorient(state)
+        }
+    }
+}
+
 

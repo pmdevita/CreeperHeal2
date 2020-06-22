@@ -1,11 +1,17 @@
 package net.pdevita.creeperheal2.core
 
+import javafx.geometry.Side
 import net.pdevita.creeperheal2.CreeperHeal2
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block
+import org.bukkit.block.BlockFace
 import org.bukkit.block.Container
+
+private object SideFaces {
+    val faces = ArrayList<BlockFace>(listOf(BlockFace.UP, BlockFace.DOWN, BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH))
+}
 
 class Explosion() {
     lateinit var plugin: CreeperHeal2
@@ -16,12 +22,14 @@ class Explosion() {
 
     constructor(plugin: CreeperHeal2, initialBlockList: List<Block>) : this() {
         this.plugin = plugin
-        // Version extracting test, just here for convenience
+        // Version extracting test, just here for convenience/testing
         var version = Bukkit.getBukkitVersion()
         version = version.substringBefore("-")
         val splitVersion = version.split(".")
         version = splitVersion[1]
         plugin.logger.info(version)
+
+        val blockList = ArrayList<ExplodedBlock>()
         // First pass, get blocks and make changes to them individually
         for (block in initialBlockList) {
             val state = block.state
@@ -29,12 +37,11 @@ class Explosion() {
             blockList.add(explodedBlock)
             locations[block.location] = explodedBlock
             // Clear containers since we keep inventory
+            // Even though we are destroying the container block, this is still necessary for some reason
             if (state is Container) {
                 plugin.logger.info("Container destroyed")
                 state.inventory.clear()
             }
-            // Don't update the first round so crops/redstone don't pop off
-//            block.type = Material.AIR
         }
 
         // Link dependent blocks to their parents
@@ -62,19 +69,45 @@ class Explosion() {
             }
         }
 
-        // Second pass, prepare blocks around the exploded blocks
-        for (explodedBlock in blockList) {
-            val block = explodedBlock.state
-            // Check above for a GravityBlock
-            val loc = Location(block.world, block.x.toDouble(), (block.y + 1).toDouble(), block.z.toDouble())
-            if (plugin.constants.gravityBlocks.contains(loc.block.blockData.material) and !locations.containsKey(loc)) {
-                plugin.logger.info("Found gravity block $loc")
-                gravityBlocks.add(loc)
+        val secondaryList = ArrayList<ExplodedBlock>()
+
+        // Third pass, prepare blocks around the exploded blocks
+        // While we still have blocks to check
+        while (blockList.isNotEmpty()) {
+            for (explodedBlock in blockList) {
+                val block = explodedBlock.state
+                val upBlock = block.block.getRelative(BlockFace.UP)
+                // First, check that this block is not already accounted for in the explosion
+                if (!locations.containsKey(upBlock.location)) {
+                    // If the above block is a gravity block, freeze it in place
+                    if (plugin.constants.gravityBlocks.contains(upBlock.blockData.material)) {
+                        gravityBlocks.add(upBlock.location)
+                        locations[upBlock.location] = ExplodedBlock(this, block)
+                        // Else, check if it is a top dependent block
+                    } else if (plugin.constants.dependentBlocks.topBlocks.contains(upBlock.blockData.material)) {
+                        val dependentBlock = ExplodedBlock(this, upBlock.state)
+                        this.plugin.debugLogger("Found extra top dependent block ${dependentBlock.state.blockData.material}")
+                        locations[upBlock.location] = dependentBlock
+                        secondaryList.add(dependentBlock)
+                        explodedBlock.dependencies.add(dependentBlock)
+                    }
+                }
+
+                // Check side blocks
+                val dependentBlocks = this.checkSides(explodedBlock)
+                if (dependentBlocks.isNotEmpty()) {
+                    for (dependentBlock in dependentBlocks) {
+                        this.plugin.debugLogger("Found extra side dependent block ${dependentBlock.state.blockData.material}")
+                        locations[dependentBlock.state.location] = dependentBlock
+                    }
+                    secondaryList.addAll(dependentBlocks)
+                    explodedBlock.dependencies.addAll(dependentBlocks)
+                }
             }
-            // Force block updates so unaffected blocks like liquids react
-//            val replacedBlock = block.location.block;
-//            replacedBlock.setType(Material.AIR)
-//            block.location.block.state.update(true, true)
+            this.blockList.addAll(blockList)
+            blockList.clear()
+            blockList.addAll(secondaryList)
+            secondaryList.clear()
         }
 
         var blockstring = ""
@@ -92,7 +125,27 @@ class Explosion() {
         plugin.server.scheduler.runTaskLater(plugin, ReplaceLater(this), 100)
     }
 
-    fun deleteBlocks(blockList: ArrayList<ExplodedBlock>) {
+    private fun checkSides(block: ExplodedBlock): ArrayList<ExplodedBlock> {
+        val foundBlocks = ArrayList<ExplodedBlock>()
+        // For all six faces
+        for (face in SideFaces.faces) {
+            val checkingBlock = block.state.block.getRelative(face)
+            // Check if that block isn't already a part of the explosion
+            if (!locations.containsKey(checkingBlock.location)) {
+                val explodedBlock = ExplodedBlock(this, checkingBlock.state)
+                // Check the block is side dependent
+                if (explodedBlock.dependent == DependentType.SIDE_DEPENDENT) {
+                    // Check the block is side dependent on this block
+                    if (explodedBlock.getParentBlockLocation() == block.state.location) {
+                        foundBlocks.add(explodedBlock)
+                    }
+                }
+            }
+        }
+        return foundBlocks
+    }
+
+    private fun deleteBlocks(blockList: ArrayList<ExplodedBlock>) {
         // Delete blocks, accounting for dependencies first
         for (block in blockList) {
             if (block.dependencies.isNotEmpty()) {

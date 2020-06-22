@@ -1,9 +1,6 @@
 package net.pdevita.creeperheal2.constants
 
-import net.pdevita.creeperheal2.utils.Behind
-import net.pdevita.creeperheal2.utils.InFrontOf
-import net.pdevita.creeperheal2.utils.FindDependentBlock
-import net.pdevita.creeperheal2.utils.Vine
+import net.pdevita.creeperheal2.utils.*
 import org.bukkit.Material
 
 // List of blocks that need to be attached to a block in this version of MC
@@ -16,8 +13,6 @@ class DependentBlocks {
         val blocks = Blocks13()
         topBlocks.addAll(blocks.topBlocks)
         sideBlocks.putAll(blocks.sideBlocks)
-        val gb = GravityBlocks()
-        topBlocks.addAll(gb.getBlocks())
     }
 }
 
@@ -174,9 +169,9 @@ class Blocks13: VersionBlocks {
             Material.ZOMBIE_HEAD
     ))
     override val sideBlocks = hashMapOf(
-            Material.ACACIA_BUTTON to Behind,
+            Material.ACACIA_BUTTON to FaceAttachable,
             Material.ACACIA_WALL_SIGN to Behind,
-            Material.BIRCH_BUTTON to Behind,
+            Material.BIRCH_BUTTON to FaceAttachable,
             Material.BIRCH_WALL_SIGN to Behind,
             Material.BLACK_WALL_BANNER to Behind,
             Material.BLUE_WALL_BANNER to Behind,
@@ -186,7 +181,7 @@ class Blocks13: VersionBlocks {
             Material.COCOA to InFrontOf,
             Material.CREEPER_WALL_HEAD to Behind,
             Material.CYAN_WALL_BANNER to Behind,
-            Material.DARK_OAK_BUTTON to Behind,
+            Material.DARK_OAK_BUTTON to FaceAttachable,
             Material.DARK_OAK_WALL_SIGN to Behind,
             Material.DEAD_BRAIN_CORAL_WALL_FAN to Behind,
             Material.DEAD_BUBBLE_CORAL_WALL_FAN to Behind,
@@ -198,16 +193,16 @@ class Blocks13: VersionBlocks {
             Material.GRAY_WALL_BANNER to Behind,
             Material.GREEN_WALL_BANNER to Behind,
             Material.HORN_CORAL_WALL_FAN to Behind,
-            Material.JUNGLE_BUTTON to Behind,
+            Material.JUNGLE_BUTTON to FaceAttachable,
             Material.JUNGLE_WALL_SIGN to Behind,
             Material.LADDER to Behind,
-            Material.LEVER to Behind,
+            Material.LEVER to FaceAttachable,
             Material.LIGHT_BLUE_WALL_BANNER to Behind,
             Material.LIGHT_GRAY_WALL_BANNER to Behind,
             Material.LIME_WALL_BANNER to Behind,
             Material.MAGENTA_WALL_BANNER to Behind,
             Material.MOVING_PISTON to Behind,
-            Material.OAK_BUTTON to Behind,
+            Material.OAK_BUTTON to FaceAttachable,
             Material.OAK_WALL_SIGN to Behind,
             Material.ORANGE_WALL_BANNER to Behind,
             Material.PAINTING to Behind,
@@ -219,9 +214,9 @@ class Blocks13: VersionBlocks {
             Material.REDSTONE_WALL_TORCH to Behind,
             Material.SCAFFOLDING to Behind,
             Material.SKELETON_WALL_SKULL to Behind,
-            Material.SPRUCE_BUTTON to Behind,
+            Material.SPRUCE_BUTTON to FaceAttachable,
             Material.SPRUCE_WALL_SIGN to Behind,
-            Material.STONE_BUTTON to Behind,
+            Material.STONE_BUTTON to FaceAttachable,
             Material.TRIPWIRE_HOOK to Behind,
             Material.TUBE_CORAL_WALL_FAN to Behind,
             Material.VINE to Vine,
