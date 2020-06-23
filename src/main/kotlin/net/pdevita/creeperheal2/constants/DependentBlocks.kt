@@ -5,7 +5,7 @@ import org.bukkit.Material
 
 // List of blocks that need to be attached to a block in this version of MC
 
-class DependentBlocks(private val version: String) {
+class DependentBlocks(private val version: ArrayList<Int>) {
     val topBlocks = HashSet<Material>()
     val sideBlocks = HashMap<Material, FindDependentBlock>()
 

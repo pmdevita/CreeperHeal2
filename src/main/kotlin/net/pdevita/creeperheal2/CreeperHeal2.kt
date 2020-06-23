@@ -1,10 +1,11 @@
 package net.pdevita.creeperheal2
 
 import net.pdevita.creeperheal2.commands.Commands
+import net.pdevita.creeperheal2.config.ConfigManager
 import net.pdevita.creeperheal2.constants.ConstantsManager
 import net.pdevita.creeperheal2.core.Explosion
 import net.pdevita.creeperheal2.core.Gravity
-import net.pdevita.creeperheal2.events.EntityExplode
+import net.pdevita.creeperheal2.events.Explode
 import org.bukkit.block.Block
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -12,7 +13,8 @@ class CreeperHeal2 : JavaPlugin {
     private val explosions: MutableList<Explosion> = ArrayList()
     val gravity = Gravity(this)
     private var debug = false
-    val constants = ConstantsManager()
+    val constants = ConstantsManager(this)
+    lateinit var settings: ConfigManager
 
     constructor() : super()
 
@@ -22,13 +24,15 @@ class CreeperHeal2 : JavaPlugin {
         saveDefaultConfig()
         reloadConfig()
         debug = config.getBoolean("debug")
+        settings = ConfigManager(this, config)
+        constants.printVersion()
 
         registerEvents()
         getCommand("ch")!!.setExecutor(Commands(this))
     }
 
     private fun registerEvents() {
-        server.pluginManager.registerEvents(EntityExplode(this), this)
+        server.pluginManager.registerEvents(Explode(this), this)
     }
 
     fun createNewExplosion(blockList: List<Block>) {

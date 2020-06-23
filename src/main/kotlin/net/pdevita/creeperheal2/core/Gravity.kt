@@ -2,10 +2,7 @@ package net.pdevita.creeperheal2.core
 
 import net.pdevita.creeperheal2.CreeperHeal2
 import net.pdevita.creeperheal2.events.BlockFall
-import net.pdevita.creeperheal2.events.EntityExplode
 import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
 // Manage all known sand blocks left behind in explosions and block them from falling

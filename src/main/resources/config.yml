@@ -1,1 +1,23 @@
+# CreeperHeal2
+
+# Delay before a hole is fixed in seconds
+initial-delay: 45
+
+# Delay between individual block replacements in ticks
+# Zero makes it replace everything at once
+between-blocks-delay: 20
+
+# Types of explosions to handle
+types:
+  creeper: true
+  tnt: false
+  fireball: false
+  ghast: false
+  wither: false
+  minecart-tnt: false
+  ender-crystal: false
+  bed: true
+
+
+# Enable debug mode
 debug: true

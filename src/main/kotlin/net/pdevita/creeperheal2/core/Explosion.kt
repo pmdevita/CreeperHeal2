@@ -4,6 +4,7 @@ import net.pdevita.creeperheal2.CreeperHeal2
 import net.pdevita.creeperheal2.utils.sync
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.World
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.Chest
@@ -125,7 +126,7 @@ class Explosion() {
         // Hand off the gravity blocks to be blocked
         plugin.gravity.addBlocks(gravityBlocks)
 //        plugin.server.scheduler.runTaskLater(plugin, ReplaceLater(this), 100)
-        replaceJob = sync(plugin, delayTicks = 100) {
+        replaceJob = sync(plugin, delayTicks = plugin.settings.general.initialDelay * 20L) {
             this.replaceBlocks()
         }
     }
@@ -175,7 +176,15 @@ class Explosion() {
             currentBlock = block.state.location.block
             if (currentBlock.blockData.material != Material.AIR) {
                 currentBlock.breakNaturally()
+            } else {
+                val entities = currentBlock.location.world?.getNearbyEntities(currentBlock.location, .5, .5, .5)
+                if (entities != null) {
+                    for (entity in entities) {
+                        entity.teleport(currentBlock.getRelative(BlockFace.UP).location)
+                    }
+                }
             }
+
             block.state.update(true)
             replaceList.addAll(block.dependencies)
             replaceList.remove()
@@ -190,7 +199,7 @@ class Explosion() {
             // If this gets set to null, it's probably because we are warping the rest
             // Only continue if not null
             if (!cancelReplace.get()) {
-                this.replaceJob = sync(plugin, delayTicks = 5) {
+                this.replaceJob = sync(plugin, delayTicks = plugin.settings.general.betweenBlocksDelay.toLong()) {
                     this.replaceBlocks()
                 }
             } else {
@@ -206,12 +215,19 @@ class Explosion() {
         replaceJob?.cancel()
 
         while (replaceList.isNotEmpty()) {
-            var block = replaceList.poll()
+            val block = replaceList.poll()
             plugin.debugLogger(block.state.blockData.material.toString())
-            var currentBlock = block.state.location.block
+            val currentBlock = block.state.location.block
             // If block isn't air, it's likely a player put it there. Just break it off normally to give it back to them
             if (currentBlock.blockData.material != Material.AIR) {
                 currentBlock.breakNaturally()
+            } else {
+                val entities = currentBlock.location.world?.getNearbyEntities(currentBlock.location, .5, .5, .5)
+                if (entities != null) {
+                    for (entity in entities) {
+                        entity.teleport(currentBlock.getRelative(BlockFace.UP).location)
+                    }
+                }
             }
             block.state.update(true)
             replaceList.addAll(block.dependencies)
