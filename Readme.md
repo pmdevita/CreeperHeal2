@@ -12,6 +12,10 @@ Download the latest release and place it in your plugins folder. The config.yml 
 time the plugin is run with the server. You can also look at it 
 [here](https://github.com/pmdevita/CreeperHeal2/blob/master/src/main/resources/config.yml).
 
+Only 1.15 is supported right now, but I will be adding 1.13 and 1.14 support. This plugin 
+technically supports 1.16 but new blocks may not get replaced properly. In general, due to the nature of this 
+kind of plugin, every major release of Minecraft will need an update to fully support it.
+
 # Warning
 
 This plugin is still in beta and while I would consider it safer than the original on 
