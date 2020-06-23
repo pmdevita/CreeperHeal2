@@ -25,13 +25,13 @@ class Gravity(val plugin: CreeperHeal2) {
     private fun updateEventRegistration() {
         // If we have blocks to watch and aren't registered, register
         if (blocks.isNotEmpty() and (registered == null)) {
-            plugin.logger.info("Registered BlockFall")
+            plugin.debugLogger("Registered BlockFall")
             registered = BlockFall(plugin)
             plugin.server.pluginManager.registerEvents(registered!!, plugin)
         }
         // If we have no blocks to watch and we are registered, unregister
         if (blocks.isEmpty() and (registered != null)) {
-            plugin.logger.info("Unregistered BlockFall")
+            plugin.debugLogger("Unregistered BlockFall")
             registered?.let { HandlerList.unregisterAll(it) }
             registered = null
         }

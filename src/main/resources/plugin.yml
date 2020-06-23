@@ -6,5 +6,5 @@ author: pmdevita
 
 commands:
   ch:
-    description: CreeperHeal2 Commands
-    usage: /ch
+    description: CreeperHeal2 commands
+    usage: /ch <command>

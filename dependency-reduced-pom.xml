@@ -68,6 +68,14 @@
             </configuration>
           </execution>
         </executions>
+        <configuration>
+          <relocations>
+            <relocation>
+              <pattern>org.bstats</pattern>
+              <shadedPattern>net.pdevita.creeperheal2</shadedPattern>
+            </relocation>
+          </relocations>
+        </configuration>
       </plugin>
     </plugins>
   </build>
@@ -75,6 +83,10 @@
     <repository>
       <id>spigot-repo</id>
       <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+    </repository>
+    <repository>
+      <id>CodeMC</id>
+      <url>https://repo.codemc.org/repository/maven-public</url>
     </repository>
   </repositories>
   <dependencies>

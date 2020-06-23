@@ -13,19 +13,20 @@ class ConfigManager(private val plugin: CreeperHeal2, private val config: FileCo
 class General(private val config: FileConfiguration) {
     val initialDelay = config.getInt("initial-delay", 45)
     val betweenBlocksDelay = config.getInt("between-blocks-delay", 20)
+    val bstats = config.getBoolean("bstats", true)
 }
 
 class ExplosionTypes(private val config: FileConfiguration) {
-    private val tnt = config.getBoolean("types.tnt")
-    private val creeper = config.getBoolean("types.creeper")
+    private val tnt = config.getBoolean("types.tnt", false)
+    private val creeper = config.getBoolean("types.creeper", true)
     // Dragon fireballs do not do any impact damage so even though it is
     // considered an explosion, it's not really something we need to worry about
 //    val endDragon = config.getBoolean("types.end_dragon")
-    private val ghast = config.getBoolean("types.ghast")
-    private val wither = config.getBoolean("types.wither")
-    private val endCrystal = config.getBoolean("types.ender-crystal")
-    private val minecartTnt = config.getBoolean("types.minecart-tnt")
-    private val bed = config.getBoolean("types.bed")
+    private val ghast = config.getBoolean("types.ghast", false)
+    private val wither = config.getBoolean("types.wither", false)
+    private val endCrystal = config.getBoolean("types.ender-crystal", false)
+    private val minecartTnt = config.getBoolean("types.minecart-tnt", false)
+    private val bed = config.getBoolean("types.bed", false)
 
     fun allowExplosionEntity(entity: EntityType): Boolean {
         return when(entity) {
@@ -39,7 +40,7 @@ class ExplosionTypes(private val config: FileConfiguration) {
         }
     }
 
-    fun allowExplosionBlock(block: Material): Boolean {
+    fun allowExplosionBlock(/*block: Material*/): Boolean {
         // Only beds cause this?
         return bed
     }

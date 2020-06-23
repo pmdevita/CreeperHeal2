@@ -20,12 +20,4 @@ class ConstantsManager(private val plugin: CreeperHeal2) {
         gravityBlocks = GravityBlocks().getBlocks(versionList)
         dependentBlocks = DependentBlocks(versionList)
     }
-
-    fun printVersion() {
-        var version = Bukkit.getBukkitVersion()
-        version = version.substringBefore("-")
-        val splitVersion = version.split(".")
-        version = splitVersion[0] + splitVersion[1]
-        plugin.debugLogger(version)
-    }
 }

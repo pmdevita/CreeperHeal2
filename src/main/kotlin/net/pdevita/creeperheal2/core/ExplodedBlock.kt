@@ -36,5 +36,4 @@ class ExplodedBlock(private val explosion: Explosion, val state: BlockState) {
         }
         return null
     }
-
 }

@@ -11,13 +11,14 @@ between-blocks-delay: 20
 types:
   creeper: true
   tnt: false
-  fireball: false
   ghast: false
   wither: false
   minecart-tnt: false
   ender-crystal: false
-  bed: true
+  bed: false
 
+# Enable stats/usage data collection
+bstats: true
 
 # Enable debug mode
-debug: true
+debug: false

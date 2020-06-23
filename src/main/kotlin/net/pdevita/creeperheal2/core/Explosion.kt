@@ -2,9 +2,7 @@ package net.pdevita.creeperheal2.core
 
 import net.pdevita.creeperheal2.CreeperHeal2
 import net.pdevita.creeperheal2.utils.sync
-import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.World
+import org.bukkit.*
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.Chest
@@ -14,6 +12,7 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import kotlin.random.Random
 
 private object SideFaces {
     val faces = ArrayList<BlockFace>(listOf(BlockFace.UP, BlockFace.DOWN, BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH))
@@ -21,7 +20,7 @@ private object SideFaces {
 
 class Explosion() {
     lateinit var plugin: CreeperHeal2
-    private val blockList = ArrayList<ExplodedBlock>()
+//    private val blockList = ArrayList<ExplodedBlock>()
     private val replaceList = LinkedList<ExplodedBlock>()
     private val gravityBlocks = ArrayList<Location>()
     private val locations = HashMap<Location, ExplodedBlock>()
@@ -32,7 +31,12 @@ class Explosion() {
     constructor(plugin: CreeperHeal2, initialBlockList: List<Block>) : this() {
         this.plugin = plugin
 
+        // Final full list of all independent blocks (with dependents linked to them)
+        val finalBlockList = ArrayList<ExplodedBlock>()
+        // List of all blocks, including dependencies, in this stage of search
+        // When we search out for other dependencies, this list will be cleared to hold the next layer
         val blockList = ArrayList<ExplodedBlock>()
+
         // First pass, get blocks and make changes to them individually
         for (block in initialBlockList) {
             val state = block.state
@@ -42,7 +46,7 @@ class Explosion() {
             // Clear containers since we keep inventory
             // Even though we are destroying the container block, this is still necessary for some reason
             if (state is Container) {
-                plugin.logger.info("Container destroyed")
+                plugin.debugLogger("Container destroyed")
                 if (state is Chest) {
                     state.blockInventory.clear()
                 } else {
@@ -55,14 +59,14 @@ class Explosion() {
         for (block in blockList) {
             // Block isn't dependent, can be replaced normally
             if (block.dependent == DependentType.NOT_DEPENDENT) {
-                replaceList.add(block)
+                finalBlockList.add(block)
             } else {
                 val parentLocation = block.getParentBlockLocation()
                 val parentBlock = parentLocation?.let { locations[parentLocation] }
                 if (parentBlock == null) {
                     // Parent is not part of explosion, this means it must already exist and block can be
                     // added at any point
-                    replaceList.add(block)
+                    finalBlockList.add(block)
                 } else {
                     // Add block to it's parent's dependency list. Once the parent is added, it's dependencies will
                     // be added to the replaceList
@@ -71,6 +75,7 @@ class Explosion() {
             }
         }
 
+        // Put the extra dependent blocks in here to differentiate them from the previous layer
         val secondaryList = ArrayList<ExplodedBlock>()
 
         // Third pass, prepare blocks around the exploded blocks
@@ -108,10 +113,13 @@ class Explosion() {
                     explodedBlock.dependencies.addAll(dependentBlocks)
                 }
             }
-            this.blockList.addAll(blockList)
+//            this.blockList.addAll(blockList)
             blockList.clear()
             blockList.addAll(secondaryList)
             secondaryList.clear()
+
+//            blockList = secondaryList
+//            secondaryList = ArrayList<ExplodedBlock>()
         }
 
 //        var blockstring = ""
@@ -119,6 +127,10 @@ class Explosion() {
 //            blockstring += block.state.blockData.material.toString() + " "
 //        }
 //        plugin.logger.info(blockstring)
+
+        // Sort by Z and put in replacelist
+        finalBlockList.sortBy { it.state.y }
+        replaceList.addAll(finalBlockList)
 
         // Ready to go, delete all the blocks
         deleteBlocks(replaceList)
@@ -177,15 +189,19 @@ class Explosion() {
             if (currentBlock.blockData.material != Material.AIR) {
                 currentBlock.breakNaturally()
             } else {
-                val entities = currentBlock.location.world?.getNearbyEntities(currentBlock.location, .5, .5, .5)
+                // If this is air, there is a chance there is an entity in the space
+                // Move it out of the way so it doesn't suffocate
+                // If it's only slightly in the block, it will get pushed out normally so avoid that
+                val entities = currentBlock.location.world?.getNearbyEntities(currentBlock.location, .4, .5, .4)
                 if (entities != null) {
                     for (entity in entities) {
-                        entity.teleport(currentBlock.getRelative(BlockFace.UP).location)
+                        entity.teleport(entity.location.add(0.0, 1.0, 0.0))
                     }
                 }
             }
 
             block.state.update(true)
+            block.state.location.world?.playSound(block.state.location, Sound.ENTITY_ITEM_PICKUP, SoundCategory.BLOCKS, .05F, .9F + Random.Default.nextFloat() * .3F)
             replaceList.addAll(block.dependencies)
             replaceList.remove()
         }
