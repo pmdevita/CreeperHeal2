@@ -16,7 +16,7 @@ class Commands(private val plugin: CreeperHeal2): CommandExecutor {
         if (args.isNotEmpty()) {
             if (player != null) {
                 when (args[0]) {
-                    "warp" -> if (player.hasPermission("creeperheal.warp")) { plugin.warpExplosions() }
+                    "warp" -> if (player.hasPermission("creeperheal2.warp")) { plugin.warpExplosions() }
                 }
             } else {
                 when (args[0]) {
