@@ -1,6 +1,7 @@
 package net.pdevita.creeperheal2.core
 
 import net.pdevita.creeperheal2.CreeperHeal2
+import net.pdevita.creeperheal2.utils.async
 import net.pdevita.creeperheal2.utils.sync
 import org.bukkit.*
 import org.bukkit.block.Block
@@ -114,6 +115,12 @@ class Explosion() {
                 }
             }
 //            this.blockList.addAll(blockList)
+            if (plugin.stats != null) {
+                val numOfBlocks = blockList.size
+                async(plugin) {
+                    val total = plugin.stats!!.totalBlocks.addAndGet(numOfBlocks)
+                }
+            }
             blockList.clear()
             blockList.addAll(secondaryList)
             secondaryList.clear()
@@ -140,6 +147,12 @@ class Explosion() {
 //        plugin.server.scheduler.runTaskLater(plugin, ReplaceLater(this), 100)
         replaceJob = sync(plugin, delayTicks = plugin.settings.general.initialDelay * 20L) {
             this.replaceBlocks()
+        }
+
+        if (plugin.stats != null) {
+            async(plugin) {
+                plugin.stats!!.totalExplosions.incrementAndGet()
+            }
         }
     }
 

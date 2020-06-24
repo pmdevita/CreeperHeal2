@@ -6,6 +6,7 @@ import net.pdevita.creeperheal2.constants.ConstantsManager
 import net.pdevita.creeperheal2.core.Explosion
 import net.pdevita.creeperheal2.core.Gravity
 import net.pdevita.creeperheal2.events.Explode
+import net.pdevita.creeperheal2.utils.Stats
 import org.bstats.bukkit.Metrics
 import org.bukkit.block.Block
 import org.bukkit.plugin.java.JavaPlugin
@@ -16,6 +17,7 @@ class CreeperHeal2 : JavaPlugin {
     private var debug = false
     val constants = ConstantsManager(this)
     lateinit var settings: ConfigManager
+    var stats: Stats? = null
 
     constructor() : super()
 
@@ -27,7 +29,7 @@ class CreeperHeal2 : JavaPlugin {
         debug = config.getBoolean("debug")
         settings = ConfigManager(this, config)
         if (settings.general.bstats) {
-            this.registerBstats()
+            this.stats = Stats(this)
         }
 
         registerEvents()
@@ -63,10 +65,6 @@ class CreeperHeal2 : JavaPlugin {
         super.onDisable()
         // Quickly replace all blocks before shutdown
         this.warpExplosions()
-    }
-
-    private fun registerBstats() {
-        val metrics = Metrics(this, 7940)
     }
 }
 
