@@ -12,7 +12,7 @@ import org.bukkit.block.Block
 import org.bukkit.plugin.java.JavaPlugin
 
 class CreeperHeal2 : JavaPlugin {
-    private val explosions: MutableList<Explosion> = ArrayList()
+    private val explosions: ArrayList<Explosion> = ArrayList()
     val gravity = Gravity(this)
     private var debug = false
     val constants = ConstantsManager(this)

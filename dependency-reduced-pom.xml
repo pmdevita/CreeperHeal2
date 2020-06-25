@@ -72,7 +72,15 @@
           <relocations>
             <relocation>
               <pattern>org.bstats</pattern>
-              <shadedPattern>net.pdevita.creeperheal2</shadedPattern>
+              <shadedPattern>net.pdevita.creeperheal2.libs</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>org.jetbrains</pattern>
+              <shadedPattern>net.pdevita.creeperheal2.libs</shadedPattern>
+            </relocation>
+            <relocation>
+              <pattern>kotlin</pattern>
+              <shadedPattern>net.pdevita.creeperheal2.libs.kotlin</shadedPattern>
             </relocation>
           </relocations>
         </configuration>

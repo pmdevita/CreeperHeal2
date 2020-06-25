@@ -1,5 +1,7 @@
 # CreeperHeal2 (v1.0 Beta) (1.15)
 
+[Spigot Plugin Page](https://www.spigotmc.org/resources/creeperheal2.80585/)
+
 All the fun of explosions with none of the cleanup!
 
 This plugin is meant to be a spiritual successor to the original CreeperHeal plugin https://github.com/nitnelave/CreeperHeal. 

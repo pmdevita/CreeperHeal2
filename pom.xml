@@ -128,7 +128,17 @@
                     <relocation>
                         <pattern>org.bstats</pattern>
                         <!-- Replace this with your package! -->
-                        <shadedPattern>net.pdevita.creeperheal2</shadedPattern>
+                        <shadedPattern>net.pdevita.creeperheal2.libs</shadedPattern>
+                    </relocation>
+                    <relocation>
+                        <pattern>org.jetbrains</pattern>
+                        <!-- Replace this with your package! -->
+                        <shadedPattern>net.pdevita.creeperheal2.libs</shadedPattern>
+                    </relocation>
+                    <relocation>
+                        <pattern>kotlin</pattern>
+                        <!-- Replace this with your package! -->
+                        <shadedPattern>net.pdevita.creeperheal2.libs.kotlin</shadedPattern>
                     </relocation>
                 </relocations>
             </configuration>

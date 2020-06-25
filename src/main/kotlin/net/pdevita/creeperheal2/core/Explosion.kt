@@ -118,7 +118,7 @@ class Explosion() {
             if (plugin.stats != null) {
                 val numOfBlocks = blockList.size
                 async(plugin) {
-                    val total = plugin.stats!!.totalBlocks.addAndGet(numOfBlocks)
+                    plugin.stats!!.totalBlocks.addAndGet(numOfBlocks)
                 }
             }
             blockList.clear()
