@@ -1,4 +1,4 @@
-# CreeperHeal2 (v1.0 Beta) (1.15)
+# CreeperHeal2 (v1.0.1 Beta) (1.15)
 
 [Spigot Plugin Page](https://www.spigotmc.org/resources/creeperheal2.80585/)
 
@@ -45,7 +45,7 @@ report to let me know.
 - [x] Support for unaffected dependent blocks whose parent block is affected by the explosion
 - [x] Shutdown/reload safety
 - [x] Polish (Configuration options, replacing from bottom up, move entities out of the way, popping sound)
-- [ ] Add 1.13/1.14 support 
+- [x] Add 1.13/1.14 support 
 
 ## Edge cases
 - [x] Vines depend from top up/direction facing
@@ -55,3 +55,4 @@ report to let me know.
 - [ ] Chorus plants need to be rescanned to build their dependency tree
 - [ ] Scaffolding need to be rescanned to build its dependency tree
 - [ ] Minecart rails don't maintain orientation when replaced
+- [ ] Liquids may remove certain blocks during replacement
