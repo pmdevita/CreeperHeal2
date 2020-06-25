@@ -4,17 +4,14 @@ import net.pdevita.creeperheal2.utils.*
 import org.bukkit.Material
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
-import kotlin.collections.HashSet
 
 // List of blocks that need to be attached to a block in this version of MC
 
 class DependentBlocks(private val version: ArrayList<Int>) {
     val topBlocks: EnumSet<Material> = EnumSet.noneOf(Material::class.java)
-    val sideBlocks: EnumMap<Material, FindDependentBlock> = EnumMap<Material, FindDependentBlock>(mapOf())
+    val sideBlocks: EnumMap<Material, FindDependentBlock> = EnumMap(Material::class.java)
 
     init {
-        print("HEY OVER HERE " + topBlocks.size.toString())
         if (version[1] >= 13) {
             this.getVersionBlocks(version[1], 13, Blocks13())
         }
@@ -182,8 +179,6 @@ class Blocks13: VersionBlocks() {
             Material.ZOMBIE_HEAD
     ))
     override val sideBlocks: EnumMap<Material, FindDependentBlock> = EnumMap<Material, FindDependentBlock>(mapOf(
-            Material.ACACIA_BUTTON to FaceAttachable,
-            Material.BIRCH_BUTTON to FaceAttachable,
             Material.BLACK_WALL_BANNER to Behind,
             Material.BLUE_WALL_BANNER to Behind,
             Material.BRAIN_CORAL_WALL_FAN to Behind,
@@ -192,7 +187,6 @@ class Blocks13: VersionBlocks() {
             Material.COCOA to InFrontOf,
             Material.CREEPER_WALL_HEAD to Behind,
             Material.CYAN_WALL_BANNER to Behind,
-            Material.DARK_OAK_BUTTON to FaceAttachable,
             Material.DEAD_BRAIN_CORAL_WALL_FAN to Behind,
             Material.DEAD_BUBBLE_CORAL_WALL_FAN to Behind,
             Material.DEAD_FIRE_CORAL_WALL_FAN to Behind,
@@ -203,15 +197,12 @@ class Blocks13: VersionBlocks() {
             Material.GRAY_WALL_BANNER to Behind,
             Material.GREEN_WALL_BANNER to Behind,
             Material.HORN_CORAL_WALL_FAN to Behind,
-            Material.JUNGLE_BUTTON to FaceAttachable,
             Material.LADDER to Behind,
-            Material.LEVER to FaceAttachable,
             Material.LIGHT_BLUE_WALL_BANNER to Behind,
             Material.LIGHT_GRAY_WALL_BANNER to Behind,
             Material.LIME_WALL_BANNER to Behind,
             Material.MAGENTA_WALL_BANNER to Behind,
             Material.MOVING_PISTON to Behind,
-            Material.OAK_BUTTON to FaceAttachable,
             Material.ORANGE_WALL_BANNER to Behind,
             Material.PAINTING to Behind,
             Material.PINK_WALL_BANNER to Behind,
@@ -221,8 +212,6 @@ class Blocks13: VersionBlocks() {
             Material.RED_WALL_BANNER to Behind,
             Material.REDSTONE_WALL_TORCH to Behind,
             Material.SKELETON_WALL_SKULL to Behind,
-            Material.SPRUCE_BUTTON to FaceAttachable,
-            Material.STONE_BUTTON to FaceAttachable,
             Material.TRIPWIRE_HOOK to Behind,
             Material.TUBE_CORAL_WALL_FAN to Behind,
             Material.VINE to Vine,
@@ -234,11 +223,21 @@ class Blocks13: VersionBlocks() {
     ))
 
     override fun versionTopBlocks(): ArrayList<Material> {
-        return ArrayList<Material>(listOf(Material.SIGN))
+        return ArrayList<Material>(listOf(Material.valueOf("SIGN")))
     }
 
     override fun versionSideBlocks(): EnumMap<Material, FindDependentBlock> {
-        return EnumMap<Material, FindDependentBlock>(mapOf(Material.WALL_SIGN to Behind))
+        return EnumMap<Material, FindDependentBlock>(mapOf(
+                Material.valueOf("WALL_SIGN") to Behind,
+                Material.ACACIA_BUTTON to Behind,
+                Material.BIRCH_BUTTON to Behind,
+                Material.DARK_OAK_BUTTON to Behind,
+                Material.JUNGLE_BUTTON to Behind,
+                Material.LEVER to Behind,
+                Material.OAK_BUTTON to Behind,
+                Material.SPRUCE_BUTTON to Behind,
+                Material.STONE_BUTTON to Behind
+        ))
     }
 }
 
@@ -266,9 +265,31 @@ class Blocks14: VersionBlocks() {
             Material.SCAFFOLDING to Behind,
             Material.SPRUCE_WALL_SIGN to Behind
     ))
+
+    override fun versionSideBlocks(): EnumMap<Material, FindDependentBlock>? {
+        return EnumMap<Material, FindDependentBlock>(mapOf(
+                Material.ACACIA_BUTTON to Behind,
+                Material.BIRCH_BUTTON to Behind,
+                Material.DARK_OAK_BUTTON to Behind,
+                Material.JUNGLE_BUTTON to Behind,
+                Material.LEVER to Behind,
+                Material.OAK_BUTTON to Behind,
+                Material.SPRUCE_BUTTON to Behind,
+                Material.STONE_BUTTON to Behind
+        ))
+    }
 }
 
 class Blocks15: VersionBlocks() {
     override val topBlocks = ArrayList<Material>(listOf())
-    override val sideBlocks: EnumMap<Material, FindDependentBlock> = EnumMap<Material, FindDependentBlock>(mapOf())
+    override val sideBlocks: EnumMap<Material, FindDependentBlock> = EnumMap<Material, FindDependentBlock>(mapOf(
+            Material.ACACIA_BUTTON to FaceAttachable,
+            Material.BIRCH_BUTTON to FaceAttachable,
+            Material.DARK_OAK_BUTTON to FaceAttachable,
+            Material.JUNGLE_BUTTON to FaceAttachable,
+            Material.LEVER to FaceAttachable,
+            Material.OAK_BUTTON to FaceAttachable,
+            Material.SPRUCE_BUTTON to FaceAttachable,
+            Material.STONE_BUTTON to FaceAttachable
+    ))
 }

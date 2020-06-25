@@ -9,19 +9,6 @@ import kotlin.collections.HashSet
 // List of blocks that are affected by gravity in this version of MC
 
 class GravityBlocks() {
-    private var blocks13 = ArrayList<Material>(listOf(
-            Material.ANVIL,
-            Material.CHIPPED_ANVIL,
-            Material.DAMAGED_ANVIL,
-            Material.DRAGON_EGG,
-            Material.GRAVEL,
-            Material.RED_SAND,
-            Material.SAND
-    ))
-    private var blocks14 = ArrayList<Material>(listOf(
-            Material.SCAFFOLDING
-    ))
-    private var blocks15 = ArrayList<Material>()
     private var concrete = ArrayList<Material>(listOf(
             Material.BLACK_CONCRETE_POWDER,
             Material.BLUE_CONCRETE_POWDER,
@@ -44,14 +31,44 @@ class GravityBlocks() {
     fun getBlocks(version: ArrayList<Int>): HashSet<Material> {
         val materials = HashSet<Material>()
         if (version[1] >= 13) {
-            materials.addAll(blocks13)
+            materials.addAll(GBlocks13().blocks)
+            materials.addAll(concrete)
         }
         if (version[1] >= 14) {
-            materials.addAll(blocks14)
+            materials.addAll(GBlocks14().blocks)
         }
         if (version[1] >= 15) {
-            materials.addAll(concrete)
+            materials.addAll(GBlocks15().blocks)
         }
         return materials
     }
+
 }
+
+interface GravityBlockList {
+    val blocks: ArrayList<Material>
+        get() = ArrayList<Material>()
+}
+
+private class GBlocks13: GravityBlockList {
+    override val blocks = ArrayList<Material>(listOf(
+            Material.ANVIL,
+            Material.CHIPPED_ANVIL,
+            Material.DAMAGED_ANVIL,
+            Material.DRAGON_EGG,
+            Material.GRAVEL,
+            Material.RED_SAND,
+            Material.SAND
+    ))
+}
+
+private class GBlocks14: GravityBlockList {
+    override val blocks = ArrayList<Material>(listOf(
+            Material.SCAFFOLDING
+    ))
+}
+
+private class GBlocks15: GravityBlockList {
+    override val blocks = ArrayList<Material>(listOf())
+}
+
