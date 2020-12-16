@@ -33,6 +33,13 @@ object Behind: FindDependentBlock {
     }
 }
 
+object OnTopOf: FindDependentBlock {
+    override fun reorient(state: BlockState): Location? {
+        return state.block.getRelative(BlockFace.UP).location
+    }
+
+}
+
 object Vine: FindDependentBlock {
     override fun reorient(state: BlockState): Location? {
         val multipleFacing = state.blockData as MultipleFacing

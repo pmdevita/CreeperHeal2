@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.pdevita</groupId>
   <artifactId>CreeperHeal2</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.1.0-SNAPSHOT</version>
   <build>
     <sourceDirectory>src/main/kotlin</sourceDirectory>
     <resources>
@@ -72,11 +72,11 @@
           <relocations>
             <relocation>
               <pattern>org.bstats</pattern>
-              <shadedPattern>net.pdevita.creeperheal2.libs</shadedPattern>
+              <shadedPattern>net.pdevita.creeperheal2.libs.bstats</shadedPattern>
             </relocation>
             <relocation>
               <pattern>org.jetbrains</pattern>
-              <shadedPattern>net.pdevita.creeperheal2.libs</shadedPattern>
+              <shadedPattern>net.pdevita.creeperheal2.libs.jetbrains</shadedPattern>
             </relocation>
             <relocation>
               <pattern>kotlin</pattern>
@@ -121,12 +121,12 @@
     <dependency>
       <groupId>org.spigotmc</groupId>
       <artifactId>spigot-api</artifactId>
-      <version>1.15.2-R0.1-SNAPSHOT</version>
+      <version>1.16.4-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
   <properties>
-    <spigot.version>1.15.2-R0.1-SNAPSHOT</spigot.version>
+    <spigot.version>1.16.4-R0.1-SNAPSHOT</spigot.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <kotlin.version>1.3.72</kotlin.version>
   </properties>

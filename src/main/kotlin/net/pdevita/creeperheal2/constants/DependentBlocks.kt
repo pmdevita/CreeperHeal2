@@ -21,6 +21,9 @@ class DependentBlocks(private val version: ArrayList<Int>) {
         if (version[1] >= 15) {
             this.getVersionBlocks(version[1], 15, Blocks15())
         }
+        if (version[1] >= 16) {
+            this.getVersionBlocks(version[1], 16, Blocks16())
+        }
     }
 
     private fun getVersionBlocks(spigotVersion: Int, thisVersion: Int, blocks: VersionBlocks) {
@@ -291,5 +294,34 @@ class Blocks15: VersionBlocks() {
             Material.OAK_BUTTON to FaceAttachable,
             Material.SPRUCE_BUTTON to FaceAttachable,
             Material.STONE_BUTTON to FaceAttachable
+    ))
+}
+
+class Blocks16: VersionBlocks() {
+    override val topBlocks = ArrayList<Material>(listOf(
+            Material.CRIMSON_DOOR,
+            Material.CRIMSON_FUNGUS,
+            Material.CRIMSON_PRESSURE_PLATE,
+            Material.CRIMSON_ROOTS,
+            Material.CRIMSON_SIGN,
+            Material.POLISHED_BLACKSTONE_PRESSURE_PLATE,
+            Material.SOUL_TORCH,
+            Material.TWISTING_VINES,
+            Material.TWISTING_VINES_PLANT,
+            Material.WARPED_DOOR,
+            Material.WARPED_FUNGUS,
+            Material.WARPED_PRESSURE_PLATE,
+            Material.WARPED_ROOTS,
+            Material.WARPED_SIGN
+    ))
+    override val sideBlocks: EnumMap<Material, FindDependentBlock> = EnumMap<Material, FindDependentBlock>(mapOf(
+            Material.CRIMSON_BUTTON to FaceAttachable,
+            Material.CRIMSON_WALL_SIGN to Behind,
+            Material.POLISHED_BLACKSTONE_BUTTON to FaceAttachable,
+            Material.SOUL_WALL_TORCH to Behind,
+            Material.WARPED_BUTTON to FaceAttachable,
+            Material.WARPED_WALL_SIGN to Behind,
+            Material.WEEPING_VINES to OnTopOf,
+            Material.WEEPING_VINES_PLANT to OnTopOf
     ))
 }

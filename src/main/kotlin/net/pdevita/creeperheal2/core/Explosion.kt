@@ -1,13 +1,18 @@
 package net.pdevita.creeperheal2.core
 
+import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
 import net.pdevita.creeperheal2.CreeperHeal2
+import net.pdevita.creeperheal2.utils.DispatcherContainer
 import net.pdevita.creeperheal2.utils.async
+import net.pdevita.creeperheal2.utils.minecraft
 import net.pdevita.creeperheal2.utils.sync
 import org.bukkit.*
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.Chest
 import org.bukkit.block.Container
+import org.bukkit.block.data.BlockData
 import org.bukkit.scheduler.BukkitTask
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
@@ -21,22 +26,33 @@ private object SideFaces {
 
 class Explosion() {
     lateinit var plugin: CreeperHeal2
-//    private val blockList = ArrayList<ExplodedBlock>()
+    private val totalBlockList = ArrayList<ExplodedBlock>()
     private val replaceList = LinkedList<ExplodedBlock>()
     private val gravityBlocks = ArrayList<Location>()
     private val locations = HashMap<Location, ExplodedBlock>()
-    private var replaceJob: BukkitTask? = null
+
+    private var postProcessComplete = AtomicBoolean(false)
     private var cancelReplace = AtomicBoolean(false)
 
+    private var startDelay = 0;
+    private var blockDelay = 0;
+    private var postProcessTask: Deferred<Unit>? = null
+    private var delayJob: Deferred<Unit>? = null
 
+
+    // Initialize the class, create the finalBlockList of every single block that is affected in this explosion and link
+    // it's dependencies
     constructor(plugin: CreeperHeal2, initialBlockList: List<Block>) : this() {
         this.plugin = plugin
+        this.startDelay = plugin.settings.general.initialDelay;
+        this.blockDelay = plugin.settings.general.betweenBlocksDelay;
 
+        // In case someone warps in the middle of preprocessing
         // Final full list of all independent blocks (with dependents linked to them)
         val finalBlockList = ArrayList<ExplodedBlock>()
         // List of all blocks, including dependencies, in this stage of search
         // When we search out for other dependencies, this list will be cleared to hold the next layer
-        val blockList = ArrayList<ExplodedBlock>()
+        var blockList = ArrayList<ExplodedBlock>()
 
         // First pass, get blocks and make changes to them individually
         for (block in initialBlockList) {
@@ -77,7 +93,7 @@ class Explosion() {
         }
 
         // Put the extra dependent blocks in here to differentiate them from the previous layer
-        val secondaryList = ArrayList<ExplodedBlock>()
+        var secondaryList = ArrayList<ExplodedBlock>()
 
         // Third pass, prepare blocks around the exploded blocks
         // While we still have blocks to check
@@ -93,7 +109,7 @@ class Explosion() {
                     if (plugin.constants.gravityBlocks.contains(upBlock.blockData.material)) {
                         gravityBlocks.add(upBlock.location)
                         locations[upBlock.location] = ExplodedBlock(this, block)
-                    // Else, check if it is a top dependent block, add it to the bottom's dependencies
+                        // Else, check if it is a top dependent block, add it to the bottom's dependencies
                     } else if (plugin.constants.dependentBlocks.topBlocks.contains(upBlock.blockData.material)) {
                         val dependentBlock = ExplodedBlock(this, upBlock.state)
                         this.plugin.debugLogger("Found extra top dependent block ${dependentBlock.state.blockData.material}")
@@ -121,9 +137,9 @@ class Explosion() {
                     plugin.stats!!.totalBlocks.addAndGet(numOfBlocks)
                 }
             }
-            blockList.clear()
-            blockList.addAll(secondaryList)
-            secondaryList.clear()
+            totalBlockList.addAll(blockList)
+            blockList = secondaryList
+            secondaryList = ArrayList()
 
 //            blockList = secondaryList
 //            secondaryList = ArrayList<ExplodedBlock>()
@@ -135,8 +151,8 @@ class Explosion() {
 //        }
 //        plugin.logger.info(blockstring)
 
-        // Sort by Z and put in replacelist
-        finalBlockList.sortBy { it.state.y }
+        // Sort by Z and put in replaceList
+        finalBlockList.sortBy { it.state.y }    // I think this needs to be done before removal in order to remove in the right order?
         replaceList.addAll(finalBlockList)
 
         // Ready to go, delete all the blocks
@@ -145,15 +161,17 @@ class Explosion() {
         // Hand off the gravity blocks to be blocked
         plugin.gravity.addBlocks(gravityBlocks)
 //        plugin.server.scheduler.runTaskLater(plugin, ReplaceLater(this), 100)
-        replaceJob = sync(plugin, delayTicks = plugin.settings.general.initialDelay * 20L) {
-            this.replaceBlocks()
-        }
+//            replaceJob = sync(plugin, delayTicks = plugin.settings.general.initialDelay * 20L) {
+//                this.replaceBlocks()
+//            }
 
         if (plugin.stats != null) {
             async(plugin) {
                 plugin.stats!!.totalExplosions.incrementAndGet()
             }
         }
+        postProcess()
+
     }
 
     private fun checkSides(block: ExplodedBlock): ArrayList<ExplodedBlock> {
@@ -187,93 +205,108 @@ class Explosion() {
         }
     }
 
-    private fun replaceBlocks() {
-        if (cancelReplace.get()) {
-            plugin.debugLogger("Canceling replacing (probably for warp)")
-            return
-        }
 
-        plugin.debugLogger("Replacing block")
-        val currentBlock: Block
-
-        if (replaceList.isNotEmpty()) {
-            val block = replaceList.peek()
-            currentBlock = block.state.location.block
-            if (currentBlock.blockData.material != Material.AIR) {
-                currentBlock.breakNaturally()
-            } else {
-                // If this is air, there is a chance there is an entity in the space
-                // Move it out of the way so it doesn't suffocate
-                // If it's only slightly in the block, it will get pushed out normally so avoid that
-                val entities = currentBlock.location.world?.getNearbyEntities(currentBlock.location, .4, .5, .4)
-                if (entities != null) {
-                    for (entity in entities) {
-                        entity.teleport(entity.location.add(0.0, 1.0, 0.0))
+    // Further processing on the block list after the initial block list creation
+    private fun postProcess() {
+        GlobalScope.launch(Dispatchers.async) {
+            // Delay before starting heal
+            delayJob = async(Dispatchers.async) {
+                delay((startDelay * 1000).toLong())
+            }
+            // Post-processing on block list
+            this@Explosion.postProcessTask = async(Dispatchers.async) {
+                for (block in totalBlockList) {
+                    if (block.state.type == Material.WEEPING_VINES_PLANT) {
+                        block.state.type = Material.WEEPING_VINES
                     }
                 }
+                plugin.debugLogger("Finished post-processing")
             }
-
-            block.state.update(true)
-            block.state.location.world?.playSound(block.state.location, Sound.ENTITY_ITEM_PICKUP, SoundCategory.BLOCKS, .05F, .9F + Random.Default.nextFloat() * .3F)
-            replaceList.addAll(block.dependencies)
-            replaceList.remove()
+            this@Explosion.postProcessComplete.set(true)
+            delayJob!!.join()
+            this@Explosion.postProcessTask!!.await()
+            if (!this@Explosion.cancelReplace.get()) {
+                newReplace()
+            }
         }
+        plugin.debugLogger("returning from new replace")
+    }
 
-        if (replaceList.isEmpty()) {
-            // Clean up
-            plugin.gravity.removeBlocks(gravityBlocks)
-            // Remove reference to self to be deleted
-            plugin.removeExplosion(this)
-        } else {
-            // If this gets set to null, it's probably because we are warping the rest
-            // Only continue if not null
-            if (!cancelReplace.get()) {
-                this.replaceJob = sync(plugin, delayTicks = plugin.settings.general.betweenBlocksDelay.toLong()) {
-                    this.replaceBlocks()
+    // Async process to schedule block replacement
+    private fun newReplace() {
+        GlobalScope.launch(Dispatchers.async) {
+            while (replaceList.isNotEmpty()) {
+                val block = replaceList.peek()
+                withContext(Dispatchers.minecraft) {
+                    if (!cancelReplace.get()) {     // Only proceed if we aren't cancelling.
+                        replaceBlock(block)
+                        replaceList.poll()
+                        replaceList.addAll(block.dependencies)
+                    }
                 }
-            } else {
-                plugin.debugLogger("Cancelling normal replacement")
+                if (!cancelReplace.get()) {
+                    plugin.debugLogger("waiting")
+                    delayJob = async(Dispatchers.async) {
+                        delay((blockDelay / 20 * 1000).toLong())
+                    }
+                    delayJob!!.join()
+                } else {
+                    break
+                }
             }
+
+            // Clean up
+            // Remove reference to self to be deleted
+//            if (!cancelReplace) {
+                plugin.gravity.removeBlocks(gravityBlocks)
+                plugin.removeExplosion(this@Explosion)
+//            }
         }
     }
 
-    // Replace blocks ASAP (used to finish repairs if plugin is being disabled)
-    fun warpReplaceBlocks(removeThis: Boolean = false) {
-        plugin.debugLogger("Warp replacing...")
-        cancelReplace.set(true)
-        replaceJob?.cancel()
+    private fun replaceBlock(block: ExplodedBlock, warp: Boolean = false) {
+        val currentBlock = block.state.location.block
 
-        while (replaceList.isNotEmpty()) {
-            val block = replaceList.poll()
-            plugin.debugLogger(block.state.blockData.material.toString())
-            val currentBlock = block.state.location.block
-            // If block isn't air, it's likely a player put it there. Just break it off normally to give it back to them
-            if (currentBlock.blockData.material != Material.AIR) {
-                currentBlock.breakNaturally()
-            } else {
-                val entities = currentBlock.location.world?.getNearbyEntities(currentBlock.location, .5, .5, .5)
-                if (entities != null) {
-                    for (entity in entities) {
-                        entity.teleport(currentBlock.getRelative(BlockFace.UP).location)
-                    }
+        // If block isn't air, it's likely a player put it there. Just break it off normally to give it back to them
+        if (currentBlock.blockData.material != Material.AIR) {
+            currentBlock.breakNaturally()
+        } else {
+            val entities = currentBlock.location.world?.getNearbyEntities(currentBlock.location, .4, .5, .4)
+            if (entities != null) {
+                for (entity in entities) {
+                    entity.teleport(currentBlock.getRelative(BlockFace.UP).location)
                 }
             }
-            block.state.update(true)
+        }
+        block.state.update(true)
+        block.state.location.world?.playSound(block.state.location, Sound.ENTITY_ITEM_PICKUP, SoundCategory.BLOCKS, .05F, .9F + Random.Default.nextFloat() * .3F)
+    }
+
+
+
+    // Replace blocks ASAP (used to finish repairs if plugin is being disabled)
+    fun warpReplaceBlocks() {
+        plugin.debugLogger("Warp replacing...")
+        // Signal to async that it needs to stop and sync tasks that they should no longer proceed
+        cancelReplace.set(true)
+        // Block until post-processing is complete
+        if (!postProcessComplete.get()) {
+            runBlocking {
+                postProcessTask?.await()
+            }
+        }
+
+
+        while (replaceList.isNotEmpty()) {
+            val block = replaceList.peek()
+            replaceBlock(block)
+            replaceList.poll()
             replaceList.addAll(block.dependencies)
         }
 
-//        var blockstring = ""
-//        for (block in replaceList) {
-//            blockstring += block.state.blockData.material.toString() + " "
-//        }
-//        plugin.logger.info(blockstring)
-
         // Clean up
         plugin.gravity.removeBlocks(gravityBlocks)
-        // Remove reference to self to be deleted
-        if (removeThis) {
-            plugin.removeExplosion(this)
-        }
+
     }
 
 }

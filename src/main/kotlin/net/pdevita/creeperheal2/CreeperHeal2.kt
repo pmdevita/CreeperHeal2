@@ -55,16 +55,22 @@ class CreeperHeal2 : JavaPlugin {
     }
 
     fun warpExplosions() {
-        for (explosion in explosions) {
-            explosion.warpReplaceBlocks()
+        this.debugLogger("Running warp")
+        val itr = explosions.iterator()
+        while (itr.hasNext()) {
+            itr.next().warpReplaceBlocks()
+            itr.remove()
         }
-        explosions.clear()
     }
 
     override fun onDisable() {
         super.onDisable()
         // Quickly replace all blocks before shutdown
-        this.warpExplosions()
+        val itr = explosions.iterator()
+        while (itr.hasNext()) {
+            itr.next().warpReplaceBlocks()
+            itr.remove()
+        }
     }
 }
 
