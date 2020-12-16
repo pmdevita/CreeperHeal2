@@ -1,4 +1,4 @@
-# CreeperHeal2 (v1.0.1 Beta) (1.15)
+# CreeperHeal2 (v1.1.0) (1.13-1.16)
 
 [Spigot Plugin Page](https://www.spigotmc.org/resources/creeperheal2.80585/)
 
@@ -6,7 +6,7 @@ All the fun of explosions with none of the cleanup!
 
 This plugin is meant to be a spiritual successor to the original CreeperHeal plugin https://github.com/nitnelave/CreeperHeal. 
 Unfortunately, it has not been updated in 3 years. Initially I was going to just fork it but the implementation seems 
-far more complicated than needed so I rewrote it.
+far more complicated than needed, so I rewrote it.
 
 # Setup/Installation
 
@@ -14,14 +14,13 @@ Download the latest release and place it in your plugins folder. The config.yml 
 time the plugin is run with the server. You can also look at it 
 [here](https://github.com/pmdevita/CreeperHeal2/blob/master/src/main/resources/config.yml).
 
-Only 1.15 is supported right now, but I will be adding 1.13 and 1.14 support. This plugin 
-technically supports 1.16 but new blocks may not get replaced properly. In general, due to the nature of this 
-kind of plugin, every major release of Minecraft will need an update to fully support it.
+New versions of Minecraft past the currently supported version do work, with the exception that newly 
+added blocks may not repair properly.
 
 # Warning
 
 This plugin is still in beta and while I would consider it safer than the original on 
-modern servers and it supports every block except those listed below, it still may fail to 
+modern servers, and it supports every block except those listed below, it still may fail to 
 replace some structures with 100% accuracy. Blocks that aren't replaced properly should drop as
 items though.
 
