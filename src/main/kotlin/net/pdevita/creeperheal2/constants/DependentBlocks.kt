@@ -37,7 +37,7 @@ class DependentBlocks(private val version: ArrayList<Int>) {
 
 }
 
-open class VersionBlocks {
+private open class VersionBlocks {
     // Any block that needs a block below it to exist
     // Their parent is not dependent on where the block is facing
     // Crops, doors, signs
@@ -52,7 +52,7 @@ open class VersionBlocks {
     open fun versionSideBlocks(): EnumMap<Material, FindDependentBlock>? { return null }
 }
 
-class Blocks13: VersionBlocks() {
+private class Blocks13: VersionBlocks() {
     override val topBlocks = ArrayList<Material>(listOf(
             Material.ACACIA_DOOR,
             Material.ACACIA_PRESSURE_PLATE,
@@ -244,7 +244,7 @@ class Blocks13: VersionBlocks() {
     }
 }
 
-class Blocks14: VersionBlocks() {
+private class Blocks14: VersionBlocks() {
     override val topBlocks = ArrayList<Material>(listOf(
             Material.ACACIA_SIGN,
             Material.BAMBOO,
@@ -266,7 +266,8 @@ class Blocks14: VersionBlocks() {
             Material.JUNGLE_WALL_SIGN to Behind,
             Material.OAK_WALL_SIGN to Behind,
             Material.SCAFFOLDING to Behind,
-            Material.SPRUCE_WALL_SIGN to Behind
+            Material.SPRUCE_WALL_SIGN to Behind,
+            Material.LANTERN to TopOrBottom
     ))
 
     override fun versionSideBlocks(): EnumMap<Material, FindDependentBlock>? {
@@ -283,7 +284,7 @@ class Blocks14: VersionBlocks() {
     }
 }
 
-class Blocks15: VersionBlocks() {
+private class Blocks15: VersionBlocks() {
     override val topBlocks = ArrayList<Material>(listOf())
     override val sideBlocks: EnumMap<Material, FindDependentBlock> = EnumMap<Material, FindDependentBlock>(mapOf(
             Material.ACACIA_BUTTON to FaceAttachable,
@@ -297,7 +298,7 @@ class Blocks15: VersionBlocks() {
     ))
 }
 
-class Blocks16: VersionBlocks() {
+private class Blocks16: VersionBlocks() {
     override val topBlocks = ArrayList<Material>(listOf(
             Material.CRIMSON_DOOR,
             Material.CRIMSON_FUNGUS,
@@ -322,6 +323,7 @@ class Blocks16: VersionBlocks() {
             Material.WARPED_BUTTON to FaceAttachable,
             Material.WARPED_WALL_SIGN to Behind,
             Material.WEEPING_VINES to OnTopOf,
-            Material.WEEPING_VINES_PLANT to OnTopOf
+            Material.WEEPING_VINES_PLANT to OnTopOf,
+            Material.SOUL_LANTERN to TopOrBottom
     ))
 }

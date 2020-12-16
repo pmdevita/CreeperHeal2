@@ -4,9 +4,11 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.BlockFace
 import org.bukkit.block.BlockState
+import org.bukkit.block.data.Bisected
 import org.bukkit.block.data.Directional
 import org.bukkit.block.data.FaceAttachable
 import org.bukkit.block.data.MultipleFacing
+import org.bukkit.block.data.type.Bed
 import org.bukkit.block.data.type.Switch
 
 interface FindDependentBlock {
@@ -63,6 +65,44 @@ object FaceAttachable: FindDependentBlock {
             FaceAttachable.AttachedFace.FLOOR -> state.block.getRelative(BlockFace.DOWN).location
             FaceAttachable.AttachedFace.WALL -> Behind.reorient(state)
         }
+    }
+}
+
+object TopOrBottom: FindDependentBlock {
+    override fun reorient(state: BlockState): Location? {
+        if (state.block.getRelative(BlockFace.UP).blockData.material != Material.AIR) {
+            return state.block.getRelative(BlockFace.UP).location
+        } else if (state.block.getRelative(BlockFace.DOWN).blockData.material != Material.AIR) {
+            return state.block.getRelative(BlockFace.DOWN).location
+        }
+        return null
+    }
+
+}
+
+object Bed:FindDependentBlock {
+    override fun reorient(state: BlockState): Location? {
+        val bed = state.blockData as Bed
+        print(bed.facing)
+        if (bed.part == Bed.Part.FOOT) {
+            return state.block.getRelative(bed.facing).location
+        } else if (bed.part == Bed.Part.HEAD) {
+            return state.block.getRelative(bed.facing.oppositeFace).location
+        }
+        return null
+    }
+}
+
+object Door:FindDependentBlock {
+    override fun reorient(state: BlockState): Location? {
+        val bisected = state.blockData as Bisected
+//        print(">>>>>>>" + bisected.half)
+        if (bisected.half == Bisected.Half.BOTTOM) {
+            return state.block.getRelative(BlockFace.UP).location
+        } else if (bisected.half == Bisected.Half.TOP) {
+            return state.block.getRelative(BlockFace.DOWN).location
+        }
+        return null
     }
 }
 

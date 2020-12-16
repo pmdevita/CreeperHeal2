@@ -13,11 +13,13 @@ import org.bukkit.block.BlockFace
 import org.bukkit.block.Chest
 import org.bukkit.block.Container
 import org.bukkit.block.data.BlockData
+import org.bukkit.block.data.type.Bed
 import org.bukkit.scheduler.BukkitTask
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import kotlin.math.exp
 import kotlin.random.Random
 
 private object SideFaces {
@@ -129,6 +131,15 @@ class Explosion() {
                     secondaryList.addAll(dependentBlocks)
                     explodedBlock.dependencies.addAll(dependentBlocks)
                 }
+
+                val multiBlockLocation = this.checkMultiBlock(explodedBlock)
+                if (multiBlockLocation != null) {
+                    val multiBlock = ExplodedBlock(this, multiBlockLocation.block.state)
+                    this.plugin.debugLogger("MultiBlock ${multiBlock.state.blockData.material}")
+                    locations[multiBlockLocation] = multiBlock
+                    secondaryList.add(multiBlock)
+                    explodedBlock.dependencies.add(multiBlock)
+                }
             }
 //            this.blockList.addAll(blockList)
             if (plugin.stats != null) {
@@ -157,6 +168,7 @@ class Explosion() {
 
         // Ready to go, delete all the blocks
         deleteBlocks(replaceList)
+        updateBlocks(replaceList)
 
         // Hand off the gravity blocks to be blocked
         plugin.gravity.addBlocks(gravityBlocks)
@@ -194,13 +206,40 @@ class Explosion() {
         return foundBlocks
     }
 
+    private fun checkMultiBlock(block: ExplodedBlock): Location? {
+        if (plugin.constants.multiBlocks.blocks.containsKey(block.state.blockData.material)) {
+            val location = plugin.constants.multiBlocks.blocks[block.state.blockData.material]?.reorient(block.state)
+            if (!locations.containsKey(location)) {
+                return location
+            }
+        }
+        return null
+    }
+
     private fun deleteBlocks(blockList: Collection<ExplodedBlock>) {
         // Delete blocks, accounting for dependencies first
         for (block in blockList) {
             if (block.dependencies.isNotEmpty()) {
                 deleteBlocks(block.dependencies)
             }
-            block.state.location.block.type = Material.AIR
+
+//            if (plugin.constants.multiBlocks.blocks.containsKey(block.state.blockData.material)) {
+                block.state.location.block.setType(Material.AIR, false)
+                block.state.location.block.state.update(true, false)
+//            } else {
+//                block.state.location.block.type = Material.AIR
+//                block.state.location.block.state.update(true, true)
+//            }
+        }
+    }
+
+    private fun updateBlocks(blockList: Collection<ExplodedBlock>) {
+        for (block in blockList) {
+            if (block.dependencies.isNotEmpty()) {
+                updateBlocks(block.dependencies)
+            }
+            block.state.location.block.setType(Material.STONE, false)
+            block.state.location.block.setType(Material.AIR, true)
             block.state.location.block.state.update(true, true)
         }
     }
@@ -220,7 +259,6 @@ class Explosion() {
                         block.state.type = Material.WEEPING_VINES
                     }
                 }
-                plugin.debugLogger("Finished post-processing")
             }
             this@Explosion.postProcessComplete.set(true)
             delayJob!!.join()
@@ -245,7 +283,6 @@ class Explosion() {
                     }
                 }
                 if (!cancelReplace.get()) {
-                    plugin.debugLogger("waiting")
                     delayJob = async(Dispatchers.async) {
                         delay((blockDelay / 20 * 1000).toLong())
                     }

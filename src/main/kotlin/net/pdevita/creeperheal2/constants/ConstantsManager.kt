@@ -8,6 +8,7 @@ import org.bukkit.Material
 class ConstantsManager(private val plugin: CreeperHeal2) {
     val gravityBlocks: HashSet<Material>
     val dependentBlocks: DependentBlocks
+    val multiBlocks: MultiBlocks
     private val versionList = ArrayList<Int>()
 
     init {
@@ -18,5 +19,6 @@ class ConstantsManager(private val plugin: CreeperHeal2) {
         versionList.addAll(listOf(splitVersion[0].toInt(), splitVersion[1].toInt()))
         gravityBlocks = GravityBlocks().getBlocks(versionList)
         dependentBlocks = DependentBlocks(versionList)
+        multiBlocks = MultiBlocks(versionList)
     }
 }
