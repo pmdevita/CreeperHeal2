@@ -127,7 +127,7 @@
   </dependencies>
   <properties>
     <spigot.version>1.16.4-R0.1-SNAPSHOT</spigot.version>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <kotlin.version>1.3.72</kotlin.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 </project>
