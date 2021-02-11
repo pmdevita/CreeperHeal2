@@ -35,11 +35,16 @@ object Behind: FindDependentBlock {
     }
 }
 
-object OnTopOf: FindDependentBlock {
+object Below: FindDependentBlock {
     override fun reorient(state: BlockState): Location? {
         return state.block.getRelative(BlockFace.UP).location
     }
+}
 
+object OnTopOf: FindDependentBlock {
+    override fun reorient(state: BlockState): Location? {
+        return state.block.getRelative(BlockFace.DOWN).location
+    }
 }
 
 object Vine: FindDependentBlock {
@@ -77,7 +82,6 @@ object TopOrBottom: FindDependentBlock {
         }
         return null
     }
-
 }
 
 object Bed:FindDependentBlock {

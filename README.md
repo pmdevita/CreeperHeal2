@@ -4,9 +4,9 @@
 
 All the fun of explosions with none of the cleanup!
 
-This plugin is meant to be a spiritual successor to the original CreeperHeal plugin https://github.com/nitnelave/CreeperHeal. 
-Unfortunately, it has not been updated in 3 years. Initially I was going to just fork it but the implementation seems 
-far more complicated than needed, so I rewrote it.
+This plugin is meant to be a spiritual successor to the original CreeperHeal plugin 
+https://github.com/nitnelave/CreeperHeal. Thanks to [nitnelave](https://github.com/nitnelave/) 
+for the original idea and name!
 
 # Setup/Installation
 
@@ -17,7 +17,7 @@ time the plugin is run with the server. You can also look at it
 New versions of Minecraft past the currently supported version do work, with the exception that newly 
 added blocks may not repair properly.
 
-# Warning
+# Development Progress
 
 This plugin is still in beta and while I would consider it safer than the original on 
 modern servers, and it supports every block except those listed below, it still may fail to 
@@ -33,8 +33,6 @@ Currently, the following blocks can not be replaced properly (they will drop as 
 
 If you are able to create a structure that consistently isn't replaced properly, file a bug 
 report to let me know.
-
-# Development progress
 
 ## Main tasks
 - [x] Support for independent blocks

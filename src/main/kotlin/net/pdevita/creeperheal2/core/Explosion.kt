@@ -49,7 +49,6 @@ class Explosion() {
         this.startDelay = plugin.settings.general.initialDelay;
         this.blockDelay = plugin.settings.general.betweenBlocksDelay;
 
-        // In case someone warps in the middle of preprocessing
         // Final full list of all independent blocks (with dependents linked to them)
         val finalBlockList = ArrayList<ExplodedBlock>()
         // List of all blocks, including dependencies, in this stage of search
@@ -72,6 +71,7 @@ class Explosion() {
                     state.inventory.clear()
                 }
             }
+
         }
 
         // Second pass, link dependent blocks to their parents
@@ -111,13 +111,6 @@ class Explosion() {
                     if (plugin.constants.gravityBlocks.contains(upBlock.blockData.material)) {
                         gravityBlocks.add(upBlock.location)
                         locations[upBlock.location] = ExplodedBlock(this, block)
-                        // Else, check if it is a top dependent block, add it to the bottom's dependencies
-                    } else if (plugin.constants.dependentBlocks.topBlocks.contains(upBlock.blockData.material)) {
-                        val dependentBlock = ExplodedBlock(this, upBlock.state)
-                        this.plugin.debugLogger("Found extra top dependent block ${dependentBlock.state.blockData.material}")
-                        locations[upBlock.location] = dependentBlock
-                        secondaryList.add(dependentBlock)
-                        explodedBlock.dependencies.add(dependentBlock)
                     }
                 }
 
@@ -162,7 +155,7 @@ class Explosion() {
 //        }
 //        plugin.logger.info(blockstring)
 
-        // Sort by Z and put in replaceList
+        // Sort by Y and put in replaceList
         finalBlockList.sortBy { it.state.y }    // I think this needs to be done before removal in order to remove in the right order?
         replaceList.addAll(finalBlockList)
 
@@ -254,6 +247,7 @@ class Explosion() {
             }
             // Post-processing on block list
             this@Explosion.postProcessTask = async(Dispatchers.async) {
+                // Fix Weeping Vine plants being weird
                 for (block in totalBlockList) {
                     if (block.state.type == Material.WEEPING_VINES_PLANT) {
                         block.state.type = Material.WEEPING_VINES
@@ -301,7 +295,7 @@ class Explosion() {
         }
     }
 
-    private fun replaceBlock(block: ExplodedBlock, warp: Boolean = false) {
+    private fun replaceBlock(block: ExplodedBlock) {
         val currentBlock = block.state.location.block
 
         // If block isn't air, it's likely a player put it there. Just break it off normally to give it back to them
