@@ -14,6 +14,7 @@ class General(private val config: FileConfiguration) {
     val initialDelay = config.getInt("initial-delay", 45)
     val betweenBlocksDelay = config.getInt("between-blocks-delay", 20)
     val bstats = config.getBoolean("bstats", true)
+    val explodeTNT = config.getBoolean("explode-tnt", true)
 }
 
 class ExplosionTypes(private val config: FileConfiguration) {

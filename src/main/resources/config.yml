@@ -20,5 +20,8 @@ types:
 # Enable stats/usage data collection
 bstats: true
 
+# Allow the chaining of TNT explosions rather than just saving the TNT block
+explode-tnt: true
+
 # Enable debug mode
 debug: false
