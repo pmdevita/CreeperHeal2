@@ -9,6 +9,7 @@ import org.bukkit.block.data.Directional
 import org.bukkit.block.data.FaceAttachable
 import org.bukkit.block.data.MultipleFacing
 import org.bukkit.block.data.type.Bed
+import org.bukkit.block.data.type.Piston
 import org.bukkit.block.data.type.Switch
 
 interface FindDependentBlock {
@@ -103,6 +104,18 @@ object Door:FindDependentBlock {
             return state.block.getRelative(BlockFace.UP).location
         } else if (bisected.half == Bisected.Half.TOP) {
             return state.block.getRelative(BlockFace.DOWN).location
+        }
+        return null
+    }
+}
+
+object Piston:FindDependentBlock {
+    override fun reorient(state: BlockState): Location? {
+        if (state.blockData is org.bukkit.block.data.type.Piston) {
+            val piston = state.blockData as org.bukkit.block.data.type.Piston
+            if (piston.isExtended) {
+                return state.block.getRelative(piston.facing).location
+            }
         }
         return null
     }
