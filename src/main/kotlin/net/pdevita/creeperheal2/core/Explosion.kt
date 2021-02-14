@@ -253,6 +253,13 @@ class Explosion() {
             }
         }
         plugin.debugLogger("Explosion within coords: ${boundary.highX}, ${boundary.highY}, ${boundary.highZ} and ${boundary.lowX}, ${boundary.lowY}, ${boundary.lowZ}")
+        // Increase boundaries by one
+        boundary.highX += 1
+        boundary.highY += 1
+        boundary.highZ += 1
+        boundary.lowX -= 1
+        boundary.lowY -= 1
+        boundary.lowZ -= 1
         return boundary
     }
 
