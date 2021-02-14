@@ -424,9 +424,6 @@ class Explosion() {
                 }
             }
         }
-        if (block.state.blockData is Piston) {
-            plugin.debugLogger("Found piston, is extended? ${(block.state.blockData as Piston).isExtended}")
-        }
         block.state.update(true)
         block.state.location.world?.playSound(block.state.location, Sound.ENTITY_ITEM_PICKUP, SoundCategory.BLOCKS, .05F, .9F + Random.Default.nextFloat() * .3F)
     }
