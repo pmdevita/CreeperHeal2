@@ -71,6 +71,10 @@ class CreeperHeal2 : JavaPlugin() {
         debugLogger("Comparing ${newExplosions.size} explosions (${explosions.size})")
         for (i in 0 until newExplosions.size) {
             for (j in i+1 until newExplosions.size) {
+                if (newExplosions[j] == newExplosions[i]) {
+                    debugLogger("The explosions are the same! Don't merge!")
+                    continue
+                }
                 val overlap = newExplosions[j].explosion.boundary?.let { newExplosions[i].explosion.boundary?.overlaps(it) }
                 if (overlap == true && newExplosions[i].explosion.postProcessComplete.get() && newExplosions[j].explosion.postProcessComplete.get()) {
                     debugLogger("Merging explosions $i $j")

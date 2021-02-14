@@ -15,7 +15,15 @@ class Gravity(val plugin: CreeperHeal2) {
         blocks.addAll(locations)
         updateEventRegistration()
     }
+    fun addBlocks(locations: HashSet<Location>) {
+        blocks.addAll(locations)
+        updateEventRegistration()
+    }
     fun removeBlocks(locations: List<Location>) {
+        blocks.removeAll(locations)
+        updateEventRegistration()
+    }
+    fun removeBlocks(locations: HashSet<Location>) {
         blocks.removeAll(locations)
         updateEventRegistration()
     }

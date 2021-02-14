@@ -9,11 +9,11 @@ import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.Chest
 import org.bukkit.block.Container
-import org.bukkit.block.data.type.Piston
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import kotlin.collections.HashSet
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
@@ -26,8 +26,8 @@ class Explosion() {
     lateinit var plugin: CreeperHeal2
     // List of all blocks involved in explosion, dependents included
     private val totalBlockList = ArrayList<ExplodedBlock>()
-    private val replaceList = LinkedList<ExplodedBlock>()
-    private val gravityBlocks = ArrayList<Location>()
+    private var replaceList = LinkedList<ExplodedBlock>()
+    private val gravityBlocks = HashSet<Location>()
     private val locations = HashMap<Location, ExplodedBlock>()
     var boundary: Boundary? = null
 
@@ -38,7 +38,7 @@ class Explosion() {
     private var blockDelay = 0
     private var postProcessTask: Deferred<Unit>? = null
     private var delayJob: Deferred<Unit>? = null
-    private var relinkJob: Deferred<Boolean>? = null
+    private var relinkJob: Deferred<Unit>? = null
 
 
     // Initialize the class, create the finalBlockList of every single block that is affected in this explosion and link
@@ -87,11 +87,11 @@ class Explosion() {
                 // A few different kinds of blocks could be above, check that first
                 val upBlock = block.block.getRelative(BlockFace.UP)
                 // First, check that the above block is not already accounted for in the explosion
-                if (!locations.containsKey(upBlock.location)) {
+                if (!locations.containsKey(upBlock.location) && !gravityBlocks.contains(upBlock.location)) {
                     // If the above block is a gravity block, freeze it in place
                     if (plugin.constants.gravityBlocks.contains(upBlock.blockData.material)) {
                         gravityBlocks.add(upBlock.location)
-                        locations[upBlock.location] = ExplodedBlock(this, block)
+//                        locations[upBlock.location] = ExplodedBlock(this, block)
                     }
                 }
 
@@ -162,12 +162,13 @@ class Explosion() {
     }
 
     constructor(
-        plugin: CreeperHeal2, totalBlockList: ArrayList<ExplodedBlock>, replaceList: ArrayList<ExplodedBlock>,
-        gravityBlocks: ArrayList<Location>, locations: HashMap<Location, ExplodedBlock>, boundary: Boundary? = null): this() {
+        plugin: CreeperHeal2, totalBlockList: ArrayList<ExplodedBlock>, replaceList: LinkedList<ExplodedBlock>,
+        gravityBlocks: HashSet<Location>, locations: HashMap<Location, ExplodedBlock>, boundary: Boundary? = null): this() {
         this.plugin = plugin
         this.totalBlockList.addAll(totalBlockList)
         this.gravityBlocks.addAll(gravityBlocks)
         this.locations.putAll(locations)
+        this.replaceList = replaceList
         this.boundary = boundary
         this.postProcessComplete.set(true)
         this.startDelay = plugin.settings.general.initialDelay
@@ -179,7 +180,9 @@ class Explosion() {
                 delay((startDelay * 1000).toLong())
             }
             this@Explosion.relinkJob = async(Dispatchers.async) {
-                this@Explosion.replaceList.addAll(linkBlocks(replaceList, true).sortedBy { it.state.y })
+                val newReplaceList = LinkedList<ExplodedBlock>()
+                newReplaceList.addAll(linkBlocks(replaceList, true).sortedBy { it.state.y })
+                this@Explosion.replaceList = newReplaceList
             }
             relinkJob!!.await()
             delayJob!!.await()
@@ -260,7 +263,7 @@ class Explosion() {
         for (face in SideFaces.faces) {
             val checkingBlock = block.state.block.getRelative(face)
             // Check if that block isn't already a part of the explosion
-            if (!locations.containsKey(checkingBlock.location)) {
+            if (!locations.containsKey(checkingBlock.location) && !gravityBlocks.contains(checkingBlock.location)) {
                 val explodedBlock = ExplodedBlock(this, checkingBlock.state)
                 // Check the block is side dependent
                 if (explodedBlock.dependent == DependentType.SIDE_DEPENDENT) {
@@ -378,6 +381,7 @@ class Explosion() {
         GlobalScope.launch(Dispatchers.async) {
             while (replaceList.isNotEmpty()) {
                 val block = replaceList.peek()
+                plugin.debugLogger("${replaceList.size} left")
                 withContext(Dispatchers.minecraft) {
                     if (!cancelReplace.get()) {     // Only proceed if we aren't cancelling.
                         replaceBlock(block)
@@ -403,6 +407,7 @@ class Explosion() {
 //            if (!cancelReplace) {
                 plugin.gravity.removeBlocks(gravityBlocks)
                 plugin.removeExplosion(this@Explosion)
+                plugin.debugLogger("Finished repairing explosion")
 //            }
         }
     }
@@ -476,12 +481,13 @@ class Explosion() {
 
     operator fun plus(other: Explosion): Explosion {
         // Stop the original explosion objects from repairing
+        plugin.debugLogger("Adding two explosions")
         this.cancel()
         other.cancel()
         val totalBlockList = ArrayList<ExplodedBlock>()
         val gravityBlocks = ArrayList<Location>()
         val locations = HashMap<Location, ExplodedBlock>()
-        val replaceList = ArrayList<ExplodedBlock>()
+        val replaceList = LinkedList<ExplodedBlock>()
         totalBlockList.addAll(this.totalBlockList)
         totalBlockList.addAll(other.totalBlockList)
         gravityBlocks.addAll(this.gravityBlocks)
@@ -490,10 +496,12 @@ class Explosion() {
         locations.putAll(other.locations)
         replaceList.addAll(this.replaceList)
         replaceList.addAll(other.replaceList)
-        // Recalculate gravity blocks
-        val removedGravity = getRemovedGravity(gravityBlocks, totalBlockList)
+        // Recalculate gravity
+        plugin.debugLogger("Finished merging basic data, cleaning gravity blocks")
+        val removedGravity = getRemovedGravity(gravityBlocks, locations)
         plugin.gravity.removeBlocks(removedGravity)
-        gravityBlocks.removeAll(removedGravity)
+        val gravityBlocksSet = HashSet<Location>(gravityBlocks)
+        gravityBlocksSet.removeAll(removedGravity)
         var boundary: Boundary? = null
         if (this.boundary != null && other.boundary != null) {
             boundary = Boundary(max(this.boundary!!.highX, other.boundary!!.highX),
@@ -503,22 +511,15 @@ class Explosion() {
                 min(this.boundary!!.lowY, other.boundary!!.lowY),
                 min(this.boundary!!.lowZ, other.boundary!!.lowZ))
         }
-
-        return Explosion(plugin, totalBlockList, replaceList, gravityBlocks, locations, boundary)
+        plugin.debugLogger("Done, initializing from data")
+        return Explosion(plugin, totalBlockList, replaceList, gravityBlocksSet, locations, boundary)
 
     }
 
-    fun getRemovedGravity(gravityBlocks: ArrayList<Location>, totalBlockList: ArrayList<ExplodedBlock>): ArrayList<Location> {
+    private fun getRemovedGravity(gravityBlocks: ArrayList<Location>, locations: HashMap<Location, ExplodedBlock>): ArrayList<Location> {
         val removed = ArrayList<Location>()
         for (gravityBlock in gravityBlocks) {
-            var contains = false
-            for (block in totalBlockList) {
-                if (block.state.location == gravityBlock) {
-                    contains = true
-                    break
-                }
-            }
-            if (contains) {
+            if (gravityBlock in locations) {
                 removed.add(gravityBlock)
             }
         }
