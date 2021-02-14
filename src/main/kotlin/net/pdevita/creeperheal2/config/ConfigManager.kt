@@ -34,6 +34,7 @@ class ExplosionTypes(private val config: FileConfiguration) {
             EntityType.CREEPER -> creeper
             EntityType.PRIMED_TNT -> tnt
             EntityType.FIREBALL -> ghast
+            EntityType.WITHER -> wither
             EntityType.WITHER_SKULL -> wither
             EntityType.ENDER_CRYSTAL -> endCrystal
             EntityType.MINECART_TNT -> minecartTnt

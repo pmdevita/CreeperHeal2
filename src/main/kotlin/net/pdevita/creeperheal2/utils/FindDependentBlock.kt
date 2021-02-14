@@ -87,7 +87,6 @@ object TopOrBottom: FindDependentBlock {
 object Bed:FindDependentBlock {
     override fun reorient(state: BlockState): Location? {
         val bed = state.blockData as Bed
-        print(bed.facing)
         if (bed.part == Bed.Part.FOOT) {
             return state.block.getRelative(bed.facing).location
         } else if (bed.part == Bed.Part.HEAD) {
@@ -100,7 +99,6 @@ object Bed:FindDependentBlock {
 object Door:FindDependentBlock {
     override fun reorient(state: BlockState): Location? {
         val bisected = state.blockData as Bisected
-//        print(">>>>>>>" + bisected.half)
         if (bisected.half == Bisected.Half.BOTTOM) {
             return state.block.getRelative(BlockFace.UP).location
         } else if (bisected.half == Bisected.Half.TOP) {

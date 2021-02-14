@@ -9,6 +9,7 @@ import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.Chest
 import org.bukkit.block.Container
+import org.bukkit.block.data.type.Piston
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.collections.ArrayList
@@ -37,7 +38,7 @@ class Explosion() {
     private var blockDelay = 0
     private var postProcessTask: Deferred<Unit>? = null
     private var delayJob: Deferred<Unit>? = null
-    private var relinkJob: Deferred<Unit>? = null
+    private var relinkJob: Deferred<Boolean>? = null
 
 
     // Initialize the class, create the finalBlockList of every single block that is affected in this explosion and link
@@ -178,14 +179,11 @@ class Explosion() {
                 delay((startDelay * 1000).toLong())
             }
             this@Explosion.relinkJob = async(Dispatchers.async) {
-                println("Replacelist before ${this@Explosion.replaceList.size}")
                 this@Explosion.replaceList.addAll(linkBlocks(replaceList, true).sortedBy { it.state.y })
-                println("Relinked blocks in merged explosion, ${this@Explosion.replaceList.size} total root parents")
             }
             relinkJob!!.await()
             delayJob!!.await()
             if (!this@Explosion.cancelReplace.get()) {
-                println("Replacing from inside a merged explosion")
                 newReplace()
             }
         }
@@ -230,7 +228,6 @@ class Explosion() {
     }
 
     private fun calcBoundary(): Boundary {
-        println("Calculating boundary with ${totalBlockList.size} blocks")
         var location = totalBlockList[0].state.location
         val boundary = Boundary(location.blockX, location.blockY, location.blockZ,
             location.blockX, location.blockY, location.blockZ)
@@ -369,7 +366,6 @@ class Explosion() {
                 plugin.checkBoundaries()
             }
             delayJob!!.join()
-            println("Postprocess and delay done, cancelReplace is ${cancelReplace.get()}")
             if (!this@Explosion.cancelReplace.get()) {
                 newReplace()
             }
@@ -379,7 +375,6 @@ class Explosion() {
 
     // Async process to schedule block replacement
     private fun newReplace() {
-        println("Starting async replacement with ${replaceList.size} in replaceList")
         GlobalScope.launch(Dispatchers.async) {
             while (replaceList.isNotEmpty()) {
                 val block = replaceList.peek()
@@ -423,9 +418,14 @@ class Explosion() {
             val entities = currentBlock.location.world?.getNearbyEntities(currentBlock.location, .4, .5, .4)
             if (entities != null) {
                 for (entity in entities) {
-                    entity.teleport(currentBlock.getRelative(BlockFace.UP).location)
+                    val newLocation = currentBlock.getRelative(BlockFace.UP).location.clone()
+                    newLocation.direction = entity.location.direction
+                    entity.teleport(newLocation)
                 }
             }
+        }
+        if (block.state.blockData is Piston) {
+            plugin.debugLogger("Found piston, is extended? ${(block.state.blockData as Piston).isExtended}")
         }
         block.state.update(true)
         block.state.location.world?.playSound(block.state.location, Sound.ENTITY_ITEM_PICKUP, SoundCategory.BLOCKS, .05F, .9F + Random.Default.nextFloat() * .3F)
@@ -475,7 +475,6 @@ class Explosion() {
                 relinkJob!!.cancel()
             }
         }
-        println("Cancelled ${cancelReplace.get()}")
     }
 
     operator fun plus(other: Explosion): Explosion {

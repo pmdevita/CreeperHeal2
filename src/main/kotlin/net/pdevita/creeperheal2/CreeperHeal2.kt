@@ -39,6 +39,10 @@ class CreeperHeal2 : JavaPlugin() {
     }
 
     fun createNewExplosion(blockList: List<Block>) {
+        if (blockList.isEmpty()) {
+            debugLogger("Explosion with no blocks")
+            return
+        }
         explosions.add(Explosion(this, blockList))
     }
 
@@ -62,11 +66,11 @@ class CreeperHeal2 : JavaPlugin() {
     }
 
     fun checkBoundaries() {
+        // Check current explosions against each other to determine if they should be merged
         val newExplosions = ArrayList<ExplosionMapping>(explosions.map { ExplosionMapping(it) })
         debugLogger("Comparing ${newExplosions.size} explosions (${explosions.size})")
         for (i in 0 until newExplosions.size) {
             for (j in i+1 until newExplosions.size) {
-                debugLogger("Comparing $i and $j")
                 val overlap = newExplosions[j].explosion.boundary?.let { newExplosions[i].explosion.boundary?.overlaps(it) }
                 if (overlap == true && newExplosions[i].explosion.postProcessComplete.get() && newExplosions[j].explosion.postProcessComplete.get()) {
                     debugLogger("Merging explosions $i $j")
