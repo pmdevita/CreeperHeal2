@@ -1,4 +1,4 @@
-# CreeperHeal2 (v1.1.0) (1.13-1.16)
+# CreeperHeal2 (v1.2.0) (1.13-1.16)
 
 [Spigot Plugin Page](https://www.spigotmc.org/resources/creeperheal2.80585/)
 
