@@ -381,7 +381,6 @@ class Explosion() {
         GlobalScope.launch(Dispatchers.async) {
             while (replaceList.isNotEmpty()) {
                 val block = replaceList.peek()
-                plugin.debugLogger("${replaceList.size} left")
                 withContext(Dispatchers.minecraft) {
                     if (!cancelReplace.get()) {     // Only proceed if we aren't cancelling.
                         replaceBlock(block)
