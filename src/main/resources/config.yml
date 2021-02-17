@@ -17,6 +17,14 @@ types:
   ender-crystal: false
   bed: false
 
+# Turbo mode can help repair larger explosions faster.
+# The minimum number of blocks an explosion should involve before turbo mode is activated
+# 0 disabled turbo, I recommend ~5000 if you do enable
+turbo-threshold: 0
+# The number of blocks to replace in each replacement cycle (For reference, non-turbo is 1)
+# Raising this will slighly increase TPS impact
+turbo-amount: 3
+
 # Enable stats/usage data collection
 bstats: true
 

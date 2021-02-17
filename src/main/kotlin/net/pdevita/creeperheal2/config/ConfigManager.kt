@@ -5,19 +5,21 @@ import org.bukkit.Material
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.EntityType
 
-class ConfigManager(private val plugin: CreeperHeal2, private val config: FileConfiguration) {
+class ConfigManager(private val plugin: CreeperHeal2, config: FileConfiguration) {
     val general = General(config)
     val types = ExplosionTypes(config)
 }
 
-class General(private val config: FileConfiguration) {
+class General(config: FileConfiguration) {
     val initialDelay = config.getInt("initial-delay", 45)
     val betweenBlocksDelay = config.getInt("between-blocks-delay", 20)
     val bstats = config.getBoolean("bstats", true)
     val explodeTNT = config.getBoolean("explode-tnt", true)
+    val turboThreshold = config.getInt("turbo-threshold", 5000)
+    val turboAmount = config.getInt("turbo-amount", 3)
 }
 
-class ExplosionTypes(private val config: FileConfiguration) {
+class ExplosionTypes(config: FileConfiguration) {
     private val tnt = config.getBoolean("types.tnt", false)
     private val creeper = config.getBoolean("types.creeper", true)
     // Dragon fireballs do not do any impact damage so even though it is

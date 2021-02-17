@@ -10,7 +10,7 @@ import org.bukkit.event.entity.EntityExplodeEvent
 class Explode(var plugin: CreeperHeal2): Listener {
     @EventHandler(priority = EventPriority.HIGH)
     fun onEntityExplodeEvent(event: EntityExplodeEvent) {
-        plugin.debugLogger("An entity explosion has happened! ${event.entityType.toString()}")
+//        plugin.debugLogger("An entity explosion has happened! ${event.entityType.toString()}")
         if (plugin.settings.types.allowExplosionEntity(event.entityType)) {
             this.plugin.createNewExplosion(event.blockList())
             event.yield = 0F
@@ -19,7 +19,7 @@ class Explode(var plugin: CreeperHeal2): Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     fun onBlockExplodeEvent(event: BlockExplodeEvent) {
-        plugin.debugLogger("A block explosion has happened! ${event.block.toString()}")
+//        plugin.debugLogger("A block explosion has happened! ${event.block.toString()}")
         if (plugin.settings.types.allowExplosionBlock(/*event.block.blockData.material*/)) {
             this.plugin.createNewExplosion(event.blockList())
             event.yield = 0F

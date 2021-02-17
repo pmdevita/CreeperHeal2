@@ -1,6 +1,8 @@
 package net.pdevita.creeperheal2.core
 
 import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import net.pdevita.creeperheal2.CreeperHeal2
 import net.pdevita.creeperheal2.utils.async
 import net.pdevita.creeperheal2.utils.minecraft
@@ -25,7 +27,7 @@ private object SideFaces {
 class Explosion() {
     lateinit var plugin: CreeperHeal2
     // List of all blocks involved in explosion, dependents included
-    private val totalBlockList = ArrayList<ExplodedBlock>()
+    val totalBlockList = ArrayList<ExplodedBlock>()
     private var replaceList = LinkedList<ExplodedBlock>()
     private val gravityBlocks = HashSet<Location>()
     private val locations = HashMap<Location, ExplodedBlock>()
@@ -34,19 +36,17 @@ class Explosion() {
     var postProcessComplete = AtomicBoolean(false)
     private var cancelReplace = AtomicBoolean(false)
 
-    private var startDelay = 0
-    private var blockDelay = 0
+    var replaceCounter = 0
     private var postProcessTask: Deferred<Unit>? = null
     private var delayJob: Deferred<Unit>? = null
     private var relinkJob: Deferred<Unit>? = null
+    var isAdded = Mutex(true)
 
 
     // Initialize the class, create the finalBlockList of every single block that is affected in this explosion and link
     // it's dependencies
     constructor(plugin: CreeperHeal2, initialBlockList: List<Block>) : this() {
         this.plugin = plugin
-        this.startDelay = plugin.settings.general.initialDelay
-        this.blockDelay = plugin.settings.general.betweenBlocksDelay
 
         // List of all blocks, including dependencies, in this stage of search
         // When we search out for other dependencies, this list will be cleared to hold the next layer
@@ -99,7 +99,6 @@ class Explosion() {
                 val dependentBlocks = this.checkSides(explodedBlock)
                 if (dependentBlocks.isNotEmpty()) {
                     for (dependentBlock in dependentBlocks) {
-                        this.plugin.debugLogger("Found extra side dependent block ${dependentBlock.state.blockData.material}")
                         locations[dependentBlock.state.location] = dependentBlock
                     }
                     secondaryList.addAll(dependentBlocks)
@@ -163,21 +162,20 @@ class Explosion() {
 
     constructor(
         plugin: CreeperHeal2, totalBlockList: ArrayList<ExplodedBlock>, replaceList: LinkedList<ExplodedBlock>,
-        gravityBlocks: HashSet<Location>, locations: HashMap<Location, ExplodedBlock>, boundary: Boundary? = null): this() {
+        gravityBlocks: HashSet<Location>, locations: HashMap<Location, ExplodedBlock>, boundary: Boundary? = null, replaceCounter: Int): this() {
         this.plugin = plugin
         this.totalBlockList.addAll(totalBlockList)
         this.gravityBlocks.addAll(gravityBlocks)
         this.locations.putAll(locations)
         this.replaceList = replaceList
         this.boundary = boundary
+        this.replaceCounter = replaceCounter
         this.postProcessComplete.set(true)
-        this.startDelay = plugin.settings.general.initialDelay
-        this.blockDelay = plugin.settings.general.betweenBlocksDelay
 
         GlobalScope.launch(Dispatchers.async) {
             // Delay before starting heal
             delayJob = async(Dispatchers.async) {
-                delay((startDelay * 1000).toLong())
+                delay((plugin.settings.general.initialDelay * 1000).toLong())
             }
             this@Explosion.relinkJob = async(Dispatchers.async) {
                 val newReplaceList = LinkedList<ExplodedBlock>()
@@ -230,29 +228,40 @@ class Explosion() {
 
     }
 
-    private fun calcBoundary(): Boundary {
-        var location = totalBlockList[0].state.location
-        val boundary = Boundary(location.blockX, location.blockY, location.blockZ,
-            location.blockX, location.blockY, location.blockZ)
-        for (block in totalBlockList) {
-            location = block.state.location
-            if (boundary.highX < location.blockX) {
-                boundary.highX = location.blockX
-            } else if (boundary.lowX > location.blockX) {
-                boundary.lowX = location.blockX
+    private fun calcBoundary(): Boundary? {
+        val boundary = Boundary(0, 0, 0, 0, 0, 0)
+        try {
+            var location = totalBlockList[0].state.location
+            boundary.highX = location.blockX
+            boundary.lowX = location.blockX
+            boundary.highY = location.blockY
+            boundary.lowY = location.blockY
+            boundary.highZ = location.blockZ
+            boundary.lowZ = location.blockZ
+
+            for (block in totalBlockList) {
+                location = block.state.location
+                if (boundary.highX < location.blockX) {
+                    boundary.highX = location.blockX
+                } else if (boundary.lowX > location.blockX) {
+                    boundary.lowX = location.blockX
+                }
+                if (boundary.highY < location.blockY) {
+                    boundary.highY = location.blockY
+                } else if (boundary.lowY > location.blockY) {
+                    boundary.lowY = location.blockY
+                }
+                if (boundary.highZ < location.blockZ) {
+                    boundary.highZ = location.blockZ
+                } else if (boundary.lowZ > location.blockZ) {
+                    boundary.lowZ = location.blockZ
+                }
             }
-            if (boundary.highY < location.blockY) {
-                boundary.highY = location.blockY
-            } else if (boundary.lowY > location.blockY) {
-                boundary.lowY = location.blockY
-            }
-            if (boundary.highZ < location.blockZ) {
-                boundary.highZ = location.blockZ
-            } else if (boundary.lowZ > location.blockZ) {
-                boundary.lowZ = location.blockZ
-            }
+        } catch (e: java.lang.IndexOutOfBoundsException) {
+            plugin.debugLogger("Couldn't calc boundaries because there are no blocks")
+            return null
         }
-        plugin.debugLogger("Explosion within coords: ${boundary.highX}, ${boundary.highY}, ${boundary.highZ} and ${boundary.lowX}, ${boundary.lowY}, ${boundary.lowZ}")
+//        plugin.debugLogger("Explosion within coords: ${boundary.highX}, ${boundary.highY}, ${boundary.highZ} and ${boundary.lowX}, ${boundary.lowY}, ${boundary.lowZ}")
         // Increase boundaries by one
         boundary.highX += 1
         boundary.highY += 1
@@ -330,7 +339,11 @@ class Explosion() {
         GlobalScope.launch(Dispatchers.async) {
             // Delay before starting heal
             delayJob = async(Dispatchers.async) {
-                delay((startDelay * 1000).toLong())
+                delay((plugin.settings.general.initialDelay * 1000).toLong())
+            }
+            // Calc boundaries so we can combine with intersecting explosions
+            val calcBoundary = async(Dispatchers.async) {
+                this@Explosion.boundary = this@Explosion.calcBoundary()
             }
             // Post-processing on block list
             this@Explosion.postProcessTask = async(Dispatchers.async) {
@@ -352,57 +365,85 @@ class Explosion() {
                         }
                     }
                     replaceList.addAll(newBlocks)
-                    totalBlockList.removeAll { it.state.blockData.material == Material.TNT }
+                    if (replaceList.isEmpty()) {
+                        // Cancel this explosion
+                        plugin.debugLogger("Explosion was only TNT, deleting")
+                        calcBoundary.cancel()
+                        this@Explosion.cancel()
+                        this@Explosion.deleteExplosion()
+                    } else {
+                        totalBlockList.removeAll { it.state.blockData.material == Material.TNT }
+                    }
                 }
             }
-            // Calc boundaries so we can combine with intersecting explosions
-            val calcBoundary = async(Dispatchers.async) {
-                this@Explosion.boundary = this@Explosion.calcBoundary()
-//                if (plugin.debug) {
-//                    val world = totalBlockList[0].state.world
-//                    withContext(Dispatchers.minecraft) {
-//                        var location = Location(world, boundary.highX.toDouble(), boundary.highY.toDouble(), boundary.highZ.toDouble())
-//                        location.block.type = Material.GOLD_BLOCK
-//                        location = Location(world, boundary.lowX.toDouble(), boundary.lowY.toDouble(), boundary.lowZ.toDouble())
-//                        location.block.type = Material.GOLD_BLOCK
-//                    }
-//                }
-            }
+
 
             this@Explosion.postProcessTask!!.await()
             calcBoundary.await()
             this@Explosion.postProcessComplete.set(true)
-            async(Dispatchers.minecraft) {
-                plugin.checkBoundaries()
+            if (!this@Explosion.cancelReplace.get()) {
+//                async(Dispatchers.minecraft) {
+                isAdded.withLock {
+                    plugin.checkBoundaries()
+                }
+//                }
             }
             delayJob!!.join()
             if (!this@Explosion.cancelReplace.get()) {
                 newReplace()
             }
         }
-        plugin.debugLogger("returning from new replace")
     }
 
     // Async process to schedule block replacement
     private fun newReplace() {
+        if (plugin.settings.general.turboThreshold > 0 && plugin.settings.general.turboThreshold < (totalBlockList.size - replaceCounter)) {
+            plugin.debugLogger("Starting off repair in turbo")
+        } else {
+            plugin.debugLogger("Staring repair")
+        }
         GlobalScope.launch(Dispatchers.async) {
+            var replaceAmount = 1
+            // Intermediate block list, mostly important for turboing
+            val blocks = LinkedList<ExplodedBlock>()
             while (replaceList.isNotEmpty()) {
-                val block = replaceList.peek()
-                withContext(Dispatchers.minecraft) {
-                    if (!cancelReplace.get()) {     // Only proceed if we aren't cancelling.
-                        replaceBlock(block)
-                        replaceList.poll()
-//                        if (block.dependencies.isNotEmpty()) {
-//                            plugin.debugLogger("Merged in ${block.dependencies.size} dependencies")
-//                        }
-                        replaceList.addAll(block.dependencies)
+                // If turbo is enabled and we are over the threshold, turn it on
+                replaceAmount = if (plugin.settings.general.turboThreshold > 0 && plugin.settings.general.turboThreshold < (totalBlockList.size - replaceCounter)) {
+                    plugin.settings.general.turboAmount
+                } else {
+                    1
+                }
+                // Peek N number of blocks to replace
+                val itr = replaceList.iterator()
+                for (i in 0..replaceAmount) {
+                    if (itr.hasNext()) {
+                        blocks.add(itr.next())
                     }
                 }
+                withContext(Dispatchers.minecraft) {
+                    if (!cancelReplace.get()) {     // Only proceed if we aren't cancelling.
+                        for (block in blocks) {
+                            // Replace block
+                            replaceBlock(block)
+                            // Remove it from the replaceList
+                            replaceList.poll()
+                            // Dump its dependencies in
+                            replaceList.addAll(block.dependencies)
+                        }
+                    }
+                }
+                // Increment the replaceCounter
+                replaceCounter += blocks.size
+                // Clear the intermediate block list
+                blocks.clear()
+                // If we are cancelling, exit, otherwise, keep going
                 if (!cancelReplace.get()) {
                     delayJob = async(Dispatchers.async) {
-                        delay((blockDelay / 20 * 1000).toLong())
+                        delay((plugin.settings.general.betweenBlocksDelay / 20 * 1000).toLong())
                     }
                     delayJob!!.join()
+                    // Delay is kinda long, could be good to check again
+                    if (cancelReplace.get()) break
                 } else {
                     break
                 }
@@ -411,21 +452,29 @@ class Explosion() {
             // Clean up
             // Remove reference to self to be deleted
 //            if (!cancelReplace) {
-                plugin.gravity.removeBlocks(gravityBlocks)
-                plugin.removeExplosion(this@Explosion)
+                deleteExplosion()
                 plugin.debugLogger("Finished repairing explosion")
 //            }
         }
     }
+
+    private fun deleteExplosion() {
+        GlobalScope.launch(Dispatchers.minecraft) {
+            plugin.gravity.removeBlocks(gravityBlocks)
+            plugin.removeExplosion(this@Explosion)
+        }
+    }
+
 
     private fun replaceBlock(block: ExplodedBlock) {
         val currentBlock = block.state.location.block
 
         // If block isn't air, it's likely a player put it there. Just break it off normally to give it back to them
         if (currentBlock.blockData.material != Material.AIR) {
-            plugin.debugLogger("Breaking a block to place a block")
+//            plugin.debugLogger("Breaking ${currentBlock.blockData.material} to place a block")
             currentBlock.breakNaturally()
         } else {
+            // If the block is air, teleport any entities in it up one to get them out of the way of the new block
             val entities = currentBlock.location.world?.getNearbyEntities(currentBlock.location, .4, .5, .4)
             if (entities != null) {
                 for (entity in entities) {
@@ -436,6 +485,7 @@ class Explosion() {
             }
         }
         block.state.update(true)
+        // Play pop sound at the location of the new block
         block.state.location.world?.playSound(block.state.location, Sound.ENTITY_ITEM_PICKUP, SoundCategory.BLOCKS, .05F, .9F + Random.Default.nextFloat() * .3F)
     }
 
@@ -458,9 +508,6 @@ class Explosion() {
             val block = replaceList.peek()
             replaceBlock(block)
             replaceList.poll()
-            if (block.dependencies.isNotEmpty()) {
-                plugin.debugLogger("Merged in ${block.dependencies.size} dependencies")
-            }
             replaceList.addAll(block.dependencies)
         }
 
@@ -494,6 +541,7 @@ class Explosion() {
         val gravityBlocks = ArrayList<Location>()
         val locations = HashMap<Location, ExplodedBlock>()
         val replaceList = LinkedList<ExplodedBlock>()
+        val replaceCounter = this.replaceCounter + other.replaceCounter
         totalBlockList.addAll(this.totalBlockList)
         totalBlockList.addAll(other.totalBlockList)
         gravityBlocks.addAll(this.gravityBlocks)
@@ -518,7 +566,7 @@ class Explosion() {
                 min(this.boundary!!.lowZ, other.boundary!!.lowZ))
         }
         plugin.debugLogger("Done, initializing from data")
-        return Explosion(plugin, totalBlockList, replaceList, gravityBlocksSet, locations, boundary)
+        return Explosion(plugin, totalBlockList, replaceList, gravityBlocksSet, locations, boundary, replaceCounter)
 
     }
 

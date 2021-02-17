@@ -4,6 +4,7 @@ import net.pdevita.creeperheal2.commands.Commands
 import net.pdevita.creeperheal2.config.ConfigManager
 import net.pdevita.creeperheal2.constants.ConstantsManager
 import net.pdevita.creeperheal2.core.Explosion
+import net.pdevita.creeperheal2.core.ExplosionManager
 import net.pdevita.creeperheal2.core.ExplosionMapping
 import net.pdevita.creeperheal2.core.Gravity
 import net.pdevita.creeperheal2.events.Explode
@@ -16,6 +17,7 @@ class CreeperHeal2 : JavaPlugin() {
     val gravity = Gravity(this)
     private var debug = false
     val constants = ConstantsManager(this)
+    val manager = ExplosionManager(this)
     lateinit var settings: ConfigManager
     var stats: Stats? = null
 
@@ -40,14 +42,16 @@ class CreeperHeal2 : JavaPlugin() {
 
     fun createNewExplosion(blockList: List<Block>) {
         if (blockList.isEmpty()) {
-            debugLogger("Explosion with no blocks")
+//            debugLogger("Explosion with no blocks")
             return
         }
-        explosions.add(Explosion(this, blockList))
+//        explosions.add(Explosion(this, blockList))
+        manager.add(Explosion(this, blockList))
     }
 
     fun removeExplosion(explosion: Explosion) {
-        explosions.remove(explosion)
+//        explosions.remove(explosion)
+        manager.remove(explosion)
     }
 
     fun debugLogger(message: String) {
@@ -58,21 +62,26 @@ class CreeperHeal2 : JavaPlugin() {
 
     fun warpExplosions() {
         this.debugLogger("Running warp")
-        val itr = explosions.iterator()
-        while (itr.hasNext()) {
-            itr.next().warpReplaceBlocks()
-            itr.remove()
-        }
+//        val itr = explosions.iterator()
+//        while (itr.hasNext()) {
+//            itr.next().warpReplaceBlocks()
+//            itr.remove()
+//        }
+        manager.warpAll()
     }
 
     fun checkBoundaries() {
+        manager.merge()
+    }
+
+    fun oldCheckBoundaries() {
         // Check current explosions against each other to determine if they should be merged
         val newExplosions = ArrayList<ExplosionMapping>(explosions.map { ExplosionMapping(it) })
         debugLogger("Comparing ${newExplosions.size} explosions (${explosions.size})")
         for (i in 0 until newExplosions.size) {
             for (j in i+1 until newExplosions.size) {
                 if (newExplosions[j] == newExplosions[i]) {
-                    debugLogger("The explosions are the same! Don't merge!")
+//                    debugLogger("The explosions are the same! Don't merge!")
                     continue
                 }
                 val overlap = newExplosions[j].explosion.boundary?.let { newExplosions[i].explosion.boundary?.overlaps(it) }
@@ -94,7 +103,7 @@ class CreeperHeal2 : JavaPlugin() {
                         newExplosions[k] = newExplosionMapping
                     }
                 } else {
-                    debugLogger("Not merging $i and $j $overlap ${newExplosions[i].explosion.postProcessComplete.get()} ${newExplosions[j].explosion.postProcessComplete.get()}")
+//                    debugLogger("Not merging $i and $j $overlap ${newExplosions[i].explosion.postProcessComplete.get()} ${newExplosions[j].explosion.postProcessComplete.get()}")
                 }
             }
         }
@@ -105,12 +114,12 @@ class CreeperHeal2 : JavaPlugin() {
     override fun onDisable() {
         super.onDisable()
         // Quickly replace all blocks before shutdown
-        val itr = explosions.iterator()
-        while (itr.hasNext()) {
-            itr.next().warpReplaceBlocks()
-            itr.remove()
-        }
-
+//        val itr = explosions.iterator()
+//        while (itr.hasNext()) {
+//            itr.next().warpReplaceBlocks()
+//            itr.remove()
+//        }
+        manager.warpAll()
     }
 }
 
