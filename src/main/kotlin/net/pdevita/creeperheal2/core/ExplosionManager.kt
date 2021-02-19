@@ -5,15 +5,15 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.pdevita.creeperheal2.CreeperHeal2
 import net.pdevita.creeperheal2.utils.async
-import java.lang.IndexOutOfBoundsException
 import java.util.concurrent.ConcurrentLinkedQueue
-import kotlin.math.exp
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 
 class ExplosionManager(val plugin: CreeperHeal2) {
+    private val explosionsLock = ReentrantLock()
     private val explosions = ArrayList<Explosion>()
     private val addedExplosions = ConcurrentLinkedQueue<Explosion>()
-
     private val removedExplosions = ConcurrentLinkedQueue<Explosion>()
 
     fun add(explosion: Explosion) {
@@ -21,7 +21,7 @@ class ExplosionManager(val plugin: CreeperHeal2) {
         GlobalScope.launch (Dispatchers.async) {
             synchronized(addedExplosions) {
                 if (addedExplosions.isNotEmpty()) {
-                    synchronized(explosions) {
+                    explosionsLock.withLock {
                         println("Adding ${addedExplosions.size} explosions from add queue")
                         while (addedExplosions.isNotEmpty()) {
                             val new = addedExplosions.poll()
@@ -39,7 +39,7 @@ class ExplosionManager(val plugin: CreeperHeal2) {
         GlobalScope.launch (Dispatchers.async) {
             synchronized(removedExplosions) {
                 if (removedExplosions.isNotEmpty()) {
-                    synchronized(explosions) {
+                    explosionsLock.withLock {
                         while (removedExplosions.isNotEmpty()) {
                             explosions.remove(removedExplosions.poll())
                         }
@@ -50,20 +50,20 @@ class ExplosionManager(val plugin: CreeperHeal2) {
     }
 
     fun size(): Int {
-        synchronized(explosions) {
+        explosionsLock.withLock {
             return explosions.size
         }
     }
 
     fun getExplosions(): ArrayList<Explosion> {
-        synchronized(explosions) {
+        explosionsLock.withLock {
             return ArrayList(explosions)
         }
     }
 
 
     fun warpAll() {
-        synchronized(explosions) {
+        explosionsLock.withLock {
             val itr = explosions.iterator()
             while (itr.hasNext()) {
                 itr.next().warpReplaceBlocks()
@@ -72,11 +72,24 @@ class ExplosionManager(val plugin: CreeperHeal2) {
         }
     }
 
+    fun cancelAll() {
+        explosionsLock.withLock {
+            val itr = explosions.iterator()
+            while (itr.hasNext()) {
+                itr.next().cancel()
+                itr.remove()
+            }
+        }
+    }
+
     fun merge() {
-        synchronized(explosions) {
+        explosionsLock.withLock {
+            if (explosions.size < 2) {
+                return@withLock
+            }
             // Check current explosions against each other to determine if they should be merged
             val newExplosions = ArrayList<ExplosionMapping>(explosions.map { ExplosionMapping(it) })
-//            plugin.debugLogger("Comparing ${newExplosions.size} explosions (${explosions.size})")
+            plugin.debugLogger("Comparing ${newExplosions.size} explosions")
             // Just to start the while loop
             var didMerge = true
             while (didMerge) {

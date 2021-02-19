@@ -5,8 +5,8 @@ import net.pdevita.creeperheal2.config.ConfigManager
 import net.pdevita.creeperheal2.constants.ConstantsManager
 import net.pdevita.creeperheal2.core.Explosion
 import net.pdevita.creeperheal2.core.ExplosionManager
-import net.pdevita.creeperheal2.core.ExplosionMapping
 import net.pdevita.creeperheal2.core.Gravity
+import net.pdevita.creeperheal2.data.MergeableLinkedListTest
 import net.pdevita.creeperheal2.events.Explode
 import net.pdevita.creeperheal2.utils.Stats
 import org.bukkit.block.Block
@@ -34,6 +34,7 @@ class CreeperHeal2 : JavaPlugin() {
 
         registerEvents()
         getCommand("ch")!!.setExecutor(Commands(this))
+//        val linkedTest = MergeableLinkedListTest()
     }
 
     private fun registerEvents() {
@@ -70,45 +71,12 @@ class CreeperHeal2 : JavaPlugin() {
         manager.warpAll()
     }
 
-    fun checkBoundaries() {
-        manager.merge()
+    fun cancelExplosions() {
+        manager.cancelAll()
     }
 
-    fun oldCheckBoundaries() {
-        // Check current explosions against each other to determine if they should be merged
-        val newExplosions = ArrayList<ExplosionMapping>(explosions.map { ExplosionMapping(it) })
-        debugLogger("Comparing ${newExplosions.size} explosions (${explosions.size})")
-        for (i in 0 until newExplosions.size) {
-            for (j in i+1 until newExplosions.size) {
-                if (newExplosions[j] == newExplosions[i]) {
-//                    debugLogger("The explosions are the same! Don't merge!")
-                    continue
-                }
-                val overlap = newExplosions[j].explosion.boundary?.let { newExplosions[i].explosion.boundary?.overlaps(it) }
-                if (overlap == true && newExplosions[i].explosion.postProcessComplete.get() && newExplosions[j].explosion.postProcessComplete.get()) {
-                    debugLogger("Merging explosions $i $j")
-
-                    // Combine them (and cancel the originals) and create a new explosion mapping
-                    val newExplosion = newExplosions[i].explosion + newExplosions[j].explosion
-                    val newExplosionMapping = ExplosionMapping(newExplosion)
-
-                    // Combine their index lists and add the new ones for our current indices
-                    newExplosionMapping.indices.addAll(newExplosions[i].indices)
-                    newExplosionMapping.indices.addAll(newExplosions[j].indices)
-                    newExplosionMapping.indices.add(i)
-                    newExplosionMapping.indices.add(j)
-
-                    // Replace all matching indexes with this object
-                    for (k in newExplosionMapping.indices) {
-                        newExplosions[k] = newExplosionMapping
-                    }
-                } else {
-//                    debugLogger("Not merging $i and $j $overlap ${newExplosions[i].explosion.postProcessComplete.get()} ${newExplosions[j].explosion.postProcessComplete.get()}")
-                }
-            }
-        }
-        explosions.clear()
-        explosions.addAll(newExplosions.map { it.explosion }.distinct())
+    fun checkBoundaries() {
+        manager.merge()
     }
 
     override fun onDisable() {

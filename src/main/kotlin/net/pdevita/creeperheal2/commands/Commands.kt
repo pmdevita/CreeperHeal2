@@ -19,6 +19,7 @@ class Commands(private val plugin: CreeperHeal2): CommandExecutor {
             return when (args[0]) {
                 "warp" -> this.warpExplosions(sender, args)
                 "stats" -> this.stats(sender, args)
+                "cancel" -> this.cancelExplosions(sender, args)
                 else -> false
             }
         }
@@ -66,6 +67,17 @@ class Commands(private val plugin: CreeperHeal2): CommandExecutor {
         }
         plugin.warpExplosions()
         sender.sendMessage("Warping explosions...")
+        return true
+    }
+
+    private fun cancelExplosions(sender: CommandSender, args: Array<out String>): Boolean {
+        if (sender is Player) {
+            if (!sender.hasPermission("creeperheal2.cancel")) {
+                return false
+            }
+        }
+        plugin.cancelExplosions()
+        sender.sendMessage("Cancelling explosions...")
         return true
     }
 

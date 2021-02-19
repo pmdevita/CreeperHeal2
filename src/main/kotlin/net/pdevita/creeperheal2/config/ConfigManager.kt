@@ -16,7 +16,10 @@ class General(config: FileConfiguration) {
     val bstats = config.getBoolean("bstats", true)
     val explodeTNT = config.getBoolean("explode-tnt", true)
     val turboThreshold = config.getInt("turbo-threshold", 5000)
+    val turboType = config.getInt("turbo-type", 0).coerceIn(0..1)
     val turboAmount = config.getInt("turbo-amount", 3)
+    val turboPercentage = config.getInt("turbo-percentage", 1).coerceIn(1..100)
+    val turboCap = config.getInt("turbo-cap", 10)
 }
 
 class ExplosionTypes(config: FileConfiguration) {
