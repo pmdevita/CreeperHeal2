@@ -20,6 +20,7 @@ import kotlin.collections.HashSet
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.round
 import kotlin.random.Random
 
 private object SideFaces {
@@ -428,7 +429,7 @@ class Explosion() {
                 replaceAmount = if (plugin.settings.general.turboThreshold > 0 && plugin.settings.general.turboThreshold < (totalBlockList.size - replaceCounter)) {
                     when (plugin.settings.general.turboType) {
                         0 -> plugin.settings.general.turboAmount
-                        1 -> min(ceil((plugin.settings.general.turboPercentage / 100.0) * (totalBlockList.size - replaceCounter)).toInt(), plugin.settings.general.turboCap)
+                        1 -> round((plugin.settings.general.turboPercentage / 100.0) * (totalBlockList.size - replaceCounter)).toInt().coerceIn(1..plugin.settings.general.turboCap)
                         else -> plugin.settings.general.turboAmount
                     }
                 } else {

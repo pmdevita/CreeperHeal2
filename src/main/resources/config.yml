@@ -24,7 +24,7 @@ types:
 turbo-threshold: 0
 
 # Turbo type lets you determine if turbo replaces at a constant
-# amount or a percentage
+# amount or a percentage of the remaining total
 # 0 - constant amount
 # 1 - percentage
 turbo-type: 0
@@ -42,7 +42,6 @@ turbo-percentage: 1
 # Important to set if you increase turbo-percentage to prevent massive
 # lag-spiking replacement cycles. Recommended <20
 turbo-cap: 10
-
 
 # Enable stats/usage data collection
 bstats: true
