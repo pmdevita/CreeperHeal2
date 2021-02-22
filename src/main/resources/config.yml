@@ -43,11 +43,11 @@ turbo-percentage: 1
 # lag-spiking replacement cycles. Recommended <20
 turbo-cap: 10
 
-# Enable stats/usage data collection
-bstats: true
-
 # Allow the chaining of TNT explosions rather than just saving the TNT block
 explode-tnt: true
+
+# Enable stats/usage data collection
+bstats: true
 
 # Enable debug mode
 debug: false
