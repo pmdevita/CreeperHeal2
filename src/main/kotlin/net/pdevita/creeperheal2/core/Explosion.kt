@@ -157,25 +157,18 @@ class Explosion() {
 //            secondaryList = ArrayList<ExplodedBlock>()
         }
 
-        val itr2 = replaceList.iterator()
-        while (itr2.hasNext()) {
-            val block = itr2.next()
-            // Block isn't dependent, can be replaced normally
+        val itr = replaceList.iterator()
+        while (itr.hasNext()) {
+            val block = itr.next()
+            // Block is dependent, should be removed and linked to parent
             if (block.dependent != DependentType.NOT_DEPENDENT) {
                 val parentLocation = block.getParentBlockLocation()
                 val parentBlock = parentLocation?.let { locations[parentLocation] }
                 if (parentBlock != null) {
                     // Add block to it's parent's dependency list. Once the parent is added, it's dependencies will
                     // be added to the replaceList
-                    if (block.state.blockData.material == Material.SCAFFOLDING) {
-                        println("Second pass linking scaffolding")
-                    }
                     parentBlock.dependencies.add(block)
-                    itr2.remove()
-                } else {
-                    if (block.state.blockData.material == Material.SCAFFOLDING) {
-                        println("Scaffolding at ${block.state.location} doesn't have a parent! Parent location is $parentLocation")
-                    }
+                    itr.remove()
                 }
             }
         }
