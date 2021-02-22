@@ -74,7 +74,12 @@ class Explosion() {
 
         }
 
-        //
+//        var blockString = ""
+//        for (block in blockList) {
+//            blockString += block.state.blockData.material.toString() + " "
+//        }
+//        plugin.debugLogger("Initial block list $blockString")
+
         replaceList.addAll(MergeableLinkedList(blockList))
 
         // You can see the full commented version under relinkBlocks
@@ -82,21 +87,21 @@ class Explosion() {
         // We have to block until this part is done otherwise we have two threads accessing
         // block dependencies
         // Second pass, link dependent blocks to their parents
-        val itr = replaceList.iterator()
-        while (itr.hasNext()) {
-            val block = itr.next()
-            // Block isn't dependent, can be replaced normally
-            if (block.dependent != DependentType.NOT_DEPENDENT) {
-                val parentLocation = block.getParentBlockLocation()
-                val parentBlock = parentLocation?.let { locations[parentLocation] }
-                if (parentBlock != null) {
-                    // Add block to it's parent's dependency list. Once the parent is added, it's dependencies will
-                    // be added to the replaceList
-                    parentBlock.dependencies.add(block)
-                    itr.remove()
-                }
-            }
-        }
+//        val itr = replaceList.iterator()
+//        while (itr.hasNext()) {
+//            val block = itr.next()
+//            // Block isn't dependent, can be replaced normally
+//            if (block.dependent != DependentType.NOT_DEPENDENT) {
+//                val parentLocation = block.getParentBlockLocation()
+//                val parentBlock = parentLocation?.let { locations[parentLocation] }
+//                if (parentBlock != null) {
+//                    // Add block to it's parent's dependency list. Once the parent is added, it's dependencies will
+//                    // be added to the replaceList
+//                    parentBlock.dependencies.add(block)
+//                    itr.remove()
+//                }
+//            }
+//        }
 
         // Put the extra dependent blocks in here to differentiate them from the previous layer
         var secondaryList = MergeableLinkedList<ExplodedBlock>()
@@ -150,6 +155,29 @@ class Explosion() {
 
 //            blockList = secondaryList
 //            secondaryList = ArrayList<ExplodedBlock>()
+        }
+
+        val itr2 = replaceList.iterator()
+        while (itr2.hasNext()) {
+            val block = itr2.next()
+            // Block isn't dependent, can be replaced normally
+            if (block.dependent != DependentType.NOT_DEPENDENT) {
+                val parentLocation = block.getParentBlockLocation()
+                val parentBlock = parentLocation?.let { locations[parentLocation] }
+                if (parentBlock != null) {
+                    // Add block to it's parent's dependency list. Once the parent is added, it's dependencies will
+                    // be added to the replaceList
+                    if (block.state.blockData.material == Material.SCAFFOLDING) {
+                        println("Second pass linking scaffolding")
+                    }
+                    parentBlock.dependencies.add(block)
+                    itr2.remove()
+                } else {
+                    if (block.state.blockData.material == Material.SCAFFOLDING) {
+                        println("Scaffolding at ${block.state.location} doesn't have a parent! Parent location is $parentLocation")
+                    }
+                }
+            }
         }
 
         // Print all blocks in the list
@@ -303,6 +331,13 @@ class Explosion() {
                 }
             }
         }
+//        if (foundBlocks.size > 0) {
+//            var blockString = ""
+//            for (block in foundBlocks) {
+//                blockString += block.state.blockData.material.toString() + " "
+//            }
+//            plugin.debugLogger("Found extra blocks $blockString")
+//        }
         return foundBlocks
     }
 
