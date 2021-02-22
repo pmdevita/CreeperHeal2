@@ -60,7 +60,7 @@ private class GBlocks13: GravityBlockList {
 
 private class GBlocks14: GravityBlockList {
     override val blocks = ArrayList<Material>(listOf(
-            Material.SCAFFOLDING
+//            Material.SCAFFOLDING
     ))
 }
 
