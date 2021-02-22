@@ -31,7 +31,7 @@ turbo-type: 0
 
 # Constant Amount Turbo Settings
 # The number of blocks to replace in each replacement cycle (For reference, non-turbo is 1)
-# Raising this will slightly increase TPS impact
+# Raising this will slightly increase visible lag. Recommended <20
 turbo-amount: 3
 
 # Percentage Turbo Settings

@@ -50,12 +50,18 @@ object OnTopOf: FindDependentBlock {
 
 object Vine: FindDependentBlock {
     override fun reorient(state: BlockState): Location? {
+        // Try to attach to a vine above first
+        if (state.block.getRelative(BlockFace.UP).blockData.material == Material.VINE) {
+            return state.block.getRelative(BlockFace.UP).location
+        }
+        // Otherwise try attaching to one of it's attached faces
         val multipleFacing = state.blockData as MultipleFacing
         for (face in multipleFacing.faces) {
             if (state.block.getRelative(face).blockData.material != Material.AIR) {
                 return state.block.getRelative(face).location
             }
         }
+        // Otherwise attach to block above
         if (state.block.getRelative(BlockFace.UP).blockData.material != Material.AIR) {
             return state.block.getRelative(BlockFace.UP).location
         }

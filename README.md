@@ -11,11 +11,18 @@ for the original idea and name!
 # Setup/Installation
 
 Download the latest release and place it in your plugins folder. The config.yml is generated the first 
-time the plugin is run with the server. You can also look at it 
+time the plugin is run on the server. You can also look at it 
 [here](https://github.com/pmdevita/CreeperHeal2/blob/master/src/main/resources/config.yml).
 
 New versions of Minecraft past the currently supported version do work, with the exception that newly 
 added blocks may not repair properly.
+
+# Commands and Permissions
+
+- `/ch warp` - `creeperheal2.warp` Immediately heal all currently tracked explosions
+- `/ch stats` - `creeperheal2.stats` View stats about currently tracked explosions
+- `/ch cancel` - `creeperheal2.cancel` Cancel replacement of currently tracked explosions (you will lose blocks so be careful)
+
 
 # Development Progress
 
@@ -24,7 +31,7 @@ modern servers, and it supports every block except those listed below, it still 
 replace some structures with 100% accuracy. Blocks that aren't replaced properly should drop as
 items though.
 
-Currently, the following blocks can not be replaced properly (they will drop as items)
+Currently, the following blocks cannot be replaced properly (they will drop as items)
 - Paintings
 - Item frames
 - Chorus plants
