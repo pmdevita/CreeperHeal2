@@ -22,7 +22,7 @@ class ExplosionManager(val plugin: CreeperHeal2) {
             synchronized(addedExplosions) {
                 if (addedExplosions.isNotEmpty()) {
                     explosionsLock.withLock {
-                        println("Adding ${addedExplosions.size} explosions from add queue")
+//                        plugin.debugLogger("Adding ${addedExplosions.size} explosions from add queue")
                         while (addedExplosions.isNotEmpty()) {
                             val new = addedExplosions.poll()
                             explosions.add(new)
