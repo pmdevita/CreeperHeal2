@@ -121,4 +121,30 @@ object Piston:FindDependentBlock {
     }
 }
 
+object Scaffolding:FindDependentBlock {
+    override fun reorient(state: BlockState): Location? {
+        if (state.blockData is Scaffolding) {
+            val scaffolding = state.blockData as Scaffolding
+            // Bottom is kinda weird, you would think it would be true
+            // if it was on the bottom or was dependent on the below block
+            if (scaffolding.isBottom) {
+                // Find a nearby scaffolding that is a lower distance than this one
+                for (blockFace in listOf(BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH)) {
+                    val block = state.block.getRelative(blockFace)
+                    if (block.blockData is Scaffolding) {
+                        if ((block.blockData as Scaffolding).distance < scaffolding.distance) {
+                            return block.location
+                        }
+                    }
+                }
+                return null
+            } else {
+                // It's on top of a block, return that block
+                return state.block.getRelative(BlockFace.DOWN).location
+            }
+        }
+        return null
+    }
+}
+
 

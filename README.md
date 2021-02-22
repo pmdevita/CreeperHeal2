@@ -50,6 +50,6 @@ report to let me know.
 - [ ] Paintings have multiple dependent blocks
 - [ ] Item frames
 - [ ] Chorus plants need to be rescanned to build their dependency tree
-- [ ] Scaffolding need to be rescanned to build its dependency tree
+- [x] Scaffolding need to be rescanned to build its dependency tree
 - [ ] Minecart rails don't maintain orientation when replaced
 - [ ] Liquids may remove certain blocks during replacement

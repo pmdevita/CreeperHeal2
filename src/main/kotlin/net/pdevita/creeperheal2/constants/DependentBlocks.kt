@@ -250,7 +250,7 @@ private class Blocks14: VersionBlocks() {
             Material.DARK_OAK_WALL_SIGN to Behind,
             Material.JUNGLE_WALL_SIGN to Behind,
             Material.OAK_WALL_SIGN to Behind,
-            Material.SCAFFOLDING to Behind,
+            Material.SCAFFOLDING to Scaffolding,
             Material.SPRUCE_WALL_SIGN to Behind,
             Material.LANTERN to TopOrBottom
     ))
