@@ -6,7 +6,6 @@ import net.pdevita.creeperheal2.constants.ConstantsManager
 import net.pdevita.creeperheal2.core.Explosion
 import net.pdevita.creeperheal2.core.ExplosionManager
 import net.pdevita.creeperheal2.core.Gravity
-import net.pdevita.creeperheal2.data.MergeableLinkedListTest
 import net.pdevita.creeperheal2.events.Explode
 import net.pdevita.creeperheal2.utils.Stats
 import org.bukkit.block.Block
@@ -16,7 +15,7 @@ class CreeperHeal2 : JavaPlugin() {
     private val explosions: ArrayList<Explosion> = ArrayList()
     val gravity = Gravity(this)
     private var debug = false
-    val constants = ConstantsManager(this)
+    val constants = ConstantsManager()
     val manager = ExplosionManager(this)
     lateinit var settings: ConfigManager
     var stats: Stats? = null

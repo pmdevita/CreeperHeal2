@@ -123,8 +123,6 @@ class ExplosionManager(val plugin: CreeperHeal2) {
                             for (k in newExplosionMapping.indices) {
                                 newExplosions[k] = newExplosionMapping
                             }
-                        } else {
-//                    plugin.debugLogger("Not merging $i and $j $overlap ${newExplosions[i].explosion.postProcessComplete.get()} ${newExplosions[j].explosion.postProcessComplete.get()}")
                         }
                     }
                 }

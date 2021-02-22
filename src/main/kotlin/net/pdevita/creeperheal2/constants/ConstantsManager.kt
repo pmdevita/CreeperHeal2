@@ -1,11 +1,10 @@
 package net.pdevita.creeperheal2.constants
 
-import net.pdevita.creeperheal2.CreeperHeal2
 import org.bukkit.Bukkit
 import org.bukkit.Material
 
 
-class ConstantsManager(private val plugin: CreeperHeal2) {
+class ConstantsManager {
     val gravityBlocks: HashSet<Material>
     val dependentBlocks: DependentBlocks
     val multiBlocks: MultiBlocks

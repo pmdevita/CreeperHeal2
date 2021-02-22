@@ -3,12 +3,10 @@ package net.pdevita.creeperheal2.constants
 import net.pdevita.creeperheal2.utils.*
 import org.bukkit.Material
 import java.util.*
-import kotlin.collections.ArrayList
 
 // List of blocks that need to be attached to a block in this version of MC
 
-class DependentBlocks(private val version: ArrayList<Int>) {
-    val topBlocks: EnumSet<Material> = EnumSet.noneOf(Material::class.java)
+class DependentBlocks(version: ArrayList<Int>) {
     val sideBlocks: EnumMap<Material, FindDependentBlock> = EnumMap(Material::class.java)
 
     init {
@@ -27,10 +25,8 @@ class DependentBlocks(private val version: ArrayList<Int>) {
     }
 
     private fun getVersionBlocks(spigotVersion: Int, thisVersion: Int, blocks: VersionBlocks) {
-        topBlocks.addAll(blocks.topBlocks)
         sideBlocks.putAll(blocks.sideBlocks)
         if (spigotVersion == thisVersion) {
-            blocks.versionTopBlocks()?.let { topBlocks.addAll(it) }
             blocks.versionSideBlocks()?.let { sideBlocks.putAll(it) }
         }
     }
@@ -38,16 +34,10 @@ class DependentBlocks(private val version: ArrayList<Int>) {
 }
 
 private open class VersionBlocks {
-    // Any block that needs a block below it to exist
-    // Their parent is not dependent on where the block is facing
-    // Crops, doors, signs
-    open val topBlocks: ArrayList<Material> = ArrayList()
     // Any block that is placed on the side of a block
     // These blocks are dependent on the block opposite of where they are facing
     // Buttons, wall signs,
     open val sideBlocks: EnumMap<Material, FindDependentBlock> = EnumMap(org.bukkit.Material::class.java)
-    // Version specific top blocks, are in a function to prevent calling them outside the supported version
-    open fun versionTopBlocks(): ArrayList<Material>? { return null }
     // Version specific side blocks
     open fun versionSideBlocks(): EnumMap<Material, FindDependentBlock>? { return null }
 }
@@ -265,7 +255,7 @@ private class Blocks14: VersionBlocks() {
             Material.LANTERN to TopOrBottom
     ))
 
-    override fun versionSideBlocks(): EnumMap<Material, FindDependentBlock>? {
+    override fun versionSideBlocks(): EnumMap<Material, FindDependentBlock> {
         return EnumMap<Material, FindDependentBlock>(mapOf(
                 Material.ACACIA_BUTTON to Behind,
                 Material.BIRCH_BUTTON to Behind,

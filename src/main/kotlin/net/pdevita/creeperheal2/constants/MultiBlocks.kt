@@ -6,7 +6,7 @@ import net.pdevita.creeperheal2.utils.FindDependentBlock
 import org.bukkit.Material
 import java.util.*
 
-class MultiBlocks(private val version: ArrayList<Int>) {
+class MultiBlocks(version: ArrayList<Int>) {
     val blocks: EnumMap<Material, FindDependentBlock> = EnumMap(Material::class.java)
 
     init {

@@ -1,6 +1,5 @@
 package net.pdevita.creeperheal2.core
 
-import kotlin.properties.Delegates
 
 class Boundary (var highX: Int, var highY: Int, var highZ: Int, var lowX: Int, var lowY: Int, var lowZ: Int) {
 

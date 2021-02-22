@@ -1,14 +1,10 @@
 package net.pdevita.creeperheal2.constants
 
-import org.bukkit.Bukkit
 import org.bukkit.Material
-import java.util.Arrays
-import kotlin.collections.ArrayList
-import kotlin.collections.HashSet
 
 // List of blocks that are affected by gravity in this version of MC
 
-class GravityBlocks() {
+class GravityBlocks {
     private var concrete = ArrayList<Material>(listOf(
             Material.BLACK_CONCRETE_POWDER,
             Material.BLUE_CONCRETE_POWDER,
@@ -47,7 +43,7 @@ class GravityBlocks() {
 
 interface GravityBlockList {
     val blocks: ArrayList<Material>
-        get() = ArrayList<Material>()
+        get() = ArrayList()
 }
 
 private class GBlocks13: GravityBlockList {

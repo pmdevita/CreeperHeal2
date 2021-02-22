@@ -10,7 +10,7 @@ import org.bukkit.block.data.FaceAttachable
 import org.bukkit.block.data.MultipleFacing
 import org.bukkit.block.data.type.Bed
 import org.bukkit.block.data.type.Piston
-import org.bukkit.block.data.type.Switch
+import org.bukkit.block.data.type.Scaffolding
 
 interface FindDependentBlock {
     fun reorient(state: BlockState): Location?
@@ -111,8 +111,8 @@ object Door:FindDependentBlock {
 
 object Piston:FindDependentBlock {
     override fun reorient(state: BlockState): Location? {
-        if (state.blockData is org.bukkit.block.data.type.Piston) {
-            val piston = state.blockData as org.bukkit.block.data.type.Piston
+        if (state.blockData is Piston) {
+            val piston = state.blockData as Piston
             if (piston.isExtended) {
                 return state.block.getRelative(piston.facing).location
             }

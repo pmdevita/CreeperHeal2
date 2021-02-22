@@ -1,12 +1,11 @@
 package net.pdevita.creeperheal2.core
 
 import org.bukkit.Location
-import org.bukkit.Material
 import org.bukkit.block.BlockState
 
 object DependentType {
     const val NOT_DEPENDENT = 0
-    const val TOP_DEPENDENT = 1
+//    const val TOP_DEPENDENT = 1
     const val SIDE_DEPENDENT = 2
     const val GRAVITY_DEPENDENT = 3
 }

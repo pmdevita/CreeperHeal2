@@ -2,7 +2,6 @@ package net.pdevita.creeperheal2.commands
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import net.pdevita.creeperheal2.CreeperHeal2
 import net.pdevita.creeperheal2.utils.async
@@ -36,9 +35,9 @@ class Commands(private val plugin: CreeperHeal2): CommandExecutor {
         val runtime = Runtime.getRuntime()
         val memory = "Server Memory Usage: ${floor(((runtime.totalMemory() - runtime.freeMemory())/1000000).toDouble()).toInt()}MB/${floor((runtime.totalMemory()/1000000).toDouble()).toInt()}MB (${floor((runtime.maxMemory()/1000000).toDouble()).toInt()}MB)"
         sender.sendMessage(memory)
-        GlobalScope.launch (Dispatchers.async) {
+        GlobalScope.launch(Dispatchers.async) {
             val explosions = plugin.manager.getExplosions()
-            async(Dispatchers.minecraft) {
+            GlobalScope.launch(Dispatchers.minecraft) {
                 sender.sendMessage("Current Explosions: ${explosions.size}")
             }
             explosions.forEachIndexed { i, explosion ->
@@ -51,7 +50,7 @@ class Commands(private val plugin: CreeperHeal2): CommandExecutor {
                 } else {
                     finishedPost
                 }
-                async(Dispatchers.minecraft) {
+                GlobalScope.launch(Dispatchers.minecraft) {
                     sender.sendMessage("Explosion $i: $status")
                 }
             }
