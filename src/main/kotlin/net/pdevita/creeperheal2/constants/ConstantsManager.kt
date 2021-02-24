@@ -5,19 +5,15 @@ import org.bukkit.Material
 
 
 class ConstantsManager {
-    val gravityBlocks: HashSet<Material>
-    val dependentBlocks: DependentBlocks
-    val multiBlocks: MultiBlocks
-    private val versionList = ArrayList<Int>()
+    val version: Pair<Int, Int> = getServerVersion()
+    val gravityBlocks: HashSet<Material> = GravityBlocks().getBlocks(version)
+    val dependentBlocks: DependentBlocks = DependentBlocks(version)
+    val multiBlocks: MultiBlocks = MultiBlocks(version)
 
-    init {
-        // Version extracting test, just here for convenience/testing
+    private fun getServerVersion(): Pair<Int, Int> {
         var version = Bukkit.getBukkitVersion()
         version = version.substringBefore("-")
         val splitVersion = version.split(".")
-        versionList.addAll(listOf(splitVersion[0].toInt(), splitVersion[1].toInt()))
-        gravityBlocks = GravityBlocks().getBlocks(versionList)
-        dependentBlocks = DependentBlocks(versionList)
-        multiBlocks = MultiBlocks(versionList)
+        return Pair(splitVersion[0].toInt(), splitVersion[1].toInt())
     }
 }

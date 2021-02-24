@@ -6,21 +6,21 @@ import java.util.*
 
 // List of blocks that need to be attached to a block in this version of MC
 
-class DependentBlocks(version: ArrayList<Int>) {
+class DependentBlocks(version: Pair<Int, Int>) {
     val sideBlocks: EnumMap<Material, FindDependentBlock> = EnumMap(Material::class.java)
 
     init {
-        if (version[1] >= 13) {
-            this.getVersionBlocks(version[1], 13, Blocks13())
+        if (version.second >= 13) {
+            this.getVersionBlocks(version.second, 13, Blocks13())
         }
-        if (version[1] >= 14) {
-            this.getVersionBlocks(version[1], 14, Blocks14())
+        if (version.second >= 14) {
+            this.getVersionBlocks(version.second, 14, Blocks14())
         }
-        if (version[1] >= 15) {
-            this.getVersionBlocks(version[1], 15, Blocks15())
+        if (version.second >= 15) {
+            this.getVersionBlocks(version.second, 15, Blocks15())
         }
-        if (version[1] >= 16) {
-            this.getVersionBlocks(version[1], 16, Blocks16())
+        if (version.second >= 16) {
+            this.getVersionBlocks(version.second, 16, Blocks16())
         }
     }
 

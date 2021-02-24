@@ -389,9 +389,11 @@ class Explosion() {
             // Post-processing on block list
             this@Explosion.postProcessTask = async(Dispatchers.async) {
                 // Fix Weeping Vine plants being weird
-                for (block in totalBlockList) {
-                    if (block.state.type == Material.WEEPING_VINES_PLANT) {
-                        block.state.type = Material.WEEPING_VINES
+                if (plugin.constants.version.second >= 16) {
+                    for (block in totalBlockList) {
+                        if (block.state.type == Material.WEEPING_VINES_PLANT) {
+                            block.state.type = Material.WEEPING_VINES
+                        }
                     }
                 }
                 // If TNT exploding is on, remove the TNT and dump it's dependents back into the tree

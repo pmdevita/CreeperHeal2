@@ -24,16 +24,16 @@ class GravityBlocks {
             Material.YELLOW_CONCRETE_POWDER
             ))
 
-    fun getBlocks(version: ArrayList<Int>): HashSet<Material> {
+    fun getBlocks(version: Pair<Int, Int>): HashSet<Material> {
         val materials = HashSet<Material>()
-        if (version[1] >= 13) {
+        if (version.second >= 13) {
             materials.addAll(GBlocks13().blocks)
             materials.addAll(concrete)
         }
-        if (version[1] >= 14) {
+        if (version.second >= 14) {
             materials.addAll(GBlocks14().blocks)
         }
-        if (version[1] >= 15) {
+        if (version.second >= 15) {
             materials.addAll(GBlocks15().blocks)
         }
         return materials

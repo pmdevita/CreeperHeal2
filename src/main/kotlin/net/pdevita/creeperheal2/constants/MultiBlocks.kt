@@ -6,15 +6,15 @@ import net.pdevita.creeperheal2.utils.FindDependentBlock
 import org.bukkit.Material
 import java.util.*
 
-class MultiBlocks(version: ArrayList<Int>) {
+class MultiBlocks(version: Pair<Int, Int>) {
     val blocks: EnumMap<Material, FindDependentBlock> = EnumMap(Material::class.java)
 
     init {
-        if (version[1] >= 13) {
-            this.getVersionBlocks(version[1], 13, MBlocks13())
+        if (version.second >= 13) {
+            this.getVersionBlocks(version.second, 13, MBlocks13())
         }
-        if (version[1] >= 16) {
-            this.getVersionBlocks(version[1], 16, MBlocks16())
+        if (version.second >= 16) {
+            this.getVersionBlocks(version.second, 16, MBlocks16())
         }
     }
 
