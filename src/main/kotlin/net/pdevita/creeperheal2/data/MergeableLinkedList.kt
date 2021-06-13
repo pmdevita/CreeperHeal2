@@ -1,8 +1,5 @@
 package net.pdevita.creeperheal2.data
 
-import java.lang.Exception
-import java.lang.IndexOutOfBoundsException
-
 class MergeableLinkedList<T>: MutableList<T> {
     internal var head: MergeableLinkedListNode<T>? = null
     internal var tail: MergeableLinkedListNode<T>? = null
@@ -12,8 +9,8 @@ class MergeableLinkedList<T>: MutableList<T> {
 
     }
 
-    constructor(size: Int) {
-    }
+//    constructor(size: Int) {
+//    }
 
     constructor(elements: Collection<T>) {
         this.addAll(elements)

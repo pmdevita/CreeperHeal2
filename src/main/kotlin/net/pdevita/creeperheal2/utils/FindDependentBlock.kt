@@ -10,6 +10,7 @@ import org.bukkit.block.data.FaceAttachable
 import org.bukkit.block.data.MultipleFacing
 import org.bukkit.block.data.type.Bed
 import org.bukkit.block.data.type.Piston
+import org.bukkit.block.data.type.PointedDripstone
 import org.bukkit.block.data.type.Scaffolding
 
 interface FindDependentBlock {
@@ -51,7 +52,7 @@ object OnTopOf: FindDependentBlock {
 object Vine: FindDependentBlock {
     override fun reorient(state: BlockState): Location? {
         // Try to attach to a vine above first
-        if (state.block.getRelative(BlockFace.UP).blockData.material == Material.VINE) {
+        if (state.block.getRelative(BlockFace.UP).blockData.material == state.blockData.material) {
             return state.block.getRelative(BlockFace.UP).location
         }
         // Otherwise try attaching to one of it's attached faces
@@ -148,6 +149,15 @@ object Scaffolding:FindDependentBlock {
                 // It's on top of a block, return that block
                 return state.block.getRelative(BlockFace.DOWN).location
             }
+        }
+        return null
+    }
+}
+
+object Dripstone:FindDependentBlock {
+    override fun reorient(state: BlockState): Location? {
+        if (state.blockData is PointedDripstone) {
+            return state.block.getRelative((state.blockData as PointedDripstone).verticalDirection.oppositeFace).location
         }
         return null
     }

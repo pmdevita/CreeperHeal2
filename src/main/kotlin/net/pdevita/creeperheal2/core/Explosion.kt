@@ -7,16 +7,16 @@ import net.pdevita.creeperheal2.CreeperHeal2
 import net.pdevita.creeperheal2.data.MergeableLinkedList
 import net.pdevita.creeperheal2.utils.async
 import net.pdevita.creeperheal2.utils.minecraft
-import org.bukkit.*
+import org.bukkit.Location
+import org.bukkit.Material
+import org.bukkit.Sound
+import org.bukkit.SoundCategory
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.Chest
 import org.bukkit.block.Container
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
-import kotlin.collections.HashSet
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.round
@@ -449,13 +449,12 @@ class Explosion() {
             plugin.debugLogger("Staring repair")
         }
         GlobalScope.launch(Dispatchers.async) {
-            var replaceAmount = 1
 //            replaceList.duplicateCheck()
             // Intermediate block list, mostly important for turboing
             val blocks = LinkedList<ExplodedBlock>()
             while (replaceList.isNotEmpty()) {
                 // If turbo is enabled and we are over the threshold, turn it on
-                replaceAmount = if (plugin.settings.general.turboThreshold > 0 && plugin.settings.general.turboThreshold < (totalBlockList.size - replaceCounter)) {
+                var replaceAmount = if (plugin.settings.general.turboThreshold > 0 && plugin.settings.general.turboThreshold < (totalBlockList.size - replaceCounter)) {
                     when (plugin.settings.general.turboType) {
                         0 -> plugin.settings.general.turboAmount
                         1 -> round((plugin.settings.general.turboPercentage / 100.0) * (totalBlockList.size - replaceCounter)).toInt().coerceIn(1..plugin.settings.general.turboCap)

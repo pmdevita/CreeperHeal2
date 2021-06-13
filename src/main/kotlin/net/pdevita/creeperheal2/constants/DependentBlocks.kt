@@ -2,6 +2,7 @@ package net.pdevita.creeperheal2.constants
 
 import net.pdevita.creeperheal2.utils.*
 import org.bukkit.Material
+import org.bukkit.Tag
 import java.util.*
 
 // List of blocks that need to be attached to a block in this version of MC
@@ -22,10 +23,18 @@ class DependentBlocks(version: Pair<Int, Int>) {
         if (version.second >= 16) {
             this.getVersionBlocks(version.second, 16, Blocks16())
         }
+        if (version.second >= 17) {
+            this.getVersionBlocks(version.second, 17, Blocks17())
+        }
     }
 
     private fun getVersionBlocks(spigotVersion: Int, thisVersion: Int, blocks: VersionBlocks) {
         sideBlocks.putAll(blocks.sideBlocks)
+        for (tag in blocks.sideTags) {
+            for (block in tag.first.values) {
+                sideBlocks[block] = tag.second
+            }
+        }
         if (spigotVersion == thisVersion) {
             blocks.versionSideBlocks()?.let { sideBlocks.putAll(it) }
         }
@@ -38,6 +47,7 @@ private open class VersionBlocks {
     // These blocks are dependent on the block opposite of where they are facing
     // Buttons, wall signs,
     open val sideBlocks: EnumMap<Material, FindDependentBlock> = EnumMap(org.bukkit.Material::class.java)
+    open val sideTags: Array<Pair<Tag<Material>, FindDependentBlock>> = arrayOf()
     // Version specific side blocks
     open fun versionSideBlocks(): EnumMap<Material, FindDependentBlock>? { return null }
 }
@@ -57,13 +67,11 @@ private class Blocks13: VersionBlocks() {
             Material.BIRCH_PRESSURE_PLATE to OnTopOf,
             Material.BIRCH_SAPLING to OnTopOf,
             Material.BLACK_BANNER to OnTopOf,
-            Material.BLACK_CARPET to OnTopOf,
             Material.BRAIN_CORAL to OnTopOf,
             Material.BRAIN_CORAL_FAN to OnTopOf,
             Material.BLUE_BANNER to OnTopOf,
             Material.BLUE_ORCHID to OnTopOf,
             Material.BROWN_BANNER to OnTopOf,
-            Material.BROWN_CARPET to OnTopOf,
             Material.BROWN_MUSHROOM to OnTopOf,
             Material.BUBBLE_CORAL to OnTopOf,
             Material.BUBBLE_CORAL_FAN to OnTopOf,
@@ -72,7 +80,6 @@ private class Blocks13: VersionBlocks() {
             Material.CHORUS_PLANT to OnTopOf,
             Material.CREEPER_HEAD to OnTopOf,
             Material.CYAN_BANNER to OnTopOf,
-            Material.CYAN_CARPET to OnTopOf,
             Material.COMPARATOR to OnTopOf,
             Material.DANDELION to OnTopOf,
             Material.DARK_OAK_DOOR to OnTopOf,
@@ -96,10 +103,8 @@ private class Blocks13: VersionBlocks() {
             Material.FIRE_CORAL to OnTopOf,
             Material.FIRE_CORAL_FAN to OnTopOf,
             Material.GRAY_BANNER to OnTopOf,
-            Material.GRAY_CARPET to OnTopOf,
             Material.GRASS to OnTopOf,
             Material.GREEN_BANNER to OnTopOf,
-            Material.GREEN_CARPET to OnTopOf,
             Material.HEAVY_WEIGHTED_PRESSURE_PLATE to OnTopOf,
             Material.HORN_CORAL to OnTopOf,
             Material.HORN_CORAL_FAN to OnTopOf,
@@ -109,37 +114,29 @@ private class Blocks13: VersionBlocks() {
             Material.KELP to OnTopOf,
             Material.LARGE_FERN to OnTopOf,
             Material.LIGHT_BLUE_BANNER to OnTopOf,
-            Material.LIGHT_BLUE_CARPET to OnTopOf,
             Material.LIGHT_GRAY_BANNER to OnTopOf,
-            Material.LIGHT_GRAY_CARPET to OnTopOf,
             Material.LIGHT_WEIGHTED_PRESSURE_PLATE to OnTopOf,
             Material.LILAC to OnTopOf,
             Material.LILY_PAD to OnTopOf,
             Material.LIME_BANNER to OnTopOf,
-            Material.LIME_CARPET to OnTopOf,
             Material.MAGENTA_BANNER to OnTopOf,
-            Material.MAGENTA_CARPET to OnTopOf,
             Material.MELON_STEM to OnTopOf,
             Material.OAK_DOOR to OnTopOf,
             Material.OAK_PRESSURE_PLATE to OnTopOf,
             Material.OAK_SAPLING to OnTopOf,
             Material.ORANGE_BANNER to OnTopOf,
-            Material.ORANGE_CARPET to OnTopOf,
             Material.ORANGE_TULIP to OnTopOf,
             Material.OXEYE_DAISY to OnTopOf,
             Material.PEONY to OnTopOf,
             Material.PINK_BANNER to OnTopOf,
-            Material.PINK_CARPET to OnTopOf,
             Material.PINK_TULIP to OnTopOf,
             Material.PLAYER_HEAD to OnTopOf,
             Material.POPPY to OnTopOf,
             Material.POTATOES to OnTopOf,
             Material.POWERED_RAIL to OnTopOf,
             Material.PURPLE_BANNER to OnTopOf,
-            Material.PURPLE_CARPET to OnTopOf,
             Material.RAIL to OnTopOf,
             Material.RED_BANNER to OnTopOf,
-            Material.RED_CARPET to OnTopOf,
             Material.RED_MUSHROOM to OnTopOf,
             Material.RED_TULIP to OnTopOf,
             Material.REDSTONE to OnTopOf,
@@ -164,11 +161,9 @@ private class Blocks13: VersionBlocks() {
             Material.TURTLE_EGG to OnTopOf,
             Material.WHEAT to OnTopOf,
             Material.WHITE_BANNER to OnTopOf,
-            Material.WHITE_CARPET to OnTopOf,
             Material.WHITE_TULIP to OnTopOf,
             Material.WITHER_SKELETON_SKULL to OnTopOf,
             Material.YELLOW_BANNER to OnTopOf,
-            Material.YELLOW_CARPET to OnTopOf,
             Material.ZOMBIE_HEAD to OnTopOf,
             Material.BLACK_WALL_BANNER to Behind,
             Material.BLUE_WALL_BANNER to Behind,
@@ -215,7 +210,11 @@ private class Blocks13: VersionBlocks() {
             Material.ZOMBIE_WALL_HEAD to Behind
     ))
 
-    override fun versionSideBlocks(): EnumMap<Material, FindDependentBlock> {
+        override val sideTags: Array<Pair<Tag<Material>, FindDependentBlock>> = arrayOf(
+            Pair(Tag.CARPETS, OnTopOf)
+        )
+
+        override fun versionSideBlocks(): EnumMap<Material, FindDependentBlock> {
         return EnumMap<Material, FindDependentBlock>(mapOf(
                 Material.valueOf("SIGN") to OnTopOf, // For values that have been removed from the current build target, reference them by string
                 Material.valueOf("WALL_SIGN") to Behind,
@@ -308,4 +307,25 @@ private class Blocks16: VersionBlocks() {
             Material.WEEPING_VINES_PLANT to Below,
             Material.SOUL_LANTERN to TopOrBottom
     ))
+}
+
+private class Blocks17: VersionBlocks() {
+    override val sideBlocks: EnumMap<Material, FindDependentBlock> = EnumMap<Material, FindDependentBlock>(mapOf(
+        Material.AMETHYST_CLUSTER to Behind,
+        Material.SMALL_AMETHYST_BUD to Behind,
+        Material.MEDIUM_AMETHYST_BUD to Behind,
+        Material.LARGE_AMETHYST_BUD to Behind,
+        Material.POINTED_DRIPSTONE to Dripstone,
+        Material.AZALEA to OnTopOf,
+        Material.FLOWERING_AZALEA to OnTopOf,
+        Material.BIG_DRIPLEAF to OnTopOf,
+        Material.SMALL_DRIPLEAF to OnTopOf,
+        Material.BIG_DRIPLEAF_STEM to OnTopOf,
+        Material.HANGING_ROOTS to Below,
+        Material.GLOW_LICHEN to Vine,
+        Material.SPORE_BLOSSOM to Below
+    ))
+    override val sideTags: Array<Pair<Tag<Material>, FindDependentBlock>> = arrayOf(
+        
+    )
 }
