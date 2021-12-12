@@ -225,61 +225,6 @@ class Explosion() {
         }
     }
 
-    private fun calcBoundary(): Boundary? {
-        // Todo: Move this to the Boundary object
-        val boundary = Boundary(0, 0, 0, 0, 0, 0)
-        try {
-            var location = totalBlockList.peek().state.location
-            boundary.highX = location.blockX
-            boundary.lowX = location.blockX
-            boundary.highY = location.blockY
-            boundary.lowY = location.blockY
-            boundary.highZ = location.blockZ
-            boundary.lowZ = location.blockZ
-
-            for (block in totalBlockList) {
-                location = block.state.location
-                if (boundary.highX < location.blockX) {
-                    boundary.highX = location.blockX
-                } else if (boundary.lowX > location.blockX) {
-                    boundary.lowX = location.blockX
-                }
-                if (boundary.highY < location.blockY) {
-                    boundary.highY = location.blockY
-                } else if (boundary.lowY > location.blockY) {
-                    boundary.lowY = location.blockY
-                }
-                if (boundary.highZ < location.blockZ) {
-                    boundary.highZ = location.blockZ
-                } else if (boundary.lowZ > location.blockZ) {
-                    boundary.lowZ = location.blockZ
-                }
-            }
-        } catch (e: java.lang.IndexOutOfBoundsException) {
-            plugin.debugLogger("Couldn't calc boundaries because there are no blocks")
-            return null
-        }
-//        plugin.debugLogger("Explosion within coords: ${boundary.highX}, ${boundary.highY}, ${boundary.highZ} and ${boundary.lowX}, ${boundary.lowY}, ${boundary.lowZ}")
-        // Increase boundaries by one
-        boundary.highX += 1
-        boundary.highY += 1
-        boundary.highZ += 1
-        boundary.lowX -= 1
-        boundary.lowY -= 1
-        boundary.lowZ -= 1
-        return boundary
-    }
-
-//    private fun checkMultiBlock(block: ExplodedBlock): Location? {
-//        if (plugin.constants.multiBlocks.blocks.containsKey(block.state.blockData.material)) {
-//            val location = plugin.constants.multiBlocks.blocks[block.state.blockData.material]?.reorient(block.state)
-//            if (!locations.containsKey(location)) {
-//                return location
-//            }
-//        }
-//        return null
-//    }
-
     private fun deleteBlocks(blockList: Collection<ExplodedBlock>) {
         // Delete blocks, accounting for dependencies first
         for (block in blockList) {
@@ -320,7 +265,7 @@ class Explosion() {
             }
             // Calc boundaries so we can combine with intersecting explosions
             val calcBoundary = async(Dispatchers.async) {
-                this@Explosion.boundary = this@Explosion.calcBoundary()
+                this@Explosion.boundary = Boundary(totalBlockList)
             }
             // Post-processing on block list
             this@Explosion.postProcessTask = async(Dispatchers.async) {
