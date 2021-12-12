@@ -1,4 +1,4 @@
-# CreeperHeal2 (v1.3.1) (1.13-1.16)
+# CreeperHeal2 (v1.4.0) (1.13-1.17)
 
 [Spigot Plugin Page](https://www.spigotmc.org/resources/creeperheal2.80585/)
 
@@ -41,22 +41,16 @@ Currently, the following blocks cannot be replaced properly (they will drop as i
 If you are able to create a structure that consistently isn't replaced properly, file a bug 
 report to let me know.
 
-## Main tasks
-- [x] Support for independent blocks
-- [x] Support for gravity-affected blocks
-- [x] Support for top-dependent blocks
-- [x] Support for side-dependent blocks
-- [x] Support for unaffected dependent blocks whose parent block is affected by the explosion
-- [x] Shutdown/reload safety
-- [x] Polish (Configuration options, replacing from bottom up, move entities out of the way, popping sound)
-- [x] Add 1.13/1.14 support 
+## Not working
 
-## Edge cases
-- [x] Vines depend from top up/direction facing
-- [x] Double chests
-- [ ] Paintings have multiple dependent blocks
-- [ ] Item frames
+There are a couple last things that are not yet 100% working due to special implementation requirements for these blocks
+
+- [ ] Add support for entity "blocks" like Paintings, Item Frames, and Armor Stands
 - [ ] Chorus plants need to be rescanned to build their dependency tree
-- [x] Scaffolding need to be rescanned to build its dependency tree
 - [ ] Minecart rails don't maintain orientation when replaced
 - [ ] Liquids may remove certain blocks during replacement
+
+## Special Thanks to
+
+- My Discord server and the many users who've helped me test and fix things
+- [Shynixn](https://github.com/Shynixn) for [MCCoroutine](https://github.com/Shynixn/MCCoroutine)
