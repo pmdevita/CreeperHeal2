@@ -2,9 +2,12 @@ package net.pdevita.creeperheal2.core
 
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.Sound
+import org.bukkit.SoundCategory
 import org.bukkit.block.BlockFace
 import org.bukkit.block.BlockState
 import java.util.*
+import kotlin.random.Random
 
 private object SideFaces {
     val faces = java.util.ArrayList<BlockFace>(
@@ -41,10 +44,6 @@ open class ExplodedBlock(protected var explosion: Explosion, val state: BlockSta
 
     fun relinkExplosion(newExplosion: Explosion) {
         this.explosion = newExplosion;
-    }
-
-    open fun addParentBlockLocationsTo(blockList: List<Location>) {
-
     }
 
     // Normal blocks don't have any parent blocks they rely on
@@ -96,12 +95,41 @@ open class ExplodedBlock(protected var explosion: Explosion, val state: BlockSta
         return foundBlocks
     }
 
-    fun placeAndGetDependents() {
+    // Alert a block that it's parent was placed (used in some subtypes)
+    open fun parentWasPlaced(parent: ExplodedBlock) {
 
     }
 
-    fun canBePlaced(): Boolean {
+    // If a block requires special conditions for placement, this can be overridden to allow that to happen first
+    open fun canBePlaced(): Boolean {
         return true
+    }
+
+    fun placeBlock() {
+        val currentBlock = this.state.location.block
+
+        // If block isn't air, it's likely a player put it there. Just break it off normally to give it back to them
+        if (currentBlock.blockData.material != Material.AIR) {
+//            plugin.debugLogger("Breaking ${currentBlock.blockData.material} to place a block")
+            currentBlock.breakNaturally()
+        } else {
+            // If the block is air, teleport any entities in it up one to get them out of the way of the new block
+            val entities = currentBlock.location.world?.getNearbyEntities(currentBlock.location, .4, .5, .4)
+            if (entities != null) {
+                for (entity in entities) {
+                    val newLocation = currentBlock.getRelative(BlockFace.UP).location.clone()
+                    newLocation.direction = entity.location.direction
+                    entity.teleport(newLocation)
+                }
+            }
+        }
+        this.state.update(true)
+        // Play pop sound at the location of the new block
+        this.state.location.world?.playSound(this.state.location, Sound.ENTITY_ITEM_PICKUP, SoundCategory.BLOCKS, .05F, .9F + Random.Default.nextFloat() * .3F)
+
+        for (dependency in this.dependencies) {
+            dependency.parentWasPlaced(this)
+        }
     }
 }
 
@@ -135,6 +163,8 @@ class GravityExplodedBlock(explosion: Explosion, state: BlockState): SideExplode
 }
 
 class MultiParentExplodedBlock(explosion: Explosion, state: BlockState) : ExplodedBlock(explosion, state) {
+    val parents = HashSet<ExplodedBlock>()
+
     fun getDependentBlocksLocation(): List<Location>? {
 //        println("multiblock has dependents ${explosion.plugin.constants.multiBlocks.blocks[state.blockData.material]?.getDependents(state)}")
 
@@ -150,7 +180,13 @@ class MultiParentExplodedBlock(explosion: Explosion, state: BlockState) : Explod
     }
 
     override fun addToParents() {
-        getParentBlocksLocation()?.forEach { this.explosion.locations[it]?.dependencies?.add(this) }
+        getParentBlocksLocation()?.forEach {
+            val parentBlock = this.explosion.locations[it]
+            if (parentBlock != null) {
+                parentBlock.dependencies?.add(this)
+                parents.add(parentBlock)
+            }
+        }
     }
 
     override fun parentInExplosion(checkGravity: Boolean): Boolean {
@@ -165,5 +201,13 @@ class MultiParentExplodedBlock(explosion: Explosion, state: BlockState) : Explod
             }
         }
         return false
+    }
+
+    override fun parentWasPlaced(parent: ExplodedBlock) {
+        parents.remove(parent)
+    }
+
+    override fun canBePlaced(): Boolean {
+        return parents.isEmpty()
     }
 }

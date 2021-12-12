@@ -9,18 +9,16 @@ import net.pdevita.creeperheal2.utils.async
 import net.pdevita.creeperheal2.utils.minecraft
 import org.bukkit.Location
 import org.bukkit.Material
-import org.bukkit.Sound
-import org.bukkit.SoundCategory
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.Chest
 import org.bukkit.block.Container
+import org.bukkit.block.data.type.BigDripleaf
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.round
-import kotlin.random.Random
 
 class Explosion() {
     lateinit var plugin: CreeperHeal2
@@ -326,11 +324,23 @@ class Explosion() {
             }
             // Post-processing on block list
             this@Explosion.postProcessTask = async(Dispatchers.async) {
-                // Fix Weeping Vine plants being weird
+                // Fix Weeping Vines and Big Dripleafs which have some odd behavior
+                // Could a better optimized system for this be made?
                 if (plugin.constants.version.second >= 16) {
                     for (block in totalBlockList) {
                         if (block.state.type == Material.WEEPING_VINES_PLANT) {
                             block.state.type = Material.WEEPING_VINES
+                        }
+                    }
+                }
+                if (plugin.constants.version.second >= 17) {
+                    for (block in totalBlockList) {
+                        if (block.state.type == Material.BIG_DRIPLEAF) {
+                            val data = block.state.blockData as BigDripleaf
+                            data.tilt = BigDripleaf.Tilt.NONE
+                            block.state.blockData = data
+                        } else if (block.state.type == Material.BIG_DRIPLEAF_STEM) {
+                            block.state.type = Material.BIG_DRIPLEAF
                         }
                     }
                 }
@@ -415,11 +425,11 @@ class Explosion() {
                     if (!cancelReplace.get()) {     // Only proceed if we aren't cancelling.
                         for (block in blocks) {
                             // Replace block
-                            replaceBlock(block)
+                            block.placeBlock()
                             // Remove it from the replaceList
                             replaceList.poll()
                             // Dump its dependencies in
-                            replaceList.addAll(block.dependencies)
+                            block.dependencies.forEach { if (it.canBePlaced()) replaceList.add(it)  }
                         }
                     }
                 }
@@ -456,32 +466,6 @@ class Explosion() {
         }
     }
 
-
-    private fun replaceBlock(block: ExplodedBlock) {
-        val currentBlock = block.state.location.block
-
-        // If block isn't air, it's likely a player put it there. Just break it off normally to give it back to them
-        if (currentBlock.blockData.material != Material.AIR) {
-//            plugin.debugLogger("Breaking ${currentBlock.blockData.material} to place a block")
-            currentBlock.breakNaturally()
-        } else {
-            // If the block is air, teleport any entities in it up one to get them out of the way of the new block
-            val entities = currentBlock.location.world?.getNearbyEntities(currentBlock.location, .4, .5, .4)
-            if (entities != null) {
-                for (entity in entities) {
-                    val newLocation = currentBlock.getRelative(BlockFace.UP).location.clone()
-                    newLocation.direction = entity.location.direction
-                    entity.teleport(newLocation)
-                }
-            }
-        }
-        block.state.update(true)
-        // Play pop sound at the location of the new block
-        block.state.location.world?.playSound(block.state.location, Sound.ENTITY_ITEM_PICKUP, SoundCategory.BLOCKS, .05F, .9F + Random.Default.nextFloat() * .3F)
-    }
-
-
-
     // Replace blocks ASAP (used to finish repairs if plugin is being disabled)
     fun warpReplaceBlocks() {
         plugin.debugLogger("Warp replacing...")
@@ -506,9 +490,12 @@ class Explosion() {
 
         while (replaceList.isNotEmpty()) {
             val block = replaceList.peek()
-            replaceBlock(block)
+            // Replace block
+            block.placeBlock()
+            // Remove it from the replaceList
             replaceList.poll()
-            replaceList.addAll(block.dependencies)
+            // Dump its dependencies in
+            block.dependencies.forEach { if (it.canBePlaced()) replaceList.add(it)  }
         }
 
         // Clean up

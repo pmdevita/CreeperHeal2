@@ -318,14 +318,8 @@ private class Blocks17: VersionBlocks() {
         Material.POINTED_DRIPSTONE to Dripstone,
         Material.AZALEA to OnTopOf,
         Material.FLOWERING_AZALEA to OnTopOf,
-        Material.BIG_DRIPLEAF to OnTopOf,
-        Material.SMALL_DRIPLEAF to OnTopOf,
-        Material.BIG_DRIPLEAF_STEM to OnTopOf,
         Material.HANGING_ROOTS to Below,
-        Material.GLOW_LICHEN to Vine,
-        Material.SPORE_BLOSSOM to Below
+        Material.SPORE_BLOSSOM to Below,
+        Material.BIG_DRIPLEAF to OnTopOf
     ))
-    override val sideTags: Array<Pair<Tag<Material>, FindDependentBlock>> = arrayOf(
-        
-    )
 }
