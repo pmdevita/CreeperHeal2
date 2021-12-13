@@ -40,13 +40,15 @@ class CreeperHeal2 : JavaPlugin() {
         server.pluginManager.registerEvents(Explode(this), this)
     }
 
-    fun createNewExplosion(blockList: List<Block>) {
+    fun createNewExplosion(blockList: List<Block>): Explosion? {
         if (blockList.isEmpty()) {
 //            debugLogger("Explosion with no blocks")
-            return
+            return null
         }
 //        explosions.add(Explosion(this, blockList))
-        manager.add(Explosion(this, blockList))
+        val newExplosion = Explosion(this, blockList)
+        manager.add(newExplosion)
+        return newExplosion
     }
 
     fun removeExplosion(explosion: Explosion) {
