@@ -202,7 +202,6 @@ private class Blocks13: VersionBlocks() {
             Material.SKELETON_WALL_SKULL to Behind,
             Material.TRIPWIRE_HOOK to Behind,
             Material.TUBE_CORAL_WALL_FAN to Behind,
-            Material.VINE to Vine,
             Material.WALL_TORCH to Behind,
             Material.WITHER_SKELETON_WALL_SKULL to Behind,
             Material.WHITE_WALL_BANNER to Behind,
@@ -320,6 +319,8 @@ private class Blocks17: VersionBlocks() {
         Material.FLOWERING_AZALEA to OnTopOf,
         Material.HANGING_ROOTS to Below,
         Material.SPORE_BLOSSOM to Below,
-        Material.BIG_DRIPLEAF to OnTopOf
+        Material.BIG_DRIPLEAF to OnTopOf,
+        Material.CAVE_VINES to Below,
+        Material.CAVE_VINES_PLANT to Below
     ))
 }

@@ -35,13 +35,13 @@ private open class MVersionBlocks {
 
 private class MBlocks13: MVersionBlocks() {
     override val blocks = EnumMap<Material, FindDependentBlocks>(mapOf(
-            Material.ACACIA_DOOR to DoorMultiBlock,
-            Material.BIRCH_DOOR to DoorMultiBlock,
-            Material.DARK_OAK_DOOR to DoorMultiBlock,
-            Material.IRON_DOOR to DoorMultiBlock,
-            Material.JUNGLE_DOOR to DoorMultiBlock,
-            Material.OAK_DOOR to DoorMultiBlock,
-            Material.SPRUCE_DOOR to DoorMultiBlock,
+            Material.ACACIA_DOOR to Door,
+            Material.BIRCH_DOOR to Door,
+            Material.DARK_OAK_DOOR to Door,
+            Material.IRON_DOOR to Door,
+            Material.JUNGLE_DOOR to Door,
+            Material.OAK_DOOR to Door,
+            Material.SPRUCE_DOOR to Door,
             Material.BLACK_BED to Bed,
             Material.BLUE_BED to Bed,
             Material.BROWN_BED to Bed,
@@ -57,15 +57,16 @@ private class MBlocks13: MVersionBlocks() {
             Material.PURPLE_BED to Bed,
             Material.RED_BED to Bed,
             Material.WHITE_BED to Bed,
-            Material.YELLOW_BED to Bed
+            Material.YELLOW_BED to Bed,
+            Material.VINE to Vine
     ))
 }
 
 
 private class MBlocks16: MVersionBlocks() {
     override val blocks: EnumMap<Material, FindDependentBlocks> = EnumMap(mapOf(
-            Material.CRIMSON_DOOR to DoorMultiBlock,
-            Material.WARPED_DOOR to DoorMultiBlock
+            Material.CRIMSON_DOOR to Door,
+            Material.WARPED_DOOR to Door
     ))
 }
 

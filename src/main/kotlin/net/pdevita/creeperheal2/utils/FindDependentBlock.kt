@@ -63,27 +63,6 @@ object OnTopOf : FindDependentBlockBase() {
     }
 }
 
-object Vine : FindDependentBlockBase() {
-    override fun getBlockFace(state: BlockState): BlockFace? {
-        // Try to attach to a vine above first
-        if (state.block.getRelative(BlockFace.UP).blockData.material == state.blockData.material) {
-            return BlockFace.UP
-        }
-        // Otherwise try attaching to one of it's attached faces
-        val multipleFacing = state.blockData as MultipleFacing
-        for (face in multipleFacing.faces) {
-            if (state.block.getRelative(face).blockData.material != Material.AIR) {
-                return face
-            }
-        }
-        // Otherwise attach to block above
-        if (state.block.getRelative(BlockFace.UP).blockData.material != Material.AIR) {
-            return BlockFace.UP
-        }
-        return null
-    }
-}
-
 object FaceAttachable : FindDependentBlockBase() {
     override fun getBlockFace(state: BlockState): BlockFace? {
         val faceAttachable = state.blockData as FaceAttachable
@@ -178,7 +157,7 @@ open class FindDependentBlocksBase : FindDependentBlocks {
     }
 }
 
-object DoorMultiBlock : FindDependentBlocksBase() {
+object Door : FindDependentBlocksBase() {
     override fun getDependentFaces(state: BlockState): LinkedList<BlockFace>? {
         val bisected = state.blockData as Bisected
         if (bisected.half == Bisected.Half.BOTTOM) {
@@ -243,5 +222,21 @@ object GlowLichen: FindDependentBlocksBase() {
     override fun getDependentFaces(state: BlockState): LinkedList<BlockFace>? {
         val lichen = state.blockData as GlowLichen
         return LinkedList<BlockFace>(lichen.faces)
+    }
+}
+
+object Vine : FindDependentBlocksBase() {
+    override fun getDependentFaces(state: BlockState): LinkedList<BlockFace>? {
+        val multipleFacing = state.blockData as MultipleFacing
+        val faces = HashSet<BlockFace>()
+
+        for (face in multipleFacing.faces) {
+            if (state.block.getRelative(face).blockData.material != Material.AIR) {
+                faces.add(face)
+            } else {
+                faces.add(BlockFace.UP)
+            }
+        }
+        return LinkedList(faces)
     }
 }
