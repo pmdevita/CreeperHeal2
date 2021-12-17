@@ -1,0 +1,10 @@
+# CreeperHeal2 World List
+
+# true if whitelist, false if blacklist
+is-whitelist: true
+
+# List of worlds
+
+worlds:
+  - yourworldnamehere
+  - anothernamedworld

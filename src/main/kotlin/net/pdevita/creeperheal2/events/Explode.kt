@@ -12,8 +12,10 @@ class Explode(var plugin: CreeperHeal2): Listener {
     fun onEntityExplodeEvent(event: EntityExplodeEvent) {
 //        plugin.debugLogger("An entity explosion has happened! ${event.entityType.toString()}")
         if (plugin.settings.types.allowExplosionEntity(event.entityType)) {
-            this.plugin.createNewExplosion(event.blockList())
-            event.yield = 0F
+            if (event.location.world?.let { plugin.settings.worldList.allowWorld(it.name) } == true) {
+                this.plugin.createNewExplosion(event.blockList())
+                event.yield = 0F
+            }
         }
     }
 
@@ -21,8 +23,10 @@ class Explode(var plugin: CreeperHeal2): Listener {
     fun onBlockExplodeEvent(event: BlockExplodeEvent) {
 //        plugin.debugLogger("A block explosion has happened! ${event.block.toString()}")
         if (plugin.settings.types.allowExplosionBlock(/*event.block.blockData.material*/)) {
-            this.plugin.createNewExplosion(event.blockList())
-            event.yield = 0F
+            if (event.block.location.world?.let { plugin.settings.worldList.allowWorld(it.name) } == true) {
+                this.plugin.createNewExplosion(event.blockList())
+                event.yield = 0F
+            }
         }
     }
 }
