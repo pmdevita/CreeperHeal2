@@ -183,7 +183,7 @@ class MultiParentExplodedBlock(explosion: Explosion, state: BlockState) : Explod
         getParentBlocksLocation()?.forEach {
             val parentBlock = this.explosion.locations[it]
             if (parentBlock != null) {
-                parentBlock.dependencies?.add(this)
+                parentBlock.dependencies.add(this)
                 parents.add(parentBlock)
             }
         }

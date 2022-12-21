@@ -54,3 +54,7 @@ There are a couple last things that are not yet 100% working due to special impl
 
 - My Discord server and the many users who've helped me test and fix things
 - [Shynixn](https://github.com/Shynixn) for [MCCoroutine](https://github.com/Shynixn/MCCoroutine)
+
+## Bstats
+
+![img](https://bstats.org/signatures/bukkit/CreeperHeal2.svg)
