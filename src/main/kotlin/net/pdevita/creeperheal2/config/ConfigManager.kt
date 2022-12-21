@@ -47,7 +47,7 @@ class ExplosionTypes(config: FileConfiguration) {
 //    val endDragon = config.getBoolean("types.end_dragon")
     private val ghast = config.getBoolean("types.ghast", false)
     private val wither = config.getBoolean("types.wither", false)
-    private val endCrystal = config.getBoolean("types.ender-crystal", false)
+    private val endCrystal = config.getBoolean("types.ender-crystal", false) or config.getBoolean("types.end-crystal", false)
     private val minecartTnt = config.getBoolean("types.minecart-tnt", false)
     private val bed = config.getBoolean("types.bed", false)
 

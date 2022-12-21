@@ -14,7 +14,7 @@ types:
   ghast: false
   wither: false
   minecart-tnt: false
-  ender-crystal: false
+  end-crystal: false
   bed: false
 
 # Turbo Mode
