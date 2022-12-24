@@ -28,7 +28,7 @@ class CreeperHeal2 : JavaPlugin() {
         }
 
         registerEvents()
-        getCommand("ch")!!.setExecutor(Commands(this))
+        getCommand("creeperheal")!!.setExecutor(Commands(this))
     }
 
     private fun registerEvents() {

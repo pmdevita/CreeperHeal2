@@ -19,9 +19,9 @@ added blocks may not repair properly.
 
 # Commands and Permissions
 
-- `/ch warp` - `creeperheal2.warp` Immediately heal all currently tracked explosions
-- `/ch stats` - `creeperheal2.stats` View stats about currently tracked explosions
-- `/ch cancel` - `creeperheal2.cancel` Cancel replacement of currently tracked explosions (you will lose blocks so be careful)
+- `/creeperheal warp` - `creeperheal2.warp` Immediately heal all currently tracked explosions
+- `/creeperheal stats` - `creeperheal2.stats` View stats about currently tracked explosions
+- `/creeperheal cancel` - `creeperheal2.cancel` Cancel replacement of currently tracked explosions (you will lose blocks so be careful)
 
 
 # Development Progress
