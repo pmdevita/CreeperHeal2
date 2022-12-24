@@ -1,13 +1,11 @@
 package net.pdevita.creeperheal2.constants
 
-import net.pdevita.creeperheal2.utils.Bed
-import net.pdevita.creeperheal2.utils.Door
-import net.pdevita.creeperheal2.utils.FindDependentBlock
+import net.pdevita.creeperheal2.utils.*
 import org.bukkit.Material
 import java.util.*
 
 class MultiBlocks(version: Pair<Int, Int>) {
-    val blocks: EnumMap<Material, FindDependentBlock> = EnumMap(Material::class.java)
+    val blocks: EnumMap<Material, FindDependentBlocks> = EnumMap(Material::class.java)
 
     init {
         if (version.second >= 13) {
@@ -15,6 +13,9 @@ class MultiBlocks(version: Pair<Int, Int>) {
         }
         if (version.second >= 16) {
             this.getVersionBlocks(version.second, 16, MBlocks16())
+        }
+        if (version.second >= 17) {
+            this.getVersionBlocks(version.second, 17, MBlocks17())
         }
     }
 
@@ -27,13 +28,13 @@ class MultiBlocks(version: Pair<Int, Int>) {
 }
 
 private open class MVersionBlocks {
-    open val blocks: EnumMap<Material, FindDependentBlock> = EnumMap(org.bukkit.Material::class.java)
-    open fun versionBlocks(): EnumMap<Material, FindDependentBlock>? { return null }
+    open val blocks: EnumMap<Material, FindDependentBlocks> = EnumMap(org.bukkit.Material::class.java)
+    open fun versionBlocks(): EnumMap<Material, FindDependentBlocks>? { return null }
 }
 
 
 private class MBlocks13: MVersionBlocks() {
-    override val blocks = EnumMap<Material, FindDependentBlock>(mapOf(
+    override val blocks = EnumMap<Material, FindDependentBlocks>(mapOf(
             Material.ACACIA_DOOR to Door,
             Material.BIRCH_DOOR to Door,
             Material.DARK_OAK_DOOR to Door,
@@ -56,14 +57,23 @@ private class MBlocks13: MVersionBlocks() {
             Material.PURPLE_BED to Bed,
             Material.RED_BED to Bed,
             Material.WHITE_BED to Bed,
-            Material.YELLOW_BED to Bed
+            Material.YELLOW_BED to Bed,
+            Material.VINE to Vine
     ))
 }
 
 
 private class MBlocks16: MVersionBlocks() {
-    override val blocks = EnumMap<Material, FindDependentBlock>(mapOf(
+    override val blocks: EnumMap<Material, FindDependentBlocks> = EnumMap(mapOf(
             Material.CRIMSON_DOOR to Door,
             Material.WARPED_DOOR to Door
+    ))
+}
+
+private class MBlocks17: MVersionBlocks() {
+    override val blocks: EnumMap<Material, FindDependentBlocks> = EnumMap(mapOf(
+        Material.SMALL_DRIPLEAF to SmallDripLeaf,
+        Material.BIG_DRIPLEAF_STEM to BigDripLeafStem,
+        Material.GLOW_LICHEN to GlowLichen
     ))
 }

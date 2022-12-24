@@ -9,30 +9,24 @@ import net.pdevita.creeperheal2.utils.async
 import net.pdevita.creeperheal2.utils.minecraft
 import org.bukkit.Location
 import org.bukkit.Material
-import org.bukkit.Sound
-import org.bukkit.SoundCategory
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.Chest
 import org.bukkit.block.Container
+import org.bukkit.block.data.type.BigDripleaf
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.round
-import kotlin.random.Random
-
-private object SideFaces {
-    val faces = ArrayList<BlockFace>(listOf(BlockFace.UP, BlockFace.DOWN, BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH))
-}
 
 class Explosion() {
     lateinit var plugin: CreeperHeal2
     // List of all blocks involved in explosion, dependents included
     val totalBlockList = MergeableLinkedList<ExplodedBlock>()
     private var replaceList = MergeableLinkedList<ExplodedBlock>()
-    private val gravityBlocks = HashSet<Location>()
-    private val locations = HashMap<Location, ExplodedBlock>()
+    val gravityBlocks = HashSet<Location>()
+    val locations = HashMap<Location, ExplodedBlock>()
     var boundary: Boundary? = null
 
     var postProcessComplete = AtomicBoolean(false)
@@ -58,7 +52,7 @@ class Explosion() {
         // First pass, get blocks and make changes to them individually
         for (block in initialBlockList) {
             val state = block.state
-            val explodedBlock = ExplodedBlock(this, state)
+            val explodedBlock = ExplodedBlock.from(this, state)
             blockList.add(explodedBlock)
             locations[block.location] = explodedBlock
             // Clear containers since we keep inventory
@@ -74,35 +68,6 @@ class Explosion() {
 
         }
 
-//        var blockString = ""
-//        for (block in blockList) {
-//            blockString += block.state.blockData.material.toString() + " "
-//        }
-//        plugin.debugLogger("Initial block list $blockString")
-
-        replaceList.addAll(MergeableLinkedList(blockList))
-
-        // You can see the full commented version under relinkBlocks
-        // This is duped because reusing the function would require needless async overhead
-        // We have to block until this part is done otherwise we have two threads accessing
-        // block dependencies
-        // Second pass, link dependent blocks to their parents
-//        val itr = replaceList.iterator()
-//        while (itr.hasNext()) {
-//            val block = itr.next()
-//            // Block isn't dependent, can be replaced normally
-//            if (block.dependent != DependentType.NOT_DEPENDENT) {
-//                val parentLocation = block.getParentBlockLocation()
-//                val parentBlock = parentLocation?.let { locations[parentLocation] }
-//                if (parentBlock != null) {
-//                    // Add block to it's parent's dependency list. Once the parent is added, it's dependencies will
-//                    // be added to the replaceList
-//                    parentBlock.dependencies.add(block)
-//                    itr.remove()
-//                }
-//            }
-//        }
-
         // Put the extra dependent blocks in here to differentiate them from the previous layer
         var secondaryList = MergeableLinkedList<ExplodedBlock>()
 
@@ -116,39 +81,33 @@ class Explosion() {
                 val upBlock = block.block.getRelative(BlockFace.UP)
                 // First, check that the above block is not already accounted for in the explosion
                 if (!locations.containsKey(upBlock.location) && !gravityBlocks.contains(upBlock.location)) {
-                    // If the above block is a gravity block, freeze it in place
+                    // If the above block is a gravity block, freeze it in place rather than making it a
+                    // dependent block
                     if (plugin.constants.gravityBlocks.contains(upBlock.blockData.material)) {
                         gravityBlocks.add(upBlock.location)
-//                        locations[upBlock.location] = ExplodedBlock(this, block)
                     }
                 }
 
-                // Check for side-dependent blocks and add them to our dependencies
-                val dependentBlocks = this.checkSides(explodedBlock)
+                // Check for blocks that depend on this one and add them to our dependencies
+                val dependentBlocks = explodedBlock.findDependentBlocks()
                 if (dependentBlocks.isNotEmpty()) {
                     for (dependentBlock in dependentBlocks) {
                         locations[dependentBlock.state.location] = dependentBlock
                     }
                     secondaryList.addAll(dependentBlocks)
-                    explodedBlock.dependencies.addAll(dependentBlocks)
-                }
-
-                val multiBlockLocation = this.checkMultiBlock(explodedBlock)
-                if (multiBlockLocation != null) {
-                    val multiBlock = ExplodedBlock(this, multiBlockLocation.block.state)
-                    this.plugin.debugLogger("MultiBlock ${multiBlock.state.blockData.material}")
-                    locations[multiBlockLocation] = multiBlock
-                    secondaryList.add(multiBlock)
-                    explodedBlock.dependencies.add(multiBlock)
+//                    explodedBlock.dependencies.addAll(dependentBlocks)
                 }
             }
 //            this.blockList.addAll(blockList)
+            // Add total blocks to Bstats
             if (plugin.stats != null) {
                 val numOfBlocks = blockList.size
                 async(plugin) {
                     plugin.stats!!.totalBlocks.addAndGet(numOfBlocks)
                 }
             }
+            // The block staging looks like this
+            // Currently found dependencies -> current blocks checking for dependencies -> Final list
             totalBlockList.append(blockList)
             blockList = secondaryList
             secondaryList = MergeableLinkedList()
@@ -157,39 +116,36 @@ class Explosion() {
 //            secondaryList = ArrayList<ExplodedBlock>()
         }
 
+        replaceList.addAll(totalBlockList)
+
+        // Do final linking of dependencies
         val itr = replaceList.iterator()
         while (itr.hasNext()) {
             val block = itr.next()
             // Block is dependent, should be removed and linked to parent
-            if (block.dependent != DependentType.NOT_DEPENDENT) {
-                val parentLocation = block.getParentBlockLocation()
-                val parentBlock = parentLocation?.let { locations[parentLocation] }
-                if (parentBlock != null) {
+            if (block !is DefaultExplodedBlock) {
+                // If the parent is in the explosion, we need to link this block to it
+                // If the parent is not in the explosion, it should already exist and so we don't need to worry
+                // about placing this block after it
+//                println("Non-default block in list ${block.state.blockData.material}")
+                if (block.parentInExplosion()) {
+                    // Attach to it
                     // Add block to it's parent's dependency list. Once the parent is added, it's dependencies will
                     // be added to the replaceList
-                    parentBlock.dependencies.add(block)
+//                    parentBlock.dependencies.add(block)
+//                    println("Attaching to parent...")
+                    block.addToParents()
                     itr.remove()
                 }
             }
         }
 
-        // Print all blocks in the list
-//        var blockString = ""
-//        for (block in totalBlockList) {
-//            blockString += block.state.blockData.material.toString() + " "
-//        }
-//        plugin.debugLogger(blockString)
-
         // Ready to go, delete all the blocks
         deleteBlocks(replaceList)
         updateBlocks(replaceList)
 
-        // Hand off the gravity blocks to be blocked
+        // Hand off the gravity blocks to be suspended
         plugin.gravity.addBlocks(gravityBlocks)
-//        plugin.server.scheduler.runTaskLater(plugin, ReplaceLater(this), 100)
-//            replaceJob = sync(plugin, delayTicks = plugin.settings.general.initialDelay * 20L) {
-//                this.replaceBlocks()
-//            }
 
         if (plugin.stats != null) {
             async(plugin) {
@@ -197,7 +153,6 @@ class Explosion() {
             }
         }
         postProcess()
-
     }
 
     constructor(
@@ -218,6 +173,7 @@ class Explosion() {
                 delay((plugin.settings.general.initialDelay * 1000).toLong())
             }
 
+            // Start the block linking job and wait
             linkBlocks(this@Explosion.replaceList)
 
             relinkJob!!.join()
@@ -235,24 +191,31 @@ class Explosion() {
 
     private fun linkBlocks(blockList: MutableList<ExplodedBlock>) {
         relinkJob = GlobalScope.launch(Dispatchers.async) {
+            // Relink each block so it knows which explosion it belongs to
+            totalBlockList.forEach { it.relinkExplosion(this@Explosion) }
+
             // Second pass, link dependent blocks to their parents
             val itr = blockList.iterator()
             while (itr.hasNext()) {
                 val block = itr.next()
                 // Block isn't dependent, can be replaced normally
-                if (block.dependent != DependentType.NOT_DEPENDENT) {
-                    val parentLocation = block.getParentBlockLocation()
-                    val parentBlock = parentLocation?.let { locations[parentLocation] }
-                    if (parentBlock != null) {
+                if (block !is DefaultExplodedBlock) {
+                    // If the parent is in the explosion, we need to link this block to it
+                    // If the parent is not in the explosion, it should already exist and so we don't need to worry
+                    // about placing this block after it
+                    if (block.parentInExplosion()) {
                         // When relinking for a merged explosion, things are a little different
-                        // First, gravityBlocks are a part of location list and we might have just decided to place it
-                        // on there. Corroborate with the gravity list
-                        if (gravityBlocks.contains(parentLocation)) {
-                            // Leave in blockList as Independent
-                        } else if (!parentBlock.dependencies.contains(block)) {
+                        // First, gravityBlocks are a part of location list so this block's parent might currently
+                        // be suspended in gravity.
+                        if (block.parentInExplosion(checkGravity = true)) {
+//                        if (gravityBlocks.contains(parentLocation)) {
+                            // Parent is in suspended gravity and should already exist, don't worry about linking
+//                        } else if (!parentBlock.dependencies.contains(block)) {
+                            // This parent doesn't contain this block in its dependencies but it should, move from
+                            // the main block list to its parent's dependency list.
+                            // If this got cancelled, we would lose the block so it's wrapped as so.
                             withContext(NonCancellable) {
-                                // Move from blockList to it's parent dependency list
-                                parentBlock.dependencies.add(block)
+                                block.addToParents()
                                 itr.remove()
                             }
                         }
@@ -260,88 +223,6 @@ class Explosion() {
                 }
             }
         }
-    }
-
-    private fun calcBoundary(): Boundary? {
-        val boundary = Boundary(0, 0, 0, 0, 0, 0)
-        try {
-            var location = totalBlockList.peek().state.location
-            boundary.highX = location.blockX
-            boundary.lowX = location.blockX
-            boundary.highY = location.blockY
-            boundary.lowY = location.blockY
-            boundary.highZ = location.blockZ
-            boundary.lowZ = location.blockZ
-
-            for (block in totalBlockList) {
-                location = block.state.location
-                if (boundary.highX < location.blockX) {
-                    boundary.highX = location.blockX
-                } else if (boundary.lowX > location.blockX) {
-                    boundary.lowX = location.blockX
-                }
-                if (boundary.highY < location.blockY) {
-                    boundary.highY = location.blockY
-                } else if (boundary.lowY > location.blockY) {
-                    boundary.lowY = location.blockY
-                }
-                if (boundary.highZ < location.blockZ) {
-                    boundary.highZ = location.blockZ
-                } else if (boundary.lowZ > location.blockZ) {
-                    boundary.lowZ = location.blockZ
-                }
-            }
-        } catch (e: java.lang.IndexOutOfBoundsException) {
-            plugin.debugLogger("Couldn't calc boundaries because there are no blocks")
-            return null
-        }
-//        plugin.debugLogger("Explosion within coords: ${boundary.highX}, ${boundary.highY}, ${boundary.highZ} and ${boundary.lowX}, ${boundary.lowY}, ${boundary.lowZ}")
-        // Increase boundaries by one
-        boundary.highX += 1
-        boundary.highY += 1
-        boundary.highZ += 1
-        boundary.lowX -= 1
-        boundary.lowY -= 1
-        boundary.lowZ -= 1
-        return boundary
-    }
-
-
-    private fun checkSides(block: ExplodedBlock): ArrayList<ExplodedBlock> {
-        val foundBlocks = ArrayList<ExplodedBlock>()
-        // For all six faces
-        for (face in SideFaces.faces) {
-            val checkingBlock = block.state.block.getRelative(face)
-            // Check if that block isn't already a part of the explosion
-            if (!locations.containsKey(checkingBlock.location) && !gravityBlocks.contains(checkingBlock.location)) {
-                val explodedBlock = ExplodedBlock(this, checkingBlock.state)
-                // Check the block is side dependent
-                if (explodedBlock.dependent == DependentType.SIDE_DEPENDENT) {
-                    // Check the block is side dependent on this block
-                    if (explodedBlock.getParentBlockLocation() == block.state.location) {
-                        foundBlocks.add(explodedBlock)
-                    }
-                }
-            }
-        }
-//        if (foundBlocks.size > 0) {
-//            var blockString = ""
-//            for (block in foundBlocks) {
-//                blockString += block.state.blockData.material.toString() + " "
-//            }
-//            plugin.debugLogger("Found extra blocks $blockString")
-//        }
-        return foundBlocks
-    }
-
-    private fun checkMultiBlock(block: ExplodedBlock): Location? {
-        if (plugin.constants.multiBlocks.blocks.containsKey(block.state.blockData.material)) {
-            val location = plugin.constants.multiBlocks.blocks[block.state.blockData.material]?.reorient(block.state)
-            if (!locations.containsKey(location)) {
-                return location
-            }
-        }
-        return null
     }
 
     private fun deleteBlocks(blockList: Collection<ExplodedBlock>) {
@@ -384,15 +265,27 @@ class Explosion() {
             }
             // Calc boundaries so we can combine with intersecting explosions
             val calcBoundary = async(Dispatchers.async) {
-                this@Explosion.boundary = this@Explosion.calcBoundary()
+                this@Explosion.boundary = Boundary(totalBlockList)
             }
             // Post-processing on block list
             this@Explosion.postProcessTask = async(Dispatchers.async) {
-                // Fix Weeping Vine plants being weird
+                // Fix Weeping Vines and Big Dripleafs which have some odd behavior
+                // Could a better optimized system for this be made?
                 if (plugin.constants.version.second >= 16) {
                     for (block in totalBlockList) {
                         if (block.state.type == Material.WEEPING_VINES_PLANT) {
                             block.state.type = Material.WEEPING_VINES
+                        }
+                    }
+                }
+                if (plugin.constants.version.second >= 17) {
+                    for (block in totalBlockList) {
+                        if (block.state.type == Material.BIG_DRIPLEAF) {
+                            val data = block.state.blockData as BigDripleaf
+                            data.tilt = BigDripleaf.Tilt.NONE
+                            block.state.blockData = data
+                        } else if (block.state.type == Material.BIG_DRIPLEAF_STEM) {
+                            block.state.type = Material.BIG_DRIPLEAF
                         }
                     }
                 }
@@ -477,11 +370,11 @@ class Explosion() {
                     if (!cancelReplace.get()) {     // Only proceed if we aren't cancelling.
                         for (block in blocks) {
                             // Replace block
-                            replaceBlock(block)
+                            block.placeBlock()
                             // Remove it from the replaceList
                             replaceList.poll()
                             // Dump its dependencies in
-                            replaceList.addAll(block.dependencies)
+                            block.dependencies.forEach { if (it.canBePlaced()) replaceList.add(it)  }
                         }
                     }
                 }
@@ -518,32 +411,6 @@ class Explosion() {
         }
     }
 
-
-    private fun replaceBlock(block: ExplodedBlock) {
-        val currentBlock = block.state.location.block
-
-        // If block isn't air, it's likely a player put it there. Just break it off normally to give it back to them
-        if (currentBlock.blockData.material != Material.AIR) {
-//            plugin.debugLogger("Breaking ${currentBlock.blockData.material} to place a block")
-            currentBlock.breakNaturally()
-        } else {
-            // If the block is air, teleport any entities in it up one to get them out of the way of the new block
-            val entities = currentBlock.location.world?.getNearbyEntities(currentBlock.location, .4, .5, .4)
-            if (entities != null) {
-                for (entity in entities) {
-                    val newLocation = currentBlock.getRelative(BlockFace.UP).location.clone()
-                    newLocation.direction = entity.location.direction
-                    entity.teleport(newLocation)
-                }
-            }
-        }
-        block.state.update(true)
-        // Play pop sound at the location of the new block
-        block.state.location.world?.playSound(block.state.location, Sound.ENTITY_ITEM_PICKUP, SoundCategory.BLOCKS, .05F, .9F + Random.Default.nextFloat() * .3F)
-    }
-
-
-
     // Replace blocks ASAP (used to finish repairs if plugin is being disabled)
     fun warpReplaceBlocks() {
         plugin.debugLogger("Warp replacing...")
@@ -568,9 +435,12 @@ class Explosion() {
 
         while (replaceList.isNotEmpty()) {
             val block = replaceList.peek()
-            replaceBlock(block)
+            // Replace block
+            block.placeBlock()
+            // Remove it from the replaceList
             replaceList.poll()
-            replaceList.addAll(block.dependencies)
+            // Dump its dependencies in
+            block.dependencies.forEach { if (it.canBePlaced()) replaceList.add(it)  }
         }
 
         // Clean up
@@ -604,11 +474,13 @@ class Explosion() {
 //        plugin.debugLogger("Adding two explosions")
         this.cancel()
         other.cancel()
+        // Create new lists to store merged data
         val totalBlockList = MergeableLinkedList<ExplodedBlock>()
         val gravityBlocks = ArrayList<Location>()
         val locations = HashMap<Location, ExplodedBlock>()
         val replaceList = MergeableLinkedList<ExplodedBlock>()
         val replaceCounter = this.replaceCounter + other.replaceCounter
+        // And merge!
         totalBlockList.append(this.totalBlockList)
         totalBlockList.append(other.totalBlockList)
         gravityBlocks.addAll(this.gravityBlocks)

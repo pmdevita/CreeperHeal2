@@ -54,7 +54,7 @@ private open class VersionBlocks {
 
 private class Blocks13: VersionBlocks() {
     override val sideBlocks: EnumMap<Material, FindDependentBlock> = EnumMap<Material, FindDependentBlock>(mapOf(
-            Material.ACACIA_DOOR to OnTopOf,
+//            Material.ACACIA_DOOR to OnTopOf,
             Material.ACACIA_PRESSURE_PLATE to OnTopOf,
             Material.ACACIA_SAPLING to OnTopOf,
             Material.ACTIVATOR_RAIL to OnTopOf,
@@ -63,7 +63,7 @@ private class Blocks13: VersionBlocks() {
             Material.ATTACHED_PUMPKIN_STEM to OnTopOf,
             Material.AZURE_BLUET to OnTopOf,
             Material.BEETROOTS to OnTopOf,
-            Material.BIRCH_DOOR to OnTopOf,
+//            Material.BIRCH_DOOR to OnTopOf,
             Material.BIRCH_PRESSURE_PLATE to OnTopOf,
             Material.BIRCH_SAPLING to OnTopOf,
             Material.BLACK_BANNER to OnTopOf,
@@ -82,7 +82,7 @@ private class Blocks13: VersionBlocks() {
             Material.CYAN_BANNER to OnTopOf,
             Material.COMPARATOR to OnTopOf,
             Material.DANDELION to OnTopOf,
-            Material.DARK_OAK_DOOR to OnTopOf,
+//            Material.DARK_OAK_DOOR to OnTopOf,
             Material.DARK_OAK_PRESSURE_PLATE to OnTopOf,
             Material.DARK_OAK_SAPLING to OnTopOf,
             Material.DEAD_BRAIN_CORAL to OnTopOf,
@@ -108,7 +108,7 @@ private class Blocks13: VersionBlocks() {
             Material.HEAVY_WEIGHTED_PRESSURE_PLATE to OnTopOf,
             Material.HORN_CORAL to OnTopOf,
             Material.HORN_CORAL_FAN to OnTopOf,
-            Material.JUNGLE_DOOR to OnTopOf,
+//            Material.JUNGLE_DOOR to OnTopOf,
             Material.JUNGLE_PRESSURE_PLATE to OnTopOf,
             Material.JUNGLE_SAPLING to OnTopOf,
             Material.KELP to OnTopOf,
@@ -121,7 +121,7 @@ private class Blocks13: VersionBlocks() {
             Material.LIME_BANNER to OnTopOf,
             Material.MAGENTA_BANNER to OnTopOf,
             Material.MELON_STEM to OnTopOf,
-            Material.OAK_DOOR to OnTopOf,
+//            Material.OAK_DOOR to OnTopOf,
             Material.OAK_PRESSURE_PLATE to OnTopOf,
             Material.OAK_SAPLING to OnTopOf,
             Material.ORANGE_BANNER to OnTopOf,
@@ -147,7 +147,7 @@ private class Blocks13: VersionBlocks() {
             Material.SEA_PICKLE to OnTopOf,
             Material.SEAGRASS to OnTopOf,
             Material.SKELETON_SKULL to OnTopOf,
-            Material.SPRUCE_DOOR to OnTopOf,
+//            Material.SPRUCE_DOOR to OnTopOf,
             Material.SPRUCE_PRESSURE_PLATE to OnTopOf,
             Material.SPRUCE_SAPLING to OnTopOf,
             Material.STONE_PRESSURE_PLATE to OnTopOf,
@@ -202,7 +202,6 @@ private class Blocks13: VersionBlocks() {
             Material.SKELETON_WALL_SKULL to Behind,
             Material.TRIPWIRE_HOOK to Behind,
             Material.TUBE_CORAL_WALL_FAN to Behind,
-            Material.VINE to Vine,
             Material.WALL_TORCH to Behind,
             Material.WITHER_SKELETON_WALL_SKULL to Behind,
             Material.WHITE_WALL_BANNER to Behind,
@@ -283,7 +282,7 @@ private class Blocks15: VersionBlocks() {
 
 private class Blocks16: VersionBlocks() {
     override val sideBlocks: EnumMap<Material, FindDependentBlock> = EnumMap<Material, FindDependentBlock>(mapOf(
-            Material.CRIMSON_DOOR to OnTopOf,
+//            Material.CRIMSON_DOOR to OnTopOf,
             Material.CRIMSON_FUNGUS to OnTopOf,
             Material.CRIMSON_PRESSURE_PLATE to OnTopOf,
             Material.CRIMSON_ROOTS to OnTopOf,
@@ -292,7 +291,7 @@ private class Blocks16: VersionBlocks() {
             Material.SOUL_TORCH to OnTopOf,
             Material.TWISTING_VINES to OnTopOf,
             Material.TWISTING_VINES_PLANT to OnTopOf,
-            Material.WARPED_DOOR to OnTopOf,
+//            Material.WARPED_DOOR to OnTopOf,
             Material.WARPED_FUNGUS to OnTopOf,
             Material.WARPED_PRESSURE_PLATE to OnTopOf,
             Material.WARPED_ROOTS to OnTopOf,
@@ -318,14 +317,10 @@ private class Blocks17: VersionBlocks() {
         Material.POINTED_DRIPSTONE to Dripstone,
         Material.AZALEA to OnTopOf,
         Material.FLOWERING_AZALEA to OnTopOf,
-        Material.BIG_DRIPLEAF to OnTopOf,
-        Material.SMALL_DRIPLEAF to OnTopOf,
-        Material.BIG_DRIPLEAF_STEM to OnTopOf,
         Material.HANGING_ROOTS to Below,
-        Material.GLOW_LICHEN to Vine,
-        Material.SPORE_BLOSSOM to Below
+        Material.SPORE_BLOSSOM to Below,
+        Material.BIG_DRIPLEAF to OnTopOf,
+        Material.CAVE_VINES to Below,
+        Material.CAVE_VINES_PLANT to Below
     ))
-    override val sideTags: Array<Pair<Tag<Material>, FindDependentBlock>> = arrayOf(
-        
-    )
 }

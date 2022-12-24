@@ -12,7 +12,6 @@ import org.bukkit.block.Block
 import org.bukkit.plugin.java.JavaPlugin
 
 class CreeperHeal2 : JavaPlugin() {
-    private val explosions: ArrayList<Explosion> = ArrayList()
     val gravity = Gravity(this)
     private var debug = false
     val constants = ConstantsManager()
@@ -22,31 +21,29 @@ class CreeperHeal2 : JavaPlugin() {
 
     override fun onEnable() {
         super.onEnable()
-        // Init config file
-        saveDefaultConfig()
-        reloadConfig()
         debug = config.getBoolean("debug")
-        settings = ConfigManager(this, config)
+        settings = ConfigManager(this)
         if (settings.general.bstats) {
             this.stats = Stats(this)
         }
 
         registerEvents()
         getCommand("ch")!!.setExecutor(Commands(this))
-//        val linkedTest = MergeableLinkedListTest()
     }
 
     private fun registerEvents() {
         server.pluginManager.registerEvents(Explode(this), this)
     }
 
-    fun createNewExplosion(blockList: List<Block>) {
+    fun createNewExplosion(blockList: List<Block>): Explosion? {
         if (blockList.isEmpty()) {
 //            debugLogger("Explosion with no blocks")
-            return
+            return null
         }
 //        explosions.add(Explosion(this, blockList))
-        manager.add(Explosion(this, blockList))
+        val newExplosion = Explosion(this, blockList)
+        manager.add(newExplosion)
+        return newExplosion
     }
 
     fun removeExplosion(explosion: Explosion) {
@@ -62,11 +59,6 @@ class CreeperHeal2 : JavaPlugin() {
 
     fun warpExplosions() {
         this.debugLogger("Running warp")
-//        val itr = explosions.iterator()
-//        while (itr.hasNext()) {
-//            itr.next().warpReplaceBlocks()
-//            itr.remove()
-//        }
         manager.warpAll()
     }
 

@@ -1,12 +1,30 @@
-package net.pdevita.creeperheal2.config
+package net.pdevita. creeperheal2.config
 
 import net.pdevita.creeperheal2.CreeperHeal2
 import org.bukkit.configuration.file.FileConfiguration
+import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.EntityType
+import java.io.File
 
-class ConfigManager(private val plugin: CreeperHeal2, config: FileConfiguration) {
-    val general = General(config)
-    val types = ExplosionTypes(config)
+
+
+
+class ConfigManager(private val plugin: CreeperHeal2) {
+    val general = General(plugin.config)
+    val types = ExplosionTypes(plugin.config)
+    private val worldListConfig = ConfigFile(plugin, "worlds.yml")
+    val worldList = WorldList(worldListConfig)
+}
+
+open class ConfigFile(private val plugin: CreeperHeal2, private val fileName: String) {
+    private val configFile = File(plugin.dataFolder, fileName)
+    var config: YamlConfiguration
+    init {
+        if (!configFile.exists()) {
+            plugin.saveResource(fileName, false)
+        }
+        config = YamlConfiguration.loadConfiguration(configFile);
+    }
 }
 
 class General(config: FileConfiguration) {
@@ -29,7 +47,7 @@ class ExplosionTypes(config: FileConfiguration) {
 //    val endDragon = config.getBoolean("types.end_dragon")
     private val ghast = config.getBoolean("types.ghast", false)
     private val wither = config.getBoolean("types.wither", false)
-    private val endCrystal = config.getBoolean("types.ender-crystal", false)
+    private val endCrystal = config.getBoolean("types.ender-crystal", false) or config.getBoolean("types.end-crystal", false)
     private val minecartTnt = config.getBoolean("types.minecart-tnt", false)
     private val bed = config.getBoolean("types.bed", false)
 
@@ -51,5 +69,19 @@ class ExplosionTypes(config: FileConfiguration) {
         return bed
     }
 
+}
+
+class WorldList(config: ConfigFile) {
+    private val mode = config.config.getString("list-type", "black")
+    private val isWhiteList = mode?.lowercase() == "white" ?: false
+    private val worldList = config.config.getStringList("worlds")
+
+    fun allowWorld(worldName: String): Boolean {
+        return if (isWhiteList) {
+            worldName in worldList
+        } else {
+            worldName !in worldList
+        }
+    }
 }
 

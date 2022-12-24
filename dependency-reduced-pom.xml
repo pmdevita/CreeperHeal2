@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.pdevita</groupId>
   <artifactId>CreeperHeal2</artifactId>
-  <version>1.3.2-SNAPSHOT</version>
+  <version>1.4.0</version>
   <build>
     <sourceDirectory>src/main/kotlin</sourceDirectory>
     <resources>
@@ -106,7 +106,7 @@
     <dependency>
       <groupId>org.jetbrains.kotlin</groupId>
       <artifactId>kotlin-test-junit</artifactId>
-      <version>1.5.10</version>
+      <version>1.6.0</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -128,7 +128,7 @@
   </dependencies>
   <properties>
     <spigot.version>1.17-R0.1-SNAPSHOT</spigot.version>
-    <kotlin.version>1.5.10</kotlin.version>
+    <kotlin.version>1.6.0</kotlin.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 </project>
