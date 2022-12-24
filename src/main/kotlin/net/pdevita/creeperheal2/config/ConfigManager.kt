@@ -1,4 +1,4 @@
-package net.pdevita. creeperheal2.config
+package net.pdevita.creeperheal2.config
 
 import net.pdevita.creeperheal2.CreeperHeal2
 import org.bukkit.configuration.file.FileConfiguration
