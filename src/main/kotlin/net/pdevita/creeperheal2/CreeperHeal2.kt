@@ -40,8 +40,16 @@ class CreeperHeal2 : JavaPlugin() {
 //            debugLogger("Explosion with no blocks")
             return null
         }
-//        explosions.add(Explosion(this, blockList))
-        val newExplosion = Explosion(this, blockList)
+
+        val newList = ArrayList<Block>()
+        for (block in blockList) {
+            if (settings.materials.allowMaterial(block.type))
+                newList.add(block)
+        }
+        if (newList.isEmpty())
+            return null
+
+        val newExplosion = Explosion(this, newList)
         manager.add(newExplosion)
         return newExplosion
     }
