@@ -17,6 +17,18 @@ types:
   end-crystal: false
   bed: false
 
+# Whether the material list is a whitelist or a blacklist
+material-list-type: blacklist
+
+# List of materials or tags
+materials:
+  - IRON_BLOCK
+  - LAPIS_BLOCK
+  - REDSTONE_BLOCK
+  - GOLD_BLOCK
+  - DIAMOND_BLOCK
+  - EMERALD_BLOCK
+
 # Turbo Mode
 # Turbo Mode can help repair larger explosions faster.
 # The minimum number of blocks an explosion should involve before turbo mode is activated
