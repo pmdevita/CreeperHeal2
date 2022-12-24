@@ -2,3 +2,5 @@
 /target/
 .idea/
 /CreeperHeal2.iml
+.vscode/
+dependency-reduced-pom.xml
