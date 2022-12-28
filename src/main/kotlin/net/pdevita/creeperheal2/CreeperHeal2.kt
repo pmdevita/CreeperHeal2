@@ -18,6 +18,7 @@ class CreeperHeal2 : JavaPlugin() {
     val manager = ExplosionManager(this)
     lateinit var settings: ConfigManager
     var stats: Stats? = null
+    val compatibilityManager = CompatibilityManager(this)
 
     override fun onEnable() {
         super.onEnable()
@@ -29,6 +30,7 @@ class CreeperHeal2 : JavaPlugin() {
 
         registerEvents()
         getCommand("creeperheal")!!.setExecutor(Commands(this))
+        compatibilityManager.loadCompatibilityPlugins()
     }
 
     private fun registerEvents() {
@@ -36,11 +38,12 @@ class CreeperHeal2 : JavaPlugin() {
     }
 
     fun createNewExplosion(blockList: List<Block>): Explosion? {
+        // Mask out blocks
+        compatibilityManager.maskBlocksFromExplosion(blockList as MutableList<Block>)
+
         if (blockList.isEmpty()) {
-//            debugLogger("Explosion with no blocks")
             return null
         }
-//        explosions.add(Explosion(this, blockList))
         val newExplosion = Explosion(this, blockList)
         manager.add(newExplosion)
         return newExplosion
