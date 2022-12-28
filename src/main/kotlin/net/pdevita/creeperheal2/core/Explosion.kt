@@ -494,8 +494,8 @@ class Explosion() {
 //        plugin.debugLogger("Finished merging basic data, cleaning gravity blocks")
         val removedGravity = getRemovedGravity(gravityBlocks, locations)
         plugin.gravity.removeBlocks(removedGravity)
-        val gravityBlocksSet = HashSet<Location>(gravityBlocks)
-        gravityBlocksSet.removeAll(removedGravity)
+        val gravityBlocksSet = HashSet(gravityBlocks)
+        gravityBlocksSet.removeAll(removedGravity.toSet())
         var boundary: Boundary? = null
         if (this.boundary != null && other.boundary != null) {
             boundary = Boundary(max(this.boundary!!.highX, other.boundary!!.highX),
