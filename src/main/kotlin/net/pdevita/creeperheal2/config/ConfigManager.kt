@@ -72,8 +72,8 @@ class ExplosionTypes(config: FileConfiguration) {
 }
 
 class WorldList(config: ConfigFile) {
-    private val mode = config.config.getString("list-type", "black")
-    private val isWhiteList = mode?.lowercase() == "white" ?: false
+    private val mode = config.config.getString("worldlist-type", "blacklist")!!.lowercase()
+    private val isWhiteList = mode == "whitelist"
     private val worldList = config.config.getStringList("worlds")
 
     fun allowWorld(worldName: String): Boolean {
