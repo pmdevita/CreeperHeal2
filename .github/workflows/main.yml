@@ -27,7 +27,7 @@ jobs:
     - name: Build with Maven
       run: mvn -B package --file pom.xml
       env:
-        - GITHUB_TOKEN_REF: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN_REF: ${{ secrets.GITHUB_TOKEN }}
     - name: Stage jar
       run: mkdir staging && cp target/CreeperHeal2*.jar staging && mv staging/CreeperHeal2*.jar staging/CreeperHeal2_$GITHUB_SHA.jar
     - name: Upload jar
