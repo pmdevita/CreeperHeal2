@@ -19,8 +19,15 @@ jobs:
         path: ~/.m2
         key: ${{ runner.os }}-m2
         restore-keys: ${{ runner.os }}-m2
+    - name: maven-settings
+        uses: s4u/maven-settings-action@v2
+        with:
+          servers: '[{"id": "github", "username": "dummy", "password": "${GITHUB_TOKEN_REF}"}]'
+          githubServer: false
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+      env:
+        - GITHUB_TOKEN_REF: ${{ secrets.GITHUB_TOKEN }}
     - name: Stage jar
       run: mkdir staging && cp target/CreeperHeal2*.jar staging && mv staging/CreeperHeal2*.jar staging/CreeperHeal2_$GITHUB_SHA.jar
     - name: Upload jar
