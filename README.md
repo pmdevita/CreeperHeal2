@@ -55,6 +55,11 @@ There are a couple last things that are not yet 100% working due to special impl
 - My Discord server and the many users who've helped me test and fix things
 - [Shynixn](https://github.com/Shynixn) for [MCCoroutine](https://github.com/Shynixn/MCCoroutine)
 
+## Building
+
+You'll need to setup GitHub Maven repo, there's an example in the .m2 folder and you 
+can find more instructions [here](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry).
+
 ## Bstats
 
 ![img](https://bstats.org/signatures/bukkit/CreeperHeal2.svg)
