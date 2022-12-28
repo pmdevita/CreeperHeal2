@@ -1,6 +1,7 @@
 package net.pdevita.creeperheal2
 
 import net.pdevita.creeperheal2.commands.Commands
+import net.pdevita.creeperheal2.compatibility.CompatibilityManager
 import net.pdevita.creeperheal2.config.ConfigManager
 import net.pdevita.creeperheal2.constants.ConstantsManager
 import net.pdevita.creeperheal2.core.Explosion

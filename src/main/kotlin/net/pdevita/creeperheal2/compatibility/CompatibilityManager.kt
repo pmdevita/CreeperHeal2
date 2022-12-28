@@ -14,17 +14,11 @@ class CompatibilityManager(val plugin: CreeperHeal2) {
     val pluginList = LinkedList<BaseCompatibility>()
 
     fun loadCompatibilityPlugins() {
-        plugin.debugLogger("Checking compatibility...")
-
         val serviceLoader = ServiceLoader.load(BaseCompatibility::class.java)
-        plugin.debugLogger("${serviceLoader.count()}")
-        for (p in Bukkit.getPluginManager().plugins) {
-            plugin.debugLogger("plugin: $p")
-        }
+        plugin.debugLogger("Found ${serviceLoader.count()} compatibility plugin(s)")
 
         for (compatibilityPlugin in COMPATIBILITY_PLUGINS) {
             val otherPlugin = Bukkit.getPluginManager().getPlugin(compatibilityPlugin.pluginName)
-            plugin.debugLogger("Found compatibility plugin for ${compatibilityPlugin.pluginName}")
             if (otherPlugin != null) {
                 plugin.debugLogger("Loading compatibility for plugin ${compatibilityPlugin.pluginName}")
                 pluginList.add(compatibilityPlugin)
@@ -43,9 +37,5 @@ class CompatibilityManager(val plugin: CreeperHeal2) {
         for (plugin in pluginList) {
             plugin.maskBlocksFromExplosion(blockList, world, boundary, center)
         }
-
-
-
     }
-
 }

@@ -503,7 +503,9 @@ class Explosion() {
                 max(this.boundary!!.highZ, other.boundary!!.highZ),
                 min(this.boundary!!.lowX, other.boundary!!.lowX),
                 min(this.boundary!!.lowY, other.boundary!!.lowY),
-                min(this.boundary!!.lowZ, other.boundary!!.lowZ))
+                min(this.boundary!!.lowZ, other.boundary!!.lowZ),
+                this.boundary!!.world
+            )
         }
 //        plugin.debugLogger("Done, initializing from data")
         return Explosion(plugin, totalBlockList, replaceList, gravityBlocksSet, locations, boundary, replaceCounter)
