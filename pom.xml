@@ -80,7 +80,7 @@
         <dependency>
             <groupId>net.countercraft</groupId>
             <artifactId>movecraft</artifactId>
-            <version>LATEST</version>
+            <version>8.0.0_beta-1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
