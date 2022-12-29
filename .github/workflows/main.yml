@@ -39,8 +39,10 @@ jobs:
         GITHUB_TOKEN_REF: ${{ secrets.GITHUB_TOKEN }}
     - name: Stage jar
       run: mkdir staging && cp target/CreeperHeal2*.jar staging && mv staging/CreeperHeal2*.jar staging/CreeperHeal2_$GITHUB_SHA.jar
+    - name: check staging
+      run: ls -la staging
     - name: Upload jar
       uses: actions/upload-artifact@v3
       with:
-        name: CreeperHeal2-${{ steps.maven-project.outputs.version }}-${{ steps.vars.outputs.sha_short }}
+        name: CreeperHeal2-dev
         path: staging/CreeperHeal2_*.jar
