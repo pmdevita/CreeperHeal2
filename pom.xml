@@ -61,6 +61,11 @@
             <version>1.6.4</version>
         </dependency>
         <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>13.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
             <version>${spigot.version}</version>
@@ -82,12 +87,6 @@
             <groupId>com.google.auto.service</groupId>
             <artifactId>auto-service-annotations</artifactId>
             <version>${auto-service.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.auto.service</groupId>
-            <artifactId>auto-service</artifactId>
-            <version>${auto-service.version}</version>
-            <optional>true</optional>
         </dependency>
     </dependencies>
 
@@ -117,14 +116,29 @@
                             <sourceDirs>
                                 <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
                             </sourceDirs>
+                            <compilerPlugins>
+                                <compilerPlugin>ksp</compilerPlugin>
+                            </compilerPlugins>
                         </configuration>
                     </execution>
                 </executions>
                 <configuration>
-                    <args>
-                        <arg>-Xuse-ir</arg>
-                    </args>
+                    <compilerPlugins>
+                        <compilerPlugin>ksp</compilerPlugin>
+                    </compilerPlugins>
                 </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.dyescape</groupId>
+                        <artifactId>kotlin-maven-symbol-processing</artifactId>
+                        <version>${ksp.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>dev.zacsweers.autoservice</groupId>
+                        <artifactId>auto-service-ksp</artifactId>
+                        <version>1.0.0</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -155,8 +169,8 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <source>10</source>
-                    <target>10</target>
+                    <source>8</source>
+                    <target>8</target>
                     <annotationProcessorPaths>
                         <annotationProcessorPath>
                             <groupId>com.google.auto.service</groupId>
