@@ -38,7 +38,7 @@ jobs:
       env:
         GITHUB_TOKEN_REF: ${{ secrets.GITHUB_TOKEN }}
     - name: Stage jar
-      run: mkdir staging && cp target/CreeperHeal2*.jar staging && mv staging/CreeperHeal2*.jar staging/CreeperHeal2_$GITHUB_SHA.jar
+      run: mkdir staging && cp target/CreeperHeal2*.jar staging && mv staging/CreeperHeal2*.jar staging/CreeperHeal2-dev-${{ steps.githash.outputs.sha_short }}.jar
     - name: check staging
       run: ls -la staging
     - name: Upload jar
