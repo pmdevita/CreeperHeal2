@@ -11,11 +11,12 @@ import net.pdevita.creeperheal2.events.Explode
 import net.pdevita.creeperheal2.utils.Stats
 import org.bukkit.block.Block
 import org.bukkit.plugin.java.JavaPlugin
+import java.util.*
 
 class CreeperHeal2 : JavaPlugin() {
     val gravity = Gravity(this)
     private var debug = false
-    val constants = ConstantsManager()
+    val constants = ConstantsManager(this)
     val manager = ExplosionManager(this)
     lateinit var settings: ConfigManager
     var stats: Stats? = null
@@ -39,13 +40,20 @@ class CreeperHeal2 : JavaPlugin() {
     }
 
     fun createNewExplosion(blockList: List<Block>): Explosion? {
-        // Mask out blocks
-        compatibilityManager.maskBlocksFromExplosion(blockList as MutableList<Block>)
-
         if (blockList.isEmpty()) {
             return null
         }
-        val newExplosion = Explosion(this, blockList)
+
+        val newBlockList = LinkedList(blockList)
+
+        // Mask out blocks used in external plugins
+        compatibilityManager.maskBlocksFromExplosion(newBlockList as MutableList<Block>)
+
+        if (newBlockList.isEmpty()) {
+            return null
+        }
+
+        val newExplosion = Explosion(this, newBlockList)
         manager.add(newExplosion)
         return newExplosion
     }
