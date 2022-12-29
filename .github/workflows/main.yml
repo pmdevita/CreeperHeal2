@@ -19,6 +19,15 @@ jobs:
         path: ~/.m2
         key: ${{ runner.os }}-m2
         restore-keys: ${{ runner.os }}-m2
+    - name: Extract Git short hash
+      id: git-hash
+      shell: bash
+      run: |
+        echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+    - name: Extract Maven project version
+      run: echo ::set-output name=version::$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
+      id: maven-project
     - name: maven-settings
       uses: s4u/maven-settings-action@v2
       with:
@@ -33,5 +42,5 @@ jobs:
     - name: Upload jar
       uses: actions/upload-artifact@v3
       with:
-        name: CreeperHeal2_Dev-Build
+        name: CreeperHeal2-${{ steps.maven-project.outputs.version }}-${{ steps.vars.outputs.sha_short }}
         path: staging/CreeperHeal2_*.jar
