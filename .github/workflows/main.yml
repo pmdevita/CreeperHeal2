@@ -45,4 +45,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: CreeperHeal2-dev-${{ steps.githash.outputs.sha_short }}
-        path: staging/CreeperHeal2_*.jar
+        path: staging/CreeperHeal2-*.jar
