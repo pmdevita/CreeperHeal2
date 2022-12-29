@@ -131,7 +131,7 @@
                     <dependency>
                         <groupId>com.dyescape</groupId>
                         <artifactId>kotlin-maven-symbol-processing</artifactId>
-                        <version>${ksp.version}</version>
+                        <version>1.4</version>
                     </dependency>
                     <dependency>
                         <groupId>dev.zacsweers.autoservice</groupId>
