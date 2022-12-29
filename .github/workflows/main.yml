@@ -25,10 +25,11 @@ jobs:
       run: |
         echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
     - name: Extract Maven project version
+      id: maven-project
       shell: bash
       run: |
-        echo "version=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)" >> $GITHUB_OUTPUT
-      id: maven-project
+        PROJECT_VERSION=`mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec`
+        echo "version=$PROJECT_VERSION" >> $GITHUB_OUTPUT
     - name: maven-settings
       uses: s4u/maven-settings-action@v2
       with:
