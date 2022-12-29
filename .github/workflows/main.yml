@@ -27,9 +27,7 @@ jobs:
     - name: Extract Maven project version
       id: maven-project
       shell: bash
-      run: |
-        PROJECT_VERSION=`mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec`
-        echo "version=$PROJECT_VERSION" >> $GITHUB_OUTPUT
+      run: echo ::set-output name=version::$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
     - name: maven-settings
       uses: s4u/maven-settings-action@v2
       with:
