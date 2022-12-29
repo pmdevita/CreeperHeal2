@@ -16,17 +16,17 @@
         <!--        <spigot.version>1.16.5-R0.1-SNAPSHOT</spigot.version>-->
         <spigot.version>1.19-R0.1-SNAPSHOT</spigot.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!--        <kotlin.compiler.incremental>true</kotlin.compiler.incremental>-->
+        <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
         <auto-service.version>1.0.1</auto-service.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
     <repositories>
-<!--        <repository>-->
-<!--            <id>spigot-repo</id>-->
-<!--            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>-->
-<!--        </repository>-->
+        <repository>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+        </repository>
 <!--        <repository>-->
 <!--            <id>CodeMC</id>-->
 <!--            <url>https://repo.codemc.org/repository/maven-public</url>-->
@@ -205,6 +205,11 @@
                             <pattern>kotlinx</pattern>
                             <!-- Replace this with your package! -->
                             <shadedPattern>net.pdevita.creeperheal2.libs.kotlinx</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>com.google.auto.service</pattern>
+                            <!-- Replace this with your package! -->
+                            <shadedPattern>net.pdevita.creeperheal2.libs.autoservice</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>

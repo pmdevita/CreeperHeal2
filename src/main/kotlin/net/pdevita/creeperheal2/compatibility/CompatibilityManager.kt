@@ -6,23 +6,19 @@ import org.bukkit.Bukkit
 import org.bukkit.block.Block
 import java.util.*
 
-val COMPATIBILITY_PLUGINS = arrayOf(
-    Movecraft
-)
-
 class CompatibilityManager(val plugin: CreeperHeal2) {
     val pluginList = LinkedList<BaseCompatibility>()
 
     fun loadCompatibilityPlugins() {
-        val serviceLoader = ServiceLoader.load(BaseCompatibility::class.java)
+        val serviceLoader = ServiceLoader.load(BaseCompatibility::class.java, plugin.javaClass.classLoader)
         plugin.debugLogger("Found ${serviceLoader.count()} compatibility plugin(s)")
 
-        for (compatibilityPlugin in COMPATIBILITY_PLUGINS) {
+        for (compatibilityPlugin in serviceLoader) {
             val otherPlugin = Bukkit.getPluginManager().getPlugin(compatibilityPlugin.pluginName)
             if (otherPlugin != null) {
                 plugin.debugLogger("Loading compatibility for plugin ${compatibilityPlugin.pluginName}")
+                compatibilityPlugin.setPluginReference(otherPlugin)
                 pluginList.add(compatibilityPlugin)
-                assert(pluginList.last != null)
             }
         }
     }
