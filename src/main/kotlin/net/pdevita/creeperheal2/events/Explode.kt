@@ -13,7 +13,7 @@ class Explode(var plugin: CreeperHeal2): Listener {
 //        plugin.debugLogger("An entity explosion has happened! ${event.entityType.toString()}")
         if (plugin.settings.types.allowExplosionEntity(event.entityType)) {
             if (event.location.world?.let { plugin.settings.worldList.allowWorld(it.name) } == true) {
-                this.plugin.createNewExplosion(LinkedList(event.blockList()))
+                this.plugin.createNewExplosion(event.blockList())
                 event.yield = 0F
             }
         }
