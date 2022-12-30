@@ -38,7 +38,7 @@ object Factions : BaseCompatibility {
         boundary: Boundary,
         center: Location
     ) {
-        var counter = 0
+//        var counter = 0
         val itr = blockList.iterator()
         while (itr.hasNext()) {
             val block = itr.next()
@@ -52,10 +52,10 @@ object Factions : BaseCompatibility {
             // then remove the block
             if (shouldRemove) {
                 itr.remove()
-                counter++
+//                counter++
             }
         }
-        println("Masked out $counter blocks from the explosion")
+//        println("Masked out $counter blocks from the explosion")
     }
 
 }

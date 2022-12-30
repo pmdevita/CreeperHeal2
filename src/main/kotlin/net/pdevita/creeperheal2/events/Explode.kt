@@ -14,7 +14,6 @@ class Explode(var plugin: CreeperHeal2): Listener {
         if (plugin.settings.types.allowExplosionEntity(event.entityType)) {
             if (event.location.world?.let { plugin.settings.worldList.allowWorld(it.name) } == true) {
                 this.plugin.createNewExplosion(event.blockList())
-                event.yield = 0F
             }
         }
     }
@@ -25,7 +24,6 @@ class Explode(var plugin: CreeperHeal2): Listener {
         if (plugin.settings.types.allowExplosionBlock(/*event.block.blockData.material*/)) {
             if (event.block.location.world?.let { plugin.settings.worldList.allowWorld(it.name) } == true) {
                 this.plugin.createNewExplosion(event.blockList())
-                event.yield = 0F
             }
         }
     }
