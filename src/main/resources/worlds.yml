@@ -5,6 +5,12 @@ is-whitelist: true
 
 # List of worlds
 
-worlds:
-  - yourworldnamehere
-  - anothernamedworld
+# Configure which worlds CreeperHeal should run in
+# Either blacklist or whitelist
+worldlist-type: blacklist
+
+# Worlds are provided as a list like this
+# worlds:
+#   - survivalworld
+#   - survivalworld_nether
+#   - another

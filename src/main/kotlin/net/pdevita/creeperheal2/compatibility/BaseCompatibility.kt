@@ -1,5 +1,6 @@
 package net.pdevita.creeperheal2.compatibility
 
+import net.pdevita.creeperheal2.CreeperHeal2
 import net.pdevita.creeperheal2.core.Boundary
 import org.bukkit.Location
 import org.bukkit.World
@@ -15,6 +16,13 @@ interface BaseCompatibility {
          */
 
     }
+
+    fun setCreeperHealReference(creeperHeal2: CreeperHeal2) {
+        /**
+         * Called at startup to pass a reference to the CreeperHeal2 plugin
+         */
+    }
+
     fun maskBlocksFromExplosion(blockList: MutableList<Block>, world: World, boundary: Boundary, center: Location) {
         /**
          * Passes the list of incoming blocks from the explosion. Remove any blocks that CreeperHeal should ignore.

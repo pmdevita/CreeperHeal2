@@ -60,6 +60,9 @@ There are a couple last things that are not yet 100% working due to special impl
 You'll need to setup GitHub Maven repo, there's an example in the .m2 folder and you 
 can find more instructions [here](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry).
 
+If you are working on any of the ServiceProvider classes, disable incremental compilation. There's some 
+sort of bug where it might drop one from the changes between builds.
+
 ## Bstats
 
 ![img](https://bstats.org/signatures/bukkit/CreeperHeal2.svg)

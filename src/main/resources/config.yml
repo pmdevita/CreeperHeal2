@@ -46,16 +46,12 @@ turbo-cap: 10
 # Allow the chaining of TNT explosions rather than just saving the TNT block
 explode-tnt: true
 
-# Configure which worlds CreeperHeal should run in
-# Either blacklist or whitelist
-worldlist-type: blacklist
-
-# Worlds are provided as a list like this
-# worlds:
-#   - survivalworld
-#   - survivalworld_nether
-#   - another
-
+# Compatibility settings for Factions
+# Should CreeperHeal repair explosions in these areas?
+factions:
+  territory: true
+  wilderness: false
+  warzone: false
 
 # Enable stats/usage data collection
 bstats: true

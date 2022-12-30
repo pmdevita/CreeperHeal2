@@ -18,6 +18,7 @@ class CompatibilityManager(val plugin: CreeperHeal2) {
             if (otherPlugin != null) {
                 plugin.debugLogger("Loading compatibility for plugin ${compatibilityPlugin.pluginName}")
                 compatibilityPlugin.setPluginReference(otherPlugin)
+                compatibilityPlugin.setCreeperHealReference(plugin)
                 pluginList.add(compatibilityPlugin)
             }
         }
