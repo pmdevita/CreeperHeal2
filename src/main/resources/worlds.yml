@@ -1,11 +1,5 @@
 # CreeperHeal2 World List
 
-# true if whitelist, false if blacklist
-is-whitelist: true
-
-# List of worlds
-
-# Configure which worlds CreeperHeal should run in
 # Either blacklist or whitelist
 worldlist-type: blacklist
 
