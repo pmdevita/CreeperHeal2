@@ -1,8 +1,5 @@
 package net.pdevita.creeperheal2.core
 
-import kotlinx.coroutines.*
-import net.pdevita.creeperheal2.utils.async
-import net.pdevita.creeperheal2.utils.minecraft
 import org.bukkit.Art
 import org.bukkit.Location
 import org.bukkit.Rotation
@@ -105,17 +102,6 @@ class ExplodedPainting(entity: Entity) : ExplodedHanging(entity) {
         println("Painting of size ${art.blockWidth}x${art.blockHeight} was originally at $location. " +
                 "After placing and setting art, it moved by $moveVector. It was then deleted and placed at " +
                 "$fixedLocation.")
-        //
-//
-//
-//        println("setting art to ${art.name}")
-//        println("placed at: $location now painting at: ${painting.location}")
-        GlobalScope.launch(Dispatchers.async) {
-            delay((1000).toLong())
-            withContext(Dispatchers.minecraft) {
-                painting.setArt(art, true)
-            }
-        }
     }
 }
 
