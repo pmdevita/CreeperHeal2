@@ -8,8 +8,28 @@ import org.bukkit.util.BoundingBox
 
 
 class Boundary (var highX: Int, var highY: Int, var highZ: Int, var lowX: Int, var lowY: Int, var lowZ: Int, var world: World) {
+
+    companion object {
+        fun from(explosionBlocks: MergeableLinkedList<ExplodedBlock>, explosionEntities: MergeableLinkedList<ExplodedEntity>): Boundary {
+            val firstLocation = if (explosionBlocks.size > 0) {
+                explosionBlocks.peek().state.location
+            } else {
+                explosionEntities.peek().location
+            }
+            return Boundary(firstLocation, explosionBlocks, explosionEntities)
+        }
+    }
+
+    constructor(initialLocation: Location, explosionBlocks: MergeableLinkedList<ExplodedBlock>, explosionEntities: MergeableLinkedList<ExplodedEntity>) :
+            this(initialLocation.blockX, initialLocation.blockY, initialLocation.blockZ, initialLocation.blockX, initialLocation.blockY, initialLocation.blockZ, initialLocation.world!!) {
+        addLocations(explosionBlocks)
+        addLocations(explosionEntities)
+        increaseBoundaries()
+    }
+
+
     constructor(explosionBlocks: MergeableLinkedList<ExplodedBlock>) : this(0, 0, 0, 0, 0, 0, explosionBlocks.peek().state.world) {
-        var location = explosionBlocks.peek().state.location
+        val location = explosionBlocks.peek().state.location
         this.highX = location.blockX
         this.lowX = location.blockX
         this.highY = location.blockY
@@ -17,40 +37,36 @@ class Boundary (var highX: Int, var highY: Int, var highZ: Int, var lowX: Int, v
         this.highZ = location.blockZ
         this.lowZ = location.blockZ
 
-        for (block in explosionBlocks) {
-            addLocation(block.state.location)
-        }
-        // Increase boundaries by one so we intersect neighboring explosions
-        this.highX += 1
-        this.highY += 1
-        this.highZ += 1
-        this.lowX -= 1
-        this.lowY -= 1
-        this.lowZ -= 1
+        addLocations(explosionBlocks)
+        increaseBoundaries()
     }
 
     constructor(blockList: List<Block>) : this(0, 0, 0, 0, 0, 0, blockList.first().world) {
-        val location = blockList.first().state.location
-        this.highX = location.blockX
-        this.lowX = location.blockX
-        this.highY = location.blockY
-        this.lowY = location.blockY
-        this.highZ = location.blockZ
-        this.lowZ = location.blockZ
+        setInitialLocation(blockList.first().state.location)
+        addLocations(blockList)
+        increaseBoundaries()
+    }
 
+   private  fun addLocations(blockList: List<Block>) {
         for (block in blockList) {
             addLocation(block.state.location)
         }
-        // Increase boundaries by one so we intersect neighboring explosions
-        this.highX += 1
-        this.highY += 1
-        this.highZ += 1
-        this.lowX -= 1
-        this.lowY -= 1
-        this.lowZ -= 1
     }
 
-    fun addLocation(location: Location) {
+    @JvmName("addLocationsForExplodedBlocks")
+    private fun addLocations(blockList: List<ExplodedBlock>) {
+        for (block in blockList) {
+            addLocation(block.state.location)
+        }
+    }
+
+    private fun addLocations(entityList: MergeableLinkedList<ExplodedEntity>) {
+        for (entity in entityList) {
+            addLocation(entity.location)
+        }
+    }
+
+    private fun addLocation(location: Location) {
         if (this.highX < location.blockX) {
             this.highX = location.blockX
         } else if (this.lowX > location.blockX) {
@@ -66,6 +82,25 @@ class Boundary (var highX: Int, var highY: Int, var highZ: Int, var lowX: Int, v
         } else if (this.lowZ > location.blockZ) {
             this.lowZ = location.blockZ
         }
+    }
+
+    private fun setInitialLocation(location: Location) {
+        this.highX = location.blockX
+        this.lowX = location.blockX
+        this.highY = location.blockY
+        this.lowY = location.blockY
+        this.highZ = location.blockZ
+        this.lowZ = location.blockZ
+    }
+
+    private fun increaseBoundaries() {
+        // Increase boundaries by one so we intersect neighboring explosions
+        this.highX += 1
+        this.highY += 1
+        this.highZ += 1
+        this.lowX -= 1
+        this.lowY -= 1
+        this.lowZ -= 1
     }
 
     // Written like this to shave off a few instructions (Thanks Narelenus)

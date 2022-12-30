@@ -14,6 +14,7 @@ import org.bukkit.block.BlockFace
 import org.bukkit.block.Chest
 import org.bukkit.block.Container
 import org.bukkit.block.data.type.BigDripleaf
+import org.bukkit.entity.Entity
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.max
@@ -24,6 +25,7 @@ class Explosion() {
     lateinit var plugin: CreeperHeal2
     // List of all blocks involved in explosion, dependents included
     val totalBlockList = MergeableLinkedList<ExplodedBlock>()
+    val entities = MergeableLinkedList<ExplodedEntity>()
     private var replaceList = MergeableLinkedList<ExplodedBlock>()
     val gravityBlocks = HashSet<Location>()
     val locations = HashMap<Location, ExplodedBlock>()
@@ -42,103 +44,108 @@ class Explosion() {
 
     // Initialize the class, create the finalBlockList of every single block that is affected in this explosion and link
     // it's dependencies
-    constructor(plugin: CreeperHeal2, initialBlockList: List<Block>) : this() {
+    constructor(plugin: CreeperHeal2, initialBlockList: List<Block>? = null, entities: List<Entity>? = null) : this() {
         this.plugin = plugin
 
-        // List of all blocks, including dependencies, in this stage of search
-        // When we search out for other dependencies, this list will be cleared to hold the next layer
-        var blockList = MergeableLinkedList<ExplodedBlock>()
+        if (initialBlockList != null) {
+            // List of all blocks, including dependencies, in this stage of search
+            // When we search out for other dependencies, this list will be cleared to hold the next layer
+            var blockList = MergeableLinkedList<ExplodedBlock>()
 
-        // First pass, get blocks and make changes to them individually
-        for (block in initialBlockList) {
-            val state = block.state
-            val explodedBlock = ExplodedBlock.from(this, state)
-            blockList.add(explodedBlock)
-            locations[block.location] = explodedBlock
-            // Clear containers since we keep inventory
-            // Even though we are destroying the container block, this is still necessary for some reason
-            if (state is Container) {
+            // First pass, get blocks and make changes to them individually
+            for (block in initialBlockList) {
+                val state = block.state
+                val explodedBlock = ExplodedBlock.from(this, state)
+                blockList.add(explodedBlock)
+                locations[block.location] = explodedBlock
+                // Clear containers since we keep inventory
+                // Even though we are destroying the container block, this is still necessary for some reason
+                if (state is Container) {
 //                plugin.debugLogger("Container destroyed")
-                if (state is Chest) {
-                    state.blockInventory.clear()
-                } else {
-                    state.inventory.clear()
+                    if (state is Chest) {
+                        state.blockInventory.clear()
+                    } else {
+                        state.inventory.clear()
+                    }
                 }
+
             }
 
-        }
+            // Put the extra dependent blocks in here to differentiate them from the previous layer
+            var secondaryList = MergeableLinkedList<ExplodedBlock>()
 
-        // Put the extra dependent blocks in here to differentiate them from the previous layer
-        var secondaryList = MergeableLinkedList<ExplodedBlock>()
-
-        // Third pass, prepare blocks around the exploded blocks
-        // While we still have blocks to check
-        while (blockList.isNotEmpty()) {
-            // Check them
-            for (explodedBlock in blockList) {
-                val block = explodedBlock.state
-                // A few different kinds of blocks could be above, check that first
-                val upBlock = block.block.getRelative(BlockFace.UP)
-                // First, check that the above block is not already accounted for in the explosion
-                if (!locations.containsKey(upBlock.location) && !gravityBlocks.contains(upBlock.location)) {
-                    // If the above block is a gravity block, freeze it in place rather than making it a
-                    // dependent block
-                    if (plugin.constants.gravityBlocks.contains(upBlock.blockData.material)) {
-                        gravityBlocks.add(upBlock.location)
+            // Third pass, prepare blocks around the exploded blocks
+            // While we still have blocks to check
+            while (blockList.isNotEmpty()) {
+                // Check them
+                for (explodedBlock in blockList) {
+                    val block = explodedBlock.state
+                    // A few different kinds of blocks could be above, check that first
+                    val upBlock = block.block.getRelative(BlockFace.UP)
+                    // First, check that the above block is not already accounted for in the explosion
+                    if (!locations.containsKey(upBlock.location) && !gravityBlocks.contains(upBlock.location)) {
+                        // If the above block is a gravity block, freeze it in place rather than making it a
+                        // dependent block
+                        if (plugin.constants.gravityBlocks.contains(upBlock.blockData.material)) {
+                            gravityBlocks.add(upBlock.location)
+                        }
                     }
-                }
 
-                // Check for blocks that depend on this one and add them to our dependencies
-                val dependentBlocks = explodedBlock.findDependentBlocks()
-                if (dependentBlocks.isNotEmpty()) {
-                    for (dependentBlock in dependentBlocks) {
-                        locations[dependentBlock.state.location] = dependentBlock
-                    }
-                    secondaryList.addAll(dependentBlocks)
+                    // Check for blocks that depend on this one and add them to our dependencies
+                    val dependentBlocks = explodedBlock.findDependentBlocks()
+                    if (dependentBlocks.isNotEmpty()) {
+                        for (dependentBlock in dependentBlocks) {
+                            locations[dependentBlock.state.location] = dependentBlock
+                        }
+                        secondaryList.addAll(dependentBlocks)
 //                    explodedBlock.dependencies.addAll(dependentBlocks)
+                    }
                 }
-            }
 //            this.blockList.addAll(blockList)
-            // Add total blocks to Bstats
-            if (plugin.stats != null) {
-                val numOfBlocks = blockList.size
-                async(plugin) {
-                    plugin.stats!!.totalBlocks.addAndGet(numOfBlocks)
+                // Add total blocks to Bstats
+                if (plugin.stats != null) {
+                    val numOfBlocks = blockList.size
+                    async(plugin) {
+                        plugin.stats!!.totalBlocks.addAndGet(numOfBlocks)
+                    }
                 }
-            }
-            // The block staging looks like this
-            // Currently found dependencies -> current blocks checking for dependencies -> Final list
-            totalBlockList.append(blockList)
-            blockList = secondaryList
-            secondaryList = MergeableLinkedList()
+                // The block staging looks like this
+                // Currently found dependencies -> current blocks checking for dependencies -> Final list
+                totalBlockList.append(blockList)
+                blockList = secondaryList
+                secondaryList = MergeableLinkedList()
 
 //            blockList = secondaryList
 //            secondaryList = ArrayList<ExplodedBlock>()
-        }
+            }
 
-        replaceList.addAll(totalBlockList)
+            replaceList.addAll(totalBlockList)
 
-        // Do final linking of dependencies
-        val itr = replaceList.iterator()
-        while (itr.hasNext()) {
-            val block = itr.next()
-            // Block is dependent, should be removed and linked to parent
-            if (block !is DefaultExplodedBlock) {
-                // If the parent is in the explosion, we need to link this block to it
-                // If the parent is not in the explosion, it should already exist and so we don't need to worry
-                // about placing this block after it
+            // Do final linking of dependencies
+            val itr = replaceList.iterator()
+            while (itr.hasNext()) {
+                val block = itr.next()
+                // Block is dependent, should be removed and linked to parent
+                if (block !is DefaultExplodedBlock) {
+                    // If the parent is in the explosion, we need to link this block to it
+                    // If the parent is not in the explosion, it should already exist and so we don't need to worry
+                    // about placing this block after it
 //                println("Non-default block in list ${block.state.blockData.material}")
-                if (block.parentInExplosion()) {
-                    // Attach to it
-                    // Add block to it's parent's dependency list. Once the parent is added, it's dependencies will
-                    // be added to the replaceList
+                    if (block.parentInExplosion()) {
+                        // Attach to it
+                        // Add block to it's parent's dependency list. Once the parent is added, it's dependencies will
+                        // be added to the replaceList
 //                    parentBlock.dependencies.add(block)
 //                    println("Attaching to parent...")
-                    block.addToParents()
-                    itr.remove()
+                        block.addToParents()
+                        itr.remove()
+                    }
                 }
             }
         }
+
+        // Add any entities to the explosion
+        entities?.forEach { this.entities.add(ExplodedEntity.from(it)) }
 
         // Ready to go, delete all the blocks
         deleteBlocks(replaceList)
@@ -156,10 +163,13 @@ class Explosion() {
     }
 
     constructor(
-        plugin: CreeperHeal2, totalBlockList: MergeableLinkedList<ExplodedBlock>, replaceList: MergeableLinkedList<ExplodedBlock>,
-        gravityBlocks: HashSet<Location>, locations: HashMap<Location, ExplodedBlock>, boundary: Boundary? = null, replaceCounter: Int): this() {
+        plugin: CreeperHeal2, totalBlockList: MergeableLinkedList<ExplodedBlock>,
+        replaceList: MergeableLinkedList<ExplodedBlock>, gravityBlocks: HashSet<Location>,
+        locations: HashMap<Location, ExplodedBlock>, boundary: Boundary? = null,
+        replaceCounter: Int, entities: MergeableLinkedList<ExplodedEntity>): this() {
         this.plugin = plugin
         this.totalBlockList.append(totalBlockList)
+        this.entities.append(entities)
         this.gravityBlocks.addAll(gravityBlocks)
         this.locations.putAll(locations)
         this.replaceList = replaceList
@@ -265,7 +275,7 @@ class Explosion() {
             }
             // Calc boundaries so we can combine with intersecting explosions
             val calcBoundary = async(Dispatchers.async) {
-                this@Explosion.boundary = Boundary(totalBlockList)
+                this@Explosion.boundary = Boundary.from(totalBlockList, entities)
             }
             // Post-processing on block list
             this@Explosion.postProcessTask = async(Dispatchers.async) {
@@ -301,9 +311,9 @@ class Explosion() {
                         }
                     }
                     replaceList.addAll(newBlocks)
-                    if (replaceList.isEmpty()) {
+                    if (replaceList.isEmpty() && entities.isEmpty()) {
                         // Cancel this explosion
-                        plugin.debugLogger("Explosion was only TNT, deleting")
+                        plugin.debugLogger("Explosion was only TNT and no entities, deleting")
                         calcBoundary.cancel()
                         this@Explosion.cancel()
                         this@Explosion.deleteExplosion()
@@ -336,18 +346,18 @@ class Explosion() {
 
     // Async process to schedule block replacement
     private fun newReplace() {
-        if (plugin.settings.general.turboThreshold > 0 && plugin.settings.general.turboThreshold < (totalBlockList.size - replaceCounter)) {
-            plugin.debugLogger("Starting off repair in turbo")
-        } else {
-            plugin.debugLogger("Staring repair")
-        }
         GlobalScope.launch(Dispatchers.async) {
+            if (plugin.settings.general.turboThreshold > 0 && plugin.settings.general.turboThreshold < (totalBlockList.size - replaceCounter)) {
+                plugin.debugLogger("Starting off repair in turbo")
+            } else {
+                plugin.debugLogger("Staring repair")
+            }
 //            replaceList.duplicateCheck()
             // Intermediate block list, mostly important for turboing
             val blocks = LinkedList<ExplodedBlock>()
             while (replaceList.isNotEmpty()) {
                 // If turbo is enabled and we are over the threshold, turn it on
-                var replaceAmount = if (plugin.settings.general.turboThreshold > 0 && plugin.settings.general.turboThreshold < (totalBlockList.size - replaceCounter)) {
+                val replaceAmount = if (plugin.settings.general.turboThreshold > 0 && plugin.settings.general.turboThreshold < (totalBlockList.size - replaceCounter)) {
                     when (plugin.settings.general.turboType) {
                         0 -> plugin.settings.general.turboAmount
                         1 -> round((plugin.settings.general.turboPercentage / 100.0) * (totalBlockList.size - replaceCounter)).toInt().coerceIn(1..plugin.settings.general.turboCap)
@@ -383,6 +393,31 @@ class Explosion() {
                 // Clear the intermediate block list
                 blocks.clear()
                 // If we are cancelling, exit, otherwise, keep going
+                if (!cancelReplace.get()) {
+                    delayJob = async(Dispatchers.async) {
+                        delay((plugin.settings.general.betweenBlocksDelay / 20 * 1000).toLong())
+                    }
+                    delayJob!!.join()
+                    // Delay is kinda long, could be good to check again
+                    if (cancelReplace.get()) break
+                } else {
+                    break
+                }
+            }
+
+            // Replace entities
+            while (entities.isNotEmpty()) {
+                val entity = entities.peek()
+                withContext(Dispatchers.minecraft) {
+                    if (!cancelReplace.get()) {     // Only proceed if we aren't cancelling.
+                        val result = entity.placeEntity()
+                        val entity = entities.poll()
+                        // If we were unable to place the entity, add it to the back of the list
+                        if (!result) {
+                            entities.add(entity)
+                        }
+                    }
+                }
                 if (!cancelReplace.get()) {
                     delayJob = async(Dispatchers.async) {
                         delay((plugin.settings.general.betweenBlocksDelay / 20 * 1000).toLong())
@@ -434,13 +469,17 @@ class Explosion() {
         }
 
         while (replaceList.isNotEmpty()) {
-            val block = replaceList.peek()
+            // Pull out the next block from the list
+            val block = replaceList.poll()
             // Replace block
             block.placeBlock()
-            // Remove it from the replaceList
-            replaceList.poll()
             // Dump its dependencies in
             block.dependencies.forEach { if (it.canBePlaced()) replaceList.add(it)  }
+        }
+
+        while (entities.isNotEmpty()) {
+            val entity = entities.poll()
+            entity.placeEntity()
         }
 
         // Clean up
@@ -477,12 +516,15 @@ class Explosion() {
         // Create new lists to store merged data
         val totalBlockList = MergeableLinkedList<ExplodedBlock>()
         val gravityBlocks = ArrayList<Location>()
+        val entities = MergeableLinkedList<ExplodedEntity>()
         val locations = HashMap<Location, ExplodedBlock>()
         val replaceList = MergeableLinkedList<ExplodedBlock>()
         val replaceCounter = this.replaceCounter + other.replaceCounter
         // And merge!
         totalBlockList.append(this.totalBlockList)
         totalBlockList.append(other.totalBlockList)
+        entities.append(this.entities)
+        entities.append(other.entities)
         gravityBlocks.addAll(this.gravityBlocks)
         gravityBlocks.addAll(other.gravityBlocks)
         locations.putAll(this.locations)
@@ -508,7 +550,7 @@ class Explosion() {
             )
         }
 //        plugin.debugLogger("Done, initializing from data")
-        return Explosion(plugin, totalBlockList, replaceList, gravityBlocksSet, locations, boundary, replaceCounter)
+        return Explosion(plugin, totalBlockList, replaceList, gravityBlocksSet, locations, boundary, replaceCounter, entities)
 
     }
 

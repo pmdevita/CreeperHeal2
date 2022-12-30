@@ -1,15 +1,15 @@
 package net.pdevita.creeperheal2.core
 
+import kotlinx.coroutines.*
+import net.pdevita.creeperheal2.utils.async
+import net.pdevita.creeperheal2.utils.minecraft
 import org.bukkit.Art
 import org.bukkit.Location
 import org.bukkit.Rotation
 import org.bukkit.block.BlockFace
-import org.bukkit.entity.Entity
-import org.bukkit.entity.EntityType
-import org.bukkit.entity.Hanging
-import org.bukkit.entity.ItemFrame
+import org.bukkit.entity.*
 import org.bukkit.inventory.ItemStack
-import kotlin.math.min
+import org.bukkit.util.Vector
 
 open class ExplodedEntity() {
     open var entityType: EntityType? = null
@@ -34,15 +34,21 @@ open class ExplodedEntity() {
         location = entity.location
     }
 
-    private fun spawnEntity(): Entity? {
+    fun spawnEntity(location: Location): Entity? {
         return entityType?.let { location.world?.spawnEntity(location, it) }
     }
 
-    fun placeEntity() {
-        val entity = spawnEntity()
-        if (entity != null) {
-            loadData(entity)
+    fun placeEntity(): Boolean {
+        try {
+            val entity = spawnEntity(location)
+            if (entity != null) {
+                loadData(entity)
+            }
+        } catch (e: IllegalArgumentException) {
+            println("IllegalArgumentException, could not place painting $location ${location.block}")
+            return false
         }
+        return true
     }
 
     open fun loadData(entity: Entity) {
@@ -75,35 +81,41 @@ class ExplodedPainting(entity: Entity) : ExplodedHanging(entity) {
         super.saveData(entity)
         val painting = entity as org.bukkit.entity.Painting
         art = painting.art
-        val direction = facingDirection.direction
-//        val downBy = if (art.blockHeight > 1) {
-//            1
-//        } else {
-//            0
-//        }
-        val downBy = min(art.blockHeight - 1, 1)
-//        val rightBy = min(art.blockWidth - 1, 1)
-//        val rightBy = art.blockWidth - 1
-        val rightBy = if (art.blockWidth == 1) {
-            0
-        } else {
-            min(art.blockWidth - 1, 2)
-        }
-        val actualLocation = Location(location.world,
-            location.x + -direction.z * rightBy,
-            location.y - downBy,
-            location.z + direction.x * rightBy)
-        println("Guessing actual painting location at $actualLocation given vector $direction $facingDirection")
-        location = actualLocation
-
     }
 
     override fun loadData(entity: Entity) {
+        // Use the normally spawned painting to figure out how far
+        // it will move after we set the art
         super.loadData(entity)
         val painting = entity as org.bukkit.entity.Painting
         painting.setArt(art, true)
-        println("setting art to ${art.name}")
-        println("placed at: $location now painting at: ${painting.location}")
+        val movedLocation = painting.location
+        val moveX = movedLocation.x - location.x
+        val moveY = movedLocation.y - location.y
+        val moveZ = movedLocation.z - location.z
+        entity.remove()
+        // Correct the location and make a new painting
+        val moveVector = Vector(moveX, moveY, moveZ)
+        val fixedLocation = location.clone()
+        fixedLocation.subtract(moveVector)
+        val fixedEntity = this.spawnEntity(fixedLocation)
+        val newPainting = fixedEntity as Painting
+        super.loadData(fixedEntity)
+        newPainting.setArt(art, true)
+        println("Painting of size ${art.blockWidth}x${art.blockHeight} was originally at $location. " +
+                "After placing and setting art, it moved by $moveVector. It was then deleted and placed at " +
+                "$fixedLocation.")
+        //
+//
+//
+//        println("setting art to ${art.name}")
+//        println("placed at: $location now painting at: ${painting.location}")
+        GlobalScope.launch(Dispatchers.async) {
+            delay((1000).toLong())
+            withContext(Dispatchers.minecraft) {
+                painting.setArt(art, true)
+            }
+        }
     }
 }
 

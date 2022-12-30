@@ -10,6 +10,7 @@ import net.pdevita.creeperheal2.core.Gravity
 import net.pdevita.creeperheal2.events.Explode
 import net.pdevita.creeperheal2.utils.Stats
 import org.bukkit.block.Block
+import org.bukkit.entity.Entity
 import org.bukkit.plugin.java.JavaPlugin
 import java.util.*
 
@@ -54,6 +55,12 @@ class CreeperHeal2 : JavaPlugin() {
         }
 
         val newExplosion = Explosion(this, newBlockList)
+        manager.add(newExplosion)
+        return newExplosion
+    }
+
+    fun createNewExplosion(entity: Entity): Explosion {
+        val newExplosion = Explosion(this, entities = listOf(entity))
         manager.add(newExplosion)
         return newExplosion
     }
