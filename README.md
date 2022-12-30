@@ -25,7 +25,10 @@ added blocks may not repair properly.
 
 # Compatibility
 
-Currently, CreeperHeal2 
+Currently, CreeperHeal2 has official support for the following plugins:
+
+- Movecraft [GitHub](https://github.com/APDevTeam/Movecraft) [Spigot](https://www.spigotmc.org/resources/movecraft.31321/)
+- FactionsUUID [GitHub](https://github.com/drtshock/Factions) [Spigot](https://www.spigotmc.org/resources/factionsuuid.1035/)
 
 # Development Progress
 
