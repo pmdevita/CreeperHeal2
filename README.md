@@ -1,4 +1,4 @@
-# CreeperHeal2 (v1.4.0) (1.13-1.18)
+# CreeperHeal2 (v1.5.0) (1.13-1.19)
 
 [Spigot Plugin Page](https://www.spigotmc.org/resources/creeperheal2.80585/)
 
@@ -23,15 +23,17 @@ added blocks may not repair properly.
 - `/creeperheal stats` - `creeperheal2.stats` View stats about currently tracked explosions
 - `/creeperheal cancel` - `creeperheal2.cancel` Cancel replacement of currently tracked explosions (you will lose blocks so be careful)
 
+# Compatibility
+
+Currently, CreeperHeal2 
 
 # Development Progress
 
-This plugin is still in beta and while I would consider it safer than the original on 
-modern servers, and it supports every block except those listed below, it still may fail to 
-replace some structures with 100% accuracy. Blocks that aren't replaced properly should drop as
-items though.
+After a few years of testing and several iterations, I can confidently say this plugin 
+has reached maturity for the features it supports. There are still some features missing 
+that have been difficult to implement or solve, or I just haven't had time for yet.
 
-Currently, the following blocks cannot be replaced properly (they will drop as items)
+Currently, the following blocks cannot be replaced properly (they will drop as items).
 - Paintings
 - Item frames
 - Chorus plants
@@ -57,11 +59,27 @@ There are a couple last things that are not yet 100% working due to special impl
 
 ## Building
 
-You'll need to setup GitHub Maven repo, there's an example in the .m2 folder and you 
+You'll need to setup GitHub Maven repo, there's an example in the .m2 folder, and you 
 can find more instructions [here](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry).
 
 If you are working on any of the ServiceProvider classes, disable incremental compilation. There's some 
-sort of bug where it might drop one from the changes between builds.
+sort of bug where it might drop one of the classes from the service manifest between builds. If you are 
+swapping between incremental and full, it might also be a good idea to clean the build before building 
+again.
+
+### Adding compatibility with another plugin
+
+This section needs to be fully fleshed out and a proper repo needs to be setup. 
+The quick answer for now is, if you want to prevent CreeperHeal2 from restoring certain blocks,
+create a plugin that implement the BaseCompatibility interface, and register it as a ServiceProvider
+(you usually do this with AutoService). You can see a few examples in the `compatibility` package.
+
+If you would like to pass a list of blocks for CreeperHeal2 to delete and then restore, you can do so 
+through the `createNewExplosion` method on the `CreeperHeal2` plugin object, passing it your collection 
+of `Block` objects. 
+
+If you need help, feel free to reach out in discussions or the issues. I also occasionally check the 
+Spigot forums.
 
 ## Bstats
 
