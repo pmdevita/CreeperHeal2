@@ -32,15 +32,13 @@ open class ExplodedEntity() {
     }
 
     fun spawnEntity(location: Location): Entity? {
-        return entityType?.let { location.world?.spawnEntity(location, it) }
+        val entityClass = entityType!!.entityClass!!
+        return location.world?.spawn(location, entityClass) { loadData(it) }
     }
 
     fun placeEntity(): Boolean {
         try {
-            val entity = spawnEntity(location)
-            if (entity != null) {
-                loadData(entity)
-            }
+            spawnEntity(location)
         } catch (e: IllegalArgumentException) {
             println("IllegalArgumentException, could not place painting $location ${location.block}")
             return false
@@ -74,6 +72,36 @@ class ExplodedPainting(entity: Entity) : ExplodedHanging(entity) {
     override var entityType: EntityType? = EntityType.PAINTING
     private lateinit var art: Art
 
+    companion object {
+        val data = HashMap<BlockFace, HashMap<String, Vector>>()
+
+        fun addPaintingData(direction: BlockFace, size: String, offset: Vector) {
+            if (!data.contains(direction)) {
+                data[direction] = HashMap()
+            }
+            val directionMap = data[direction]!!
+            if (!directionMap.contains(size)) {
+                directionMap[size] = offset
+            } else {
+                if (directionMap[size] != offset) {
+                    println("Different offsets!!! $direction $size ${directionMap[size]} != ${offset}")
+                }
+            }
+        }
+
+        fun printPaintingData() {
+            println("Painting Stats:")
+            for (direction in data.keys) {
+                val directionMap = data[direction]!!
+                println("$direction:")
+                for (size in directionMap.keys) {
+                    println("$size - ${directionMap[size]}")
+                }
+            }
+        }
+
+    }
+
     override fun saveData(entity: Entity) {
         super.saveData(entity)
         val painting = entity as org.bukkit.entity.Painting
@@ -93,15 +121,20 @@ class ExplodedPainting(entity: Entity) : ExplodedHanging(entity) {
         entity.remove()
         // Correct the location and make a new painting
         val moveVector = Vector(moveX, moveY, moveZ)
+        addPaintingData(facingDirection, "${art.blockWidth}x${art.blockHeight}", moveVector)
         val fixedLocation = location.clone()
         fixedLocation.subtract(moveVector)
-        val fixedEntity = this.spawnEntity(fixedLocation)
-        val newPainting = fixedEntity as Painting
-        super.loadData(fixedEntity)
-        newPainting.setArt(art, true)
+        val entityClass = entityType!!.entityClass!!
+        location.world?.spawn(fixedLocation, entityClass) {
+            super.loadData(it)
+            val newPainting = it as Painting
+            newPainting.setArt(art, true)
+
+        }
         println("Painting of size ${art.blockWidth}x${art.blockHeight} was originally at $location. " +
                 "After placing and setting art, it moved by $moveVector. It was then deleted and placed at " +
                 "$fixedLocation.")
+        printPaintingData()
     }
 }
 
