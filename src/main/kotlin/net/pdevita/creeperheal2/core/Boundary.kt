@@ -121,17 +121,17 @@ class Boundary (var highX: Int, var highY: Int, var highZ: Int, var lowX: Int, v
 
     fun centerAsVector(): Triple<Int, Int, Int> {
         return Triple(
-            (highX-lowX/2)+lowX,
-            (highY-lowY/2)+lowY,
-            (highZ-lowZ/2)+lowZ,
+            ((highX-lowX)/2)+lowX,
+            ((highY-lowY)/2)+lowY,
+            ((highZ-lowZ)/2)+lowZ,
         )
     }
     fun center(): Location {
         return Location(
             world,
-            (highX-lowX/2.0)+lowX,
-            (highY-lowY/2.0)+lowY,
-            (highZ-lowZ/2.0)+lowZ,
+            ((highX-lowX)/2.0)+lowX,
+            ((highY-lowY)/2.0)+lowY,
+            ((highZ-lowZ)/2.0)+lowZ,
         )
     }
 
