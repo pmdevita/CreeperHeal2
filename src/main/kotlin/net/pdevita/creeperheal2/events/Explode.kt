@@ -1,10 +1,13 @@
 package net.pdevita.creeperheal2.events
 
 import net.pdevita.creeperheal2.CreeperHeal2
+import org.bukkit.entity.ArmorStand
+import org.bukkit.entity.EntityType
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockExplodeEvent
+import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.EntityExplodeEvent
 import org.bukkit.event.hanging.HangingBreakByEntityEvent
 import org.bukkit.event.hanging.HangingBreakEvent
@@ -42,6 +45,23 @@ class Explode(var plugin: CreeperHeal2): Listener {
             }
             plugin.createNewExplosion(event.entity)
             event.isCancelled = true
+        }
+    }
+
+    @EventHandler()
+    fun onEntityDamageEvent(event: EntityDamageEvent) {
+        if (event.entityType == EntityType.ARMOR_STAND) {
+            if (event.cause == EntityDamageEvent.DamageCause.BLOCK_EXPLOSION ||
+                event.cause == EntityDamageEvent.DamageCause.ENTITY_EXPLOSION
+            ) {
+                val armorStand = event.entity as ArmorStand
+                // You should be able to just check if it was dealt a killing blow but ehhhhh idk don't work
+                // println("${armorStand.health} - ${event.finalDamage}")
+                // if ((armorStand.health - event.finalDamage).roundToInt() < 0) {
+                plugin.createNewExplosion(armorStand)
+                event.isCancelled = true
+                // }
+            }
         }
     }
 }

@@ -7,6 +7,7 @@ import org.bukkit.Rotation
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.*
 import org.bukkit.inventory.ItemStack
+import org.bukkit.util.EulerAngle
 import org.bukkit.util.Vector
 
 open class ExplodedEntity() {
@@ -16,9 +17,10 @@ open class ExplodedEntity() {
     companion object {
         fun from(entity: Entity): ExplodedEntity {
             return when (entity) {
-                is org.bukkit.entity.Painting -> ExplodedPainting(entity)
-                is org.bukkit.entity.ItemFrame -> ExplodedItemFrame(entity)
-                if org.bukkit.entity.GlowItemFrame -> ExplodedGlowItemFrame(entity)
+                is Painting -> ExplodedPainting(entity)
+                is GlowItemFrame -> ExplodedGlowItemFrame(entity)
+                is ItemFrame -> ExplodedItemFrame(entity)
+                is ArmorStand -> ExplodedArmorStand(entity)
                 else -> throw java.lang.Exception("$entity is not a supported exploded entity")
             }
         }
@@ -135,4 +137,59 @@ open class ExplodedItemFrame(entity: Entity) : ExplodedHanging(entity) {
 
 class ExplodedGlowItemFrame(entity: Entity): ExplodedItemFrame(entity) {
     override val entityType: EntityType = EntityType.GLOW_ITEM_FRAME
+}
+
+class ExplodedArmorStand(entity: Entity): ExplodedEntity(entity) {
+    override val entityType: EntityType = EntityType.ARMOR_STAND
+
+    private lateinit var bodyPose: EulerAngle
+    private lateinit var headPose: EulerAngle
+    private lateinit var leftLegPose: EulerAngle
+    private lateinit var leftArmPose: EulerAngle
+    private lateinit var rightLegPose: EulerAngle
+    private lateinit var rightArmPose: EulerAngle
+    private var hasArms: Boolean = false
+    private var noBasePlate: Boolean = false
+    private var small: Boolean = false
+
+    private lateinit var armor: Array<ItemStack>
+    private lateinit var mainHand: ItemStack
+    private lateinit var offHand: ItemStack
+
+    override fun saveData(entity: Entity) {
+        super.saveData(entity)
+        val armorStand = entity as ArmorStand
+        if (armorStand.equipment != null) {
+            armor = armorStand.equipment!!.armorContents
+            mainHand = armorStand.equipment!!.itemInMainHand
+            offHand = armorStand.equipment!!.itemInOffHand
+        }
+        bodyPose = armorStand.bodyPose
+        headPose = armorStand.headPose
+        leftLegPose = armorStand.leftLegPose
+        leftArmPose = armorStand.leftArmPose
+        rightArmPose = armorStand.rightArmPose
+        rightLegPose = armorStand.rightLegPose
+        hasArms = armorStand.hasArms()
+        noBasePlate = armorStand.hasBasePlate()
+        small = armorStand.isSmall
+    }
+
+    override fun loadData(entity: Entity) {
+        super.loadData(entity)
+        val armorStand = entity as ArmorStand
+        armorStand.equipment!!.armorContents = armor
+        armorStand.equipment!!.setItemInMainHand(mainHand)
+        armorStand.equipment!!.setItemInOffHand(offHand)
+        armorStand.headPose = headPose
+        armorStand.bodyPose = bodyPose
+        armorStand.leftArmPose = leftArmPose
+        armorStand.leftLegPose = leftLegPose
+        armorStand.rightArmPose = rightArmPose
+        armorStand.rightLegPose = rightLegPose
+        armorStand.setArms(hasArms)
+        armorStand.setBasePlate(noBasePlate)
+        armorStand.isSmall = small
+    }
+
 }
