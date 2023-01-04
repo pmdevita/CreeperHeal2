@@ -12,6 +12,7 @@ import net.pdevita.creeperheal2.utils.Stats
 import org.bukkit.block.Block
 import org.bukkit.entity.Entity
 import org.bukkit.plugin.java.JavaPlugin
+import java.io.File
 import java.util.*
 
 class CreeperHeal2 : JavaPlugin() {
@@ -25,6 +26,11 @@ class CreeperHeal2 : JavaPlugin() {
 
     override fun onEnable() {
         super.onEnable()
+
+        if (!File(config.currentPath).exists()) {
+            saveDefaultConfig()
+        }
+
         debug = config.getBoolean("debug")
         settings = ConfigManager(this)
         if (settings.general.bstats) {
