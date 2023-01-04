@@ -17,6 +17,9 @@ types:
   end-crystal: false
   bed: false
 
+# Support entity-type blocks (Paintings, Item Frames, Armor Stands)
+entity-type: true
+
 # Turbo Mode
 # Turbo Mode can help repair larger explosions faster.
 # The minimum number of blocks an explosion should involve before turbo mode is activated

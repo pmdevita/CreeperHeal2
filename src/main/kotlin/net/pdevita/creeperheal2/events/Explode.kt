@@ -35,32 +35,36 @@ class Explode(var plugin: CreeperHeal2): Listener {
 
     @EventHandler()
     fun onHangingBreakEvent(event: HangingBreakEvent) {
-        if (event.cause == HangingBreakEvent.RemoveCause.EXPLOSION) {
-            if (event.entity.location.world?.let { plugin.settings.worldList.allowWorld(it.name) } == true) {
-                if (event is HangingBreakByEntityEvent) {
-                    plugin.debugLogger("${event.entity} ${event.entity.type} at ${event.entity.location} exploded by ${event.remover}")
-                } else {
-                    plugin.debugLogger("${event.entity} ${event.entity.type} at ${event.entity.location} exploded")
+        if (plugin.settings.general.entityType && event.entity.location.world?.let { plugin.settings.worldList.allowWorld(it.name) } == true) {
+            if (event.cause == HangingBreakEvent.RemoveCause.EXPLOSION) {
+                if (event.entity.location.world?.let { plugin.settings.worldList.allowWorld(it.name) } == true) {
+                    if (event is HangingBreakByEntityEvent) {
+                        plugin.debugLogger("${event.entity} ${event.entity.type} at ${event.entity.location} exploded by ${event.remover}")
+                    } else {
+                        plugin.debugLogger("${event.entity} ${event.entity.type} at ${event.entity.location} exploded")
+                    }
                 }
+                plugin.createNewExplosion(event.entity)
+                event.isCancelled = true
             }
-            plugin.createNewExplosion(event.entity)
-            event.isCancelled = true
         }
     }
 
     @EventHandler()
     fun onEntityDamageEvent(event: EntityDamageEvent) {
-        if (event.entityType == EntityType.ARMOR_STAND) {
-            if (event.cause == EntityDamageEvent.DamageCause.BLOCK_EXPLOSION ||
-                event.cause == EntityDamageEvent.DamageCause.ENTITY_EXPLOSION
-            ) {
-                val armorStand = event.entity as ArmorStand
-                // You should be able to just check if it was dealt a killing blow but ehhhhh idk don't work
-                // println("${armorStand.health} - ${event.finalDamage}")
-                // if ((armorStand.health - event.finalDamage).roundToInt() < 0) {
-                plugin.createNewExplosion(armorStand)
-                event.isCancelled = true
-                // }
+        if (plugin.settings.general.entityType && event.entity.location.world?.let { plugin.settings.worldList.allowWorld(it.name) } == true) {
+            if (event.entityType == EntityType.ARMOR_STAND) {
+                if (event.cause == EntityDamageEvent.DamageCause.BLOCK_EXPLOSION ||
+                    event.cause == EntityDamageEvent.DamageCause.ENTITY_EXPLOSION
+                ) {
+                    val armorStand = event.entity as ArmorStand
+                    // You should be able to just check if it was dealt a killing blow but ehhhhh idk don't work
+                    // println("${armorStand.health} - ${event.finalDamage}")
+                    // if ((armorStand.health - event.finalDamage).roundToInt() < 0) {
+                    plugin.createNewExplosion(armorStand)
+                    event.isCancelled = true
+                    // }
+                }
             }
         }
     }

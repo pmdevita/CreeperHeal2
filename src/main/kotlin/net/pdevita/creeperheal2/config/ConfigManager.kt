@@ -37,6 +37,7 @@ class General(config: FileConfiguration) {
     val turboAmount = config.getInt("turbo-amount", 3).coerceAtMost(1000)
     val turboPercentage = config.getInt("turbo-percentage", 1).coerceIn(1..100)
     val turboCap = config.getInt("turbo-cap", 10).coerceAtMost(1000)
+    val entityType = config.getBoolean("entity-type", true)
 }
 
 class ExplosionTypes(config: FileConfiguration) {

@@ -1,4 +1,4 @@
-# CreeperHeal2 (v1.5.0) (1.13-1.19)
+# CreeperHeal2 (v2.0.0) (1.13-1.19)
 
 [Spigot Plugin Page](https://www.spigotmc.org/resources/creeperheal2.80585/)
 
@@ -36,11 +36,8 @@ After a few years of testing and several iterations, I can confidently say this 
 has reached maturity for the features it supports. There are still some features missing 
 that have been difficult to implement or solve, or I just haven't had time for yet.
 
-Currently, the following blocks cannot be replaced properly (they will drop as items).
-- Paintings
-- Item frames
+Currently, the following blocks are not replaced properly (they will drop as items).
 - Chorus plants
-- Scaffolding
 - Minecart rails (can be replaced fine, may not keep original orientation)
 
 If you are able to create a structure that consistently isn't replaced properly, file a bug 
@@ -50,7 +47,7 @@ report to let me know.
 
 There are a couple last things that are not yet 100% working due to special implementation requirements for these blocks
 
-- [ ] Add support for entity "blocks" like Paintings, Item Frames, and Armor Stands
+- [x] Add support for entity "blocks" like Paintings, Item Frames, and Armor Stands - Added with 2.0.0!
 - [ ] Chorus plants need to be rescanned to build their dependency tree
 - [ ] Minecart rails don't maintain orientation when replaced
 - [ ] Liquids may remove certain blocks during replacement
