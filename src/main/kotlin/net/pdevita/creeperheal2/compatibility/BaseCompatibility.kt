@@ -9,6 +9,7 @@ import org.bukkit.plugin.Plugin
 
 interface BaseCompatibility {
     val pluginName: String /* The name of the plugin (as defined in its plugin.yml) */
+    val pluginPackage: String /* The fully qualified name of the Plugin class for that plugin ex. net.pdevita.creeperheal2.CreeperHeal2 */
 
     fun setPluginReference(plugin: Plugin) {
         /**

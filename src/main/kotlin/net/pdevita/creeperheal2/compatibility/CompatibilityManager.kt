@@ -14,16 +14,17 @@ class CompatibilityManager(val plugin: CreeperHeal2) {
         plugin.debugLogger("Found ${serviceLoader.count()} compatibility plugin(s)")
 
         for (compatibilityPlugin in serviceLoader) {
-            val otherPlugin = Bukkit.getPluginManager().getPlugin(compatibilityPlugin.pluginName)
-            if (otherPlugin != null) {
-                plugin.debugLogger("Loading compatibility for plugin ${compatibilityPlugin.pluginName}")
-                try {
-                    compatibilityPlugin.setPluginReference(otherPlugin)
-                    compatibilityPlugin.setCreeperHealReference(plugin)
-                    pluginList.add(compatibilityPlugin)
-                } catch (e: NoClassDefFoundError) {
-                    continue
-                }
+            val otherPlugin = Bukkit.getPluginManager().getPlugin(compatibilityPlugin.pluginName) ?: continue
+            if (otherPlugin.javaClass.name != compatibilityPlugin.pluginPackage) {
+                continue
+            }
+            plugin.debugLogger("Loading compatibility for plugin ${compatibilityPlugin.pluginName} ${otherPlugin.javaClass.name}")
+            try {
+                compatibilityPlugin.setPluginReference(otherPlugin)
+                compatibilityPlugin.setCreeperHealReference(plugin)
+                pluginList.add(compatibilityPlugin)
+            } catch (e: NoClassDefFoundError) {
+                continue
             }
         }
     }

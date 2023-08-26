@@ -10,6 +10,7 @@ import org.bukkit.block.Block
 
 object Movecraft : BaseCompatibility {
     override val pluginName = "Movecraft"
+    override val pluginPackage = "net.countercraft.movecraft.Movecraft"
     override fun maskBlocksFromExplosion(blockList: MutableList<Block>, world: World, boundary: Boundary, center: Location) {
 //        var counter = 0
         for (craft in CraftManager.getInstance().getCraftsInWorld(world)) {

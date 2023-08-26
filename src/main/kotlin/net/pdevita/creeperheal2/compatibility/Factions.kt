@@ -13,6 +13,7 @@ import org.bukkit.plugin.Plugin
 
 object Factions : BaseCompatibility {
     override val pluginName = "Factions"
+    override val pluginPackage = "com.massivecraft.factions.FactionsPlugin"
     private lateinit var factionPlugin: FactionsPlugin
     private lateinit var creeperHeal2: CreeperHeal2
     var territory = false

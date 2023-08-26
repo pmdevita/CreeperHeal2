@@ -60,7 +60,9 @@ There are a couple last things that are not yet 100% working due to special impl
 ## Building
 
 You'll need to setup GitHub Maven repo, there's an example in the .m2 folder, and you 
-can find more instructions [here](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry).
+can find more instructions [here](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry). 
+The `settings.xml` file need to go in `~/.m2/` on Mac/Linux and in `C:\Users\USERNAME\.m2\` on Windows. You need 
+a Github Personal Access Token with only the `read:packages` permission.
 
 If you are working on any of the ServiceProvider classes, disable incremental compilation. There's some 
 sort of bug where it might drop one of the classes from the service manifest between builds. If you are 
