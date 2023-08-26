@@ -6,7 +6,10 @@ import org.bukkit.Sound
 import org.bukkit.SoundCategory
 import org.bukkit.block.BlockFace
 import org.bukkit.block.BlockState
+import org.bukkit.entity.Entity
+import org.bukkit.entity.Player
 import java.util.*
+import kotlin.math.ceil
 import kotlin.random.Random
 
 private object SideFaces {
@@ -112,24 +115,60 @@ open class ExplodedBlock(protected var explosion: Explosion, val state: BlockSta
         if (currentBlock.blockData.material != Material.AIR) {
 //            plugin.debugLogger("Breaking ${currentBlock.blockData.material} to place a block")
             currentBlock.breakNaturally()
-        } else {
-            // If the block is air, teleport any entities in it up one to get them out of the way of the new block
-            val entities = currentBlock.location.world?.getNearbyEntities(currentBlock.location, .4, .5, .4)
-            if (entities != null) {
-                for (entity in entities) {
-                    val newLocation = currentBlock.getRelative(BlockFace.UP).location.clone()
-                    newLocation.direction = entity.location.direction
-                    entity.teleport(newLocation)
+        }
+        this.state.update(true)
+
+        // Get any entities inside t
+        val entities = currentBlock.location.world?.getNearbyEntities(state.block.boundingBox)
+        if (entities != null) {
+            for (entity in entities) {
+                println("Checking to entity $entity at ${entity.location} out of the way of block ${state.blockData.material} ${state.block.boundingBox}")
+                println("Bounding box Height: ${entity.boundingBox.height} Max Y: ${entity.boundingBox.maxY} Min Y: ${entity.boundingBox.minY}")
+
+                // If an entity has a Y equal to or greater than the placing block, we should probably teleport up
+                // If there is enough space below this block, we can leave the entity there
+                println("bruh wtf ${entity.location.y >= state.location.y} ${hasValidSpaceBelow(state.location, entity)}")
+                if (entity.location.y >= state.location.y || !hasValidSpaceBelow(state.location, entity)) {
+                    val oneBlockUp = currentBlock.getRelative(BlockFace.UP).location.clone()
+                    oneBlockUp.direction = entity.location.direction
+                    println("Teleporting $entity up")
+                    entity.teleport(oneBlockUp)
                 }
             }
         }
-        this.state.update(true)
+
         // Play pop sound at the location of the new block
         this.state.location.world?.playSound(this.state.location, Sound.ENTITY_ITEM_PICKUP, SoundCategory.BLOCKS, .05F, .9F + Random.Default.nextFloat() * .3F)
 
         for (dependency in this.dependencies) {
             dependency.parentWasPlaced(this)
         }
+    }
+
+    private fun hasValidSpaceBelow(location: Location, entity: Entity): Boolean {
+        // If an entity has their feet below the newly placed block, check if leaving them there will still be valid
+        var entityHeight = entity.boundingBox.height
+        // Players can be compressed into a height of 1
+        if (entity is Player) {
+            entityHeight = 1.0
+        }
+        val blocksBelow = ceil(entityHeight).toInt() + 1   // How many blocks below we need to check, with an extra just in case.
+        var spaceBelow = 0.0
+        println("Checking $blocksBelow blocks below...")
+        for (i in 1..blocksBelow) {
+            val locationBelow = location.clone()
+            locationBelow.y -= i
+            val blockBelow = locationBelow.block
+            println("Bounding box for ${blockBelow.blockData.material} ${blockBelow.boundingBox} $locationBelow")
+            if (blockBelow.blockData.material == Material.AIR) {
+                spaceBelow += 1
+            } else {
+                println("final block gives ${locationBelow.y + 1 - blockBelow.boundingBox.maxY} of space")
+                spaceBelow += locationBelow.y + 1 - blockBelow.boundingBox.maxY
+                break
+            }
+        }
+        return spaceBelow >= entityHeight
     }
 }
 
