@@ -199,7 +199,7 @@ class Explosion() {
             }
             delayJob!!.await()
             if (!this@Explosion.cancelReplace.get()) {
-                newReplace()
+                replace()
             }
         }
     }
@@ -344,13 +344,13 @@ class Explosion() {
             }
             delayJob!!.join()
             if (!this@Explosion.cancelReplace.get()) {
-                newReplace()
+                replace()
             }
         }
     }
 
     // Async process to schedule block replacement
-    private fun newReplace() {
+    private fun replace() {
         GlobalScope.launch(Dispatchers.async) {
             if (plugin.settings.general.turboThreshold > 0 && plugin.settings.general.turboThreshold < (totalBlockList.size - replaceCounter)) {
                 plugin.debugLogger("Starting off repair in turbo")
