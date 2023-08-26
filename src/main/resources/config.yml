@@ -17,6 +17,9 @@ types:
   end-crystal: false
   bed: false
 
+# Disable saving for container blocks (chests, shulker boxes, etc.)
+disable-containers: false
+
 # Support entity-type blocks (Paintings, Item Frames, Armor Stands)
 entity-type: true
 

@@ -56,18 +56,23 @@ class Explosion() {
             for (block in initialBlockList) {
                 val state = block.state
                 val explodedBlock = ExplodedBlock.from(this, state)
-                blockList.add(explodedBlock)
-                locations[block.location] = explodedBlock
                 // Clear containers since we keep inventory
                 // Even though we are destroying the container block, this is still necessary for some reason
                 if (state is Container) {
-//                plugin.debugLogger("Container destroyed")
-                    if (state is Chest) {
-                        state.blockInventory.clear()
+                    // If we are disabling container saving, skip adding this block to the block list
+                    if (plugin.settings.general.disableContainers) {
+                        continue
                     } else {
-                        state.inventory.clear()
+                        if (state is Chest) {
+                            state.blockInventory.clear()
+                        } else {
+                            state.inventory.clear()
+                        }
                     }
                 }
+
+                blockList.add(explodedBlock)
+                locations[block.location] = explodedBlock
 
             }
 
