@@ -1,12 +1,11 @@
 package net.pdevita.creeperheal2.config
 
 import net.pdevita.creeperheal2.CreeperHeal2
+import org.bukkit.Material
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.EntityType
 import java.io.File
-
-
 
 
 class ConfigManager(private val plugin: CreeperHeal2) {
@@ -14,6 +13,8 @@ class ConfigManager(private val plugin: CreeperHeal2) {
     val types = ExplosionTypes(plugin.config)
     private val worldListConfig = ConfigFile(plugin, "worlds.yml")
     val worldList = WorldList(worldListConfig)
+    private val blockListConfig = ConfigFile(plugin, "blocks.yml")
+    val blockList = BlockList(blockListConfig)
 }
 
 open class ConfigFile(private val plugin: CreeperHeal2, private val fileName: String) {
@@ -83,6 +84,22 @@ class WorldList(config: ConfigFile) {
             worldName in worldList
         } else {
             worldName !in worldList
+        }
+    }
+}
+
+
+class BlockList(config: ConfigFile) {
+    private val mode = config.config.getString("blocklist-type", "blacklist")!!.lowercase()
+    private val isWhiteList = mode == "whitelist"
+    private val blockListStrings = config.config.getStringList("blocks")
+    private val blockList = blockListStrings.map { Material.valueOf(it) }.toSet()
+
+    fun allowMaterial(material: Material): Boolean {
+        return if (isWhiteList) {
+            material in blockList
+        } else {
+            material !in blockList
         }
     }
 }
