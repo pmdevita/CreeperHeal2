@@ -59,15 +59,24 @@ class Explosion() {
                 // Clear containers since we keep inventory
                 // Even though we are destroying the container block, this is still necessary for some reason
                 if (state is Container) {
-                    // If we are disabling container saving, skip adding this block to the block list
+                    // If we are disabling container saving, empty its contents
                     if (plugin.settings.general.disableContainers) {
-                        continue
-                    } else {
-                        if (state is Chest) {
-                            state.blockInventory.clear()
-                        } else {
-                            state.inventory.clear()
+                        // loop through all the items in the inventory
+                        for (item in state.inventory.contents) {
+                            if (item == null) {
+                                continue
+                            }
+                            // spawn the item naturally in the world at the blocks location
+                            block.world.dropItemNaturally(block.location, item)
+                            // Had a lot of trouble just calling inventory.clear() but this works
+                            state.inventory.remove(item)
                         }
+                    }
+                    // Clear the inventory of the remaining container block in world
+                    if (state is Chest) {
+                        state.blockInventory.clear()
+                    } else {
+                        state.inventory.clear()
                     }
                 }
 
