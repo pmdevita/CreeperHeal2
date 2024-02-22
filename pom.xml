@@ -32,7 +32,7 @@
 <!--            <url>https://repo.codemc.org/repository/maven-public</url>-->
 <!--        </repository>-->
         <repository>
-            <id>github</id>
+            <id>movecraft-github</id>
             <name>GitHub APDevTeam/Movecraft Apache Maven Packages</name>
             <url>https://maven.pkg.github.com/APDevTeam/Movecraft</url>
             <releases>
