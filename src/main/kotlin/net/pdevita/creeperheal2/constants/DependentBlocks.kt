@@ -376,6 +376,31 @@ private object Blocks19 : VersionBlocks {
 @AutoService(VersionBlocks::class)
 class Blocks19Proxy : VersionBlocks by Blocks19
 
+
+private object Blocks20 : VersionBlocks {
+    override val version = 20
+    override val blocks: EnumMap<Material, FindDependentBlock>
+        get() {
+            return EnumMap<Material, FindDependentBlock>(
+                mapOf(
+                    Material.PITCHER_PLANT to OnTopOf,
+                    Material.PINK_PETALS to OnTopOf,
+                    Material.TORCHFLOWER to OnTopOf,
+                    Material.TORCHFLOWER_CROP to OnTopOf
+                )
+            )
+        }
+    override val tags: Array<Pair<Tag<Material>, FindDependentBlock>>
+        get() {
+            return arrayOf(
+                Pair(Tag.CEILING_HANGING_SIGNS, Below)
+            )
+        }
+}
+
+@AutoService(VersionBlocks::class)
+class Blocks20Proxy : VersionBlocks by Blocks20
+
 fun pre16PressurePlates(): EnumMap<Material, FindDependentBlock> {
     return EnumMap<Material, FindDependentBlock>(
         mapOf(
