@@ -122,16 +122,16 @@ open class ExplodedBlock(protected var explosion: Explosion, val state: BlockSta
         val entities = currentBlock.location.world?.getNearbyEntities(state.block.boundingBox)
         if (entities != null) {
             for (entity in entities) {
-                println("Checking to entity $entity at ${entity.location} out of the way of block ${state.blockData.material} ${state.block.boundingBox}")
-                println("Bounding box Height: ${entity.boundingBox.height} Max Y: ${entity.boundingBox.maxY} Min Y: ${entity.boundingBox.minY}")
+                // println("Checking to entity $entity at ${entity.location} out of the way of block ${state.blockData.material} ${state.block.boundingBox}")
+                // println("Bounding box Height: ${entity.boundingBox.height} Max Y: ${entity.boundingBox.maxY} Min Y: ${entity.boundingBox.minY}")
 
                 // If an entity has a Y equal to or greater than the placing block, we should probably teleport up
                 // If there is enough space below this block, we can leave the entity there
-                println("bruh wtf ${entity.location.y >= state.location.y} ${hasValidSpaceBelow(state.location, entity)}")
+                // println("bruh wtf ${entity.location.y >= state.location.y} ${hasValidSpaceBelow(state.location, entity)}")
                 if (entity.location.y >= state.location.y || !hasValidSpaceBelow(state.location, entity)) {
                     val oneBlockUp = currentBlock.getRelative(BlockFace.UP).location.clone()
                     oneBlockUp.direction = entity.location.direction
-                    println("Teleporting $entity up")
+                    // println("Teleporting $entity up")
                     entity.teleport(oneBlockUp)
                 }
             }
