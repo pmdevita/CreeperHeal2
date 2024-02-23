@@ -14,7 +14,7 @@ class ConfigManager(private val plugin: CreeperHeal2) {
     private val worldListConfig = ConfigFile(plugin, "worlds.yml")
     val worldList = WorldList(worldListConfig)
     private val blockListConfig = ConfigFile(plugin, "blocks.yml")
-    val blockList = BlockList(blockListConfig)
+    val blockList = BlockList(plugin, blockListConfig)
 }
 
 open class ConfigFile(private val plugin: CreeperHeal2, private val fileName: String) {
@@ -89,11 +89,23 @@ class WorldList(config: ConfigFile) {
 }
 
 
-class BlockList(config: ConfigFile) {
+class BlockList(plugin: CreeperHeal2, config: ConfigFile) {
     private val mode = config.config.getString("blocklist-type", "blacklist")!!.lowercase()
     private val isWhiteList = mode == "whitelist"
     private val blockListStrings = config.config.getStringList("blocks")
-    private val blockList = blockListStrings.map { Material.valueOf(it) }.toSet()
+    private val blockList = blockListStrings.mapNotNull { materialOrNull(it) }.toSet()
+
+    private fun materialOrNull(name: String): Material? {
+        return try {
+            Material.valueOf(name)
+        } catch (e: IllegalArgumentException) {
+            null
+        }
+    }
+
+    init {
+        plugin.debugLogger("Enabling blocklist in ${if (isWhiteList) "whitelist" else "blacklist"} mode with blocks ${blockList.map { it.name }.joinToString { ", " }}")
+    }
 
     fun allowMaterial(material: Material): Boolean {
         return if (isWhiteList) {
