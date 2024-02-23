@@ -14,6 +14,7 @@ import org.bukkit.block.BlockFace
 import org.bukkit.block.Chest
 import org.bukkit.block.Container
 import org.bukkit.block.data.type.BigDripleaf
+import org.bukkit.block.data.type.Dripleaf
 import org.bukkit.entity.Entity
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
@@ -315,7 +316,11 @@ class Explosion() {
                             data.tilt = BigDripleaf.Tilt.NONE
                             block.state.blockData = data
                         } else if (block.state.type == Material.BIG_DRIPLEAF_STEM) {
+                            val facing = (block.state.blockData as Dripleaf).facing
                             block.state.type = Material.BIG_DRIPLEAF
+                            val data = block.state.blockData as BigDripleaf
+                            data.facing = facing
+                            block.state.blockData = data
                         }
                     }
                 }
