@@ -102,6 +102,11 @@ class Explosion() {
                     val upBlock = block.block.getRelative(BlockFace.UP)
                     // First, check that the above block is not already accounted for in the explosion
                     if (!locations.containsKey(upBlock.location) && !gravityBlocks.contains(upBlock.location)) {
+                        // Filter blocks based on the black/whitelist
+                        if (!plugin.settings.blockList.allowMaterial(upBlock.type)) {
+                            continue
+                        }
+
                         // If the above block is a gravity block, freeze it in place rather than making it a
                         // dependent block
                         if (plugin.constants.gravityBlocks.contains(upBlock.blockData.material)) {
@@ -112,14 +117,20 @@ class Explosion() {
                     // Check for blocks that depend on this one and add them to our dependencies
                     val dependentBlocks = explodedBlock.findDependentBlocks()
                     if (dependentBlocks.isNotEmpty()) {
-                        for (dependentBlock in dependentBlocks) {
+                        val itr = dependentBlocks.iterator()
+                        while (itr.hasNext()) {
+                            val dependentBlock = itr.next()
+                            // Filter blocks based on the black/whitelist
+                            if (!plugin.settings.blockList.allowMaterial(dependentBlock.state.type)) {
+                                itr.remove()
+                                continue
+                            }
                             locations[dependentBlock.state.location] = dependentBlock
                         }
                         secondaryList.addAll(dependentBlocks)
-//                    explodedBlock.dependencies.addAll(dependentBlocks)
                     }
                 }
-//            this.blockList.addAll(blockList)
+
                 // Add total blocks to Bstats
                 if (plugin.stats != null) {
                     val numOfBlocks = blockList.size
