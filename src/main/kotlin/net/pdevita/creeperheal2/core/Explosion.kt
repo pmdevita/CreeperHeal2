@@ -11,7 +11,6 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
-import org.bukkit.block.Chest
 import org.bukkit.block.Container
 import org.bukkit.block.data.type.BigDripleaf
 import org.bukkit.block.data.type.Dripleaf
@@ -78,12 +77,10 @@ class Explosion() {
                             // Had a lot of trouble just calling inventory.clear() but this works
                             state.inventory.remove(item)
                         }
-                    }
-                    // Clear the inventory of the remaining container block in world
-                    if (state is Chest) {
-                        state.blockInventory.clear()
-                    } else {
-                        state.inventory.clear()
+                        if (explodedBlock.state is Container) {
+                            explodedBlock.state.snapshotInventory.clear()
+                            state.update()
+                        }
                     }
                 }
 
