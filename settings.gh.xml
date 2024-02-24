@@ -3,6 +3,25 @@
           xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
                       http://maven.apache.org/xsd/settings-1.0.0.xsd">
 
+    <activeProfiles>
+        <activeProfile>creeperheal-github</activeProfile>
+    </activeProfiles>
+
+    <profiles>
+        <profile>
+            <id>creeperheal-github</id>
+            <repositories>
+                <repository>
+                    <id>github</id>
+                    <url>https://maven.pkg.github.com/pmdevita/CreeperHeal2</url>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+        </profile>
+    </profiles>
+
     <servers>
         <server>
             <id>movecraft-github</id>
@@ -12,6 +31,8 @@
         </server>
         <server>
             <id>creeperheal-github</id>
+            <username>github</username>
+            <password>${env.GITHUB_TOKEN}</password>
             <configuration>
                 <httpHeaders>
                     <property>
