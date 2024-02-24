@@ -20,7 +20,8 @@ jobs:
       - run: |
           mvn dokka:dokka
           mvn dokka:javadoc
-          cd target
-          mv dokkaJavadoc javadoc
+          mv ./target/dokkaJavadoc ./target/javadoc
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./target
