@@ -16,7 +16,7 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
       - run: |
-          rm .mvn/maven.config
+          echo "-ssettings.gh.xml" > .mvn/maven.config
       - name: Publish package
         run: mvn --batch-mode deploy
         env:
