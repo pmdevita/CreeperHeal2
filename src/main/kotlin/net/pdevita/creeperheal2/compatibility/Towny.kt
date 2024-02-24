@@ -10,14 +10,19 @@ import org.bukkit.event.EventHandler
 
 @AutoService(BaseCompatibility::class)
 class Towny : BaseCompatibility {
-    override val pluginName = "Towny"
-    override val pluginPackage = "com.palmergames.bukkit.towny.Towny"
+//    override val pluginName = "TownyBUTDONTLOAD"
+    override val pluginName = "Disabled"
+//    override val pluginPackage = "com.palmergames.bukkit.towny.Towny"
+    override val pluginPackage = "Disabled"
+
+    val townyAPI: TownyAPI = TownyAPI.getInstance()
+
     @EventHandler
     fun onCHExplosionEvent(event: CHExplosionEvent) {
         val itr = event.blockList.iterator()
         while (itr.hasNext()) {
             val block = itr.next()
-            val town = TownyAPI.getInstance().getTown(block.location)
+            val town = townyAPI.getTown(block.location)
 
             if (town != null && town.hasActiveWar()) {
                 itr.remove()
