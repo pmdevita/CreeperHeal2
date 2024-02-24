@@ -15,6 +15,12 @@ import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 import java.util.*
 
+/**
+ * CreeperHeal2
+ *
+ * This is the main CreeperHeal2 plugin, which will be instantiated by Spigot. It's the main entry
+ * point into accessing functions on the rest of the library.
+ */
 class CreeperHeal2 : JavaPlugin() {
     val gravity = Gravity(this)
     private var debug = false
@@ -54,15 +60,18 @@ class CreeperHeal2 : JavaPlugin() {
         server.pluginManager.registerEvents(Explode(this), this)
     }
 
+    /**
+     * Takes a list of blocks and creates a new Explosion object.
+     */
     fun createNewExplosion(blockList: List<Block>): Explosion? {
         if (blockList.isEmpty()) {
             return null
         }
 
-        val newBlockList = LinkedList(blockList)
+        val newBlockList = LinkedList(blockList.filter { settings.blockList.allowMaterial(it.type) })
 
         // Mask out blocks used in external plugins
-        compatibilityManager.maskBlocksFromExplosion(newBlockList as MutableList<Block>)
+        compatibilityManager.maskBlocksFromExplosion(newBlockList)
 
         if (newBlockList.isEmpty()) {
             return null
@@ -73,6 +82,10 @@ class CreeperHeal2 : JavaPlugin() {
         return newExplosion
     }
 
+    /**
+     * Takes an entity and creates a new Explosion saving it. Only a few entity types are supported,
+     * including Paintings, Hangings, and Armor Stands.
+     */
     fun createNewExplosion(entity: Entity): Explosion {
         val newExplosion = Explosion(this, entities = listOf(entity))
         manager.add(newExplosion)

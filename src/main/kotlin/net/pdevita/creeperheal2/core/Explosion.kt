@@ -57,11 +57,6 @@ class Explosion() {
                 val state = block.state
                 val explodedBlock = ExplodedBlock.from(this, state)
 
-                // Filter blocks based on the black/whitelist
-                if (!plugin.settings.blockList.allowMaterial(state.type)) {
-                    continue
-                }
-
                 // Clear containers since we keep inventory
                 // Even though we are destroying the container block, this is still necessary for some reason
                 if (state is Container) {
