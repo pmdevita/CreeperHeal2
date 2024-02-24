@@ -25,7 +25,7 @@ jobs:
           cat pom.xml
       - name: Publish package
         run: |
-          mvn versions:set -DnewVersion=`mvn help:evaluate -Dexpression=project.version -q -DforceStdout`-SNAPSHOT
+          mvn versions:set "-DnewVersion=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)-SNAPSHOT"
           mvn --batch-mode deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
