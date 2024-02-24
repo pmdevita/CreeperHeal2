@@ -11,11 +11,16 @@ jobs:
     permissions:
       contents: write  # if you have a protection rule on your repository, you'll need to give write permission to the workflow.
     steps:
-      - name: Deploy JavaDoc 🚀
-        uses: MathieuSoysal/Javadoc-publisher.yml@v2.5.0
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v3
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          javadoc-branch: javadoc
-          java-version: 17
-          target-folder: javadoc
-          project: maven
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+      - run: |
+          mvn dokka:dokka
+          mvn dokka:javadoc
+          cd target
+          mv dokkaJavadoc javadoc
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
