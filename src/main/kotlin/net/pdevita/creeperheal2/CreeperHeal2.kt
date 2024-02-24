@@ -24,6 +24,14 @@ class CreeperHeal2 : JavaPlugin() {
     var stats: Stats? = null
     val compatibilityManager = CompatibilityManager(this)
 
+    companion object {
+        lateinit var instance: CreeperHeal2
+    }
+
+    init {
+        instance = this
+    }
+
     override fun onEnable() {
         super.onEnable()
 
