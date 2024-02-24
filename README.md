@@ -1,6 +1,6 @@
 # CreeperHeal2 (v2.1.0) (1.13-1.20+)
 
-[Spigot Plugin Page](https://www.spigotmc.org/resources/creeperheal2.80585/)
+[Spigot Plugin Page](https://www.spigotmc.org/resources/creeperheal2.80585/) [Dokka](https://pmdevita.github.io/CreeperHeal2/dokka) [Javadocs](https://pmdevita.github.io/CreeperHeal2/javadoc)
 
 All the fun of explosions with none of the cleanup!
 
