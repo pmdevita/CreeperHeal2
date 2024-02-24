@@ -16,6 +16,7 @@ types:
   minecart-tnt: false
   end-crystal: false
   bed: false
+  custom: true
 
 # Disable saving for container blocks (chests, shulker boxes, etc.)
 disable-containers: false
