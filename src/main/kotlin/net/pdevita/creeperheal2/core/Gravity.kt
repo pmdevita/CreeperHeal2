@@ -1,7 +1,7 @@
 package net.pdevita.creeperheal2.core
 
 import net.pdevita.creeperheal2.CreeperHeal2
-import net.pdevita.creeperheal2.events.BlockFall
+import net.pdevita.creeperheal2.listeners.BlockFall
 import org.bukkit.Location
 import org.bukkit.event.HandlerList
 

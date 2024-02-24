@@ -1,9 +1,7 @@
 package net.pdevita.creeperheal2.core
 
-import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.Sound
-import org.bukkit.SoundCategory
+import net.pdevita.creeperheal2.CreeperHeal2
+import org.bukkit.*
 import org.bukkit.block.BlockFace
 import org.bukkit.block.BlockState
 import org.bukkit.entity.Entity
@@ -29,6 +27,7 @@ open class ExplodedBlock(protected var explosion: Explosion, val state: BlockSta
     var dependencies = ArrayList<ExplodedBlock>()
 
     companion object {
+        val plugin = Bukkit.getPluginManager().getPlugin("CreeperHeal2") as CreeperHeal2
         fun from(explosion: Explosion, state: BlockState): ExplodedBlock {
             return when {
                 explosion.plugin.constants.dependentBlocks.sideBlocks.containsKey(state.block.blockData.material) -> {
@@ -113,7 +112,7 @@ open class ExplodedBlock(protected var explosion: Explosion, val state: BlockSta
 
         // If block isn't air, it's likely a player put it there. Just break it off normally to give it back to them
         if (currentBlock.blockData.material != Material.AIR) {
-//            plugin.debugLogger("Breaking ${currentBlock.blockData.material} to place a block")
+            plugin.debugLogger("Breaking ${currentBlock.blockData.material} to place a block")
             currentBlock.breakNaturally()
         }
         this.state.update(true)

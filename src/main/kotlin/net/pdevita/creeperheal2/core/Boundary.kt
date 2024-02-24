@@ -135,4 +135,8 @@ class Boundary (var highX: Int, var highY: Int, var highZ: Int, var lowX: Int, v
         )
     }
 
+    override fun toString(): String {
+        return "Boundary($lowX, $lowY, $lowZ - $highX, $highY, $highZ)"
+    }
+
 }

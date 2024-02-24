@@ -5,13 +5,12 @@ import com.massivecraft.factions.Board
 import com.massivecraft.factions.FLocation
 import com.massivecraft.factions.FactionsPlugin
 import net.pdevita.creeperheal2.CreeperHeal2
-import net.pdevita.creeperheal2.core.Boundary
-import org.bukkit.Location
-import org.bukkit.World
-import org.bukkit.block.Block
+import net.pdevita.creeperheal2.events.CHExplosionEvent
+import org.bukkit.event.EventHandler
 import org.bukkit.plugin.Plugin
 
-object Factions : BaseCompatibility {
+@AutoService(BaseCompatibility::class)
+class Factions : BaseCompatibility {
     override val pluginName = "Factions"
     override val pluginPackage = "com.massivecraft.factions.FactionsPlugin"
     private lateinit var factionPlugin: FactionsPlugin
@@ -33,14 +32,11 @@ object Factions : BaseCompatibility {
         warzone = !creeperHeal2.config.getBoolean("factions.warzone", false)
     }
 
-    override fun maskBlocksFromExplosion(
-        blockList: MutableList<Block>,
-        world: World,
-        boundary: Boundary,
-        center: Location
-    ) {
+    @EventHandler
+    fun onCHExplosionEvent(event: CHExplosionEvent) {
 //        var counter = 0
-        val itr = blockList.iterator()
+        creeperHeal2.debugLogger("Masking blocks for Factions")
+        val itr = event.blockList.iterator()
         while (itr.hasNext()) {
             val block = itr.next()
             val faction = Board.getInstance().getFactionAt(FLocation(block.location))
@@ -60,6 +56,3 @@ object Factions : BaseCompatibility {
     }
 
 }
-
-@AutoService(BaseCompatibility::class)
-class FactionsProxy : BaseCompatibility by Factions

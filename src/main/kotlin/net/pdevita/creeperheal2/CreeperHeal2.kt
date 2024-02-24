@@ -7,7 +7,7 @@ import net.pdevita.creeperheal2.constants.ConstantsManager
 import net.pdevita.creeperheal2.core.Explosion
 import net.pdevita.creeperheal2.core.ExplosionManager
 import net.pdevita.creeperheal2.core.Gravity
-import net.pdevita.creeperheal2.events.Explode
+import net.pdevita.creeperheal2.listeners.Explode
 import net.pdevita.creeperheal2.utils.Stats
 import org.bukkit.block.Block
 import org.bukkit.entity.Entity

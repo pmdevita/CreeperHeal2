@@ -5,9 +5,10 @@ import net.pdevita.creeperheal2.core.Boundary
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.block.Block
+import org.bukkit.event.Listener
 import org.bukkit.plugin.Plugin
 
-interface BaseCompatibility {
+interface BaseCompatibility: Listener {
     val pluginName: String /* The name of the plugin (as defined in its plugin.yml) */
     val pluginPackage: String /* The fully qualified name of the Plugin class for that plugin ex. net.pdevita.creeperheal2.CreeperHeal2 */
 

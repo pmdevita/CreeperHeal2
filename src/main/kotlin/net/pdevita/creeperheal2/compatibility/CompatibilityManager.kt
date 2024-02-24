@@ -2,13 +2,12 @@ package net.pdevita.creeperheal2.compatibility
 
 import net.pdevita.creeperheal2.CreeperHeal2
 import net.pdevita.creeperheal2.core.Boundary
+import net.pdevita.creeperheal2.events.CHExplosionEvent
 import org.bukkit.Bukkit
 import org.bukkit.block.Block
 import java.util.*
 
 class CompatibilityManager(val plugin: CreeperHeal2) {
-    val pluginList = LinkedList<BaseCompatibility>()
-
     fun loadCompatibilityPlugins() {
         val serviceLoader = ServiceLoader.load(BaseCompatibility::class.java, plugin.javaClass.classLoader)
         plugin.debugLogger("Found ${serviceLoader.count()} compatibility plugin(s)")
@@ -22,22 +21,20 @@ class CompatibilityManager(val plugin: CreeperHeal2) {
             try {
                 compatibilityPlugin.setPluginReference(otherPlugin)
                 compatibilityPlugin.setCreeperHealReference(plugin)
-                pluginList.add(compatibilityPlugin)
+                plugin.server.pluginManager.registerEvents(compatibilityPlugin, plugin)
             } catch (e: NoClassDefFoundError) {
+                plugin.debugLogger("NoClassDefFoundError")
                 continue
             }
         }
     }
 
     fun maskBlocksFromExplosion(blockList: MutableList<Block>) {
-        if (pluginList.isEmpty()) {
-            return
-        }
         val boundary = Boundary(blockList)
-        val center = boundary.center()
         val world = blockList.first().world
-        for (plugin in pluginList) {
-            plugin.maskBlocksFromExplosion(blockList, world, boundary, center)
-        }
+
+        val event = CHExplosionEvent(blockList, world, boundary)
+        plugin.debugLogger("Calling CHExplosionEvent in $world with $boundary")
+        Bukkit.getPluginManager().callEvent(event)
     }
 }

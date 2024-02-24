@@ -1,4 +1,4 @@
-package net.pdevita.creeperheal2.events
+package net.pdevita.creeperheal2.listeners
 
 import net.pdevita.creeperheal2.CreeperHeal2
 import org.bukkit.Material
