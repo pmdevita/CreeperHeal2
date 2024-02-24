@@ -106,7 +106,6 @@ private object Blocks13 : VersionBlocks {
                     Material.FIRE_CORAL to OnTopOf,
                     Material.FIRE_CORAL_FAN to OnTopOf,
                     Material.GRAY_BANNER to OnTopOf,
-                    Material.GRASS to OnTopOf,
                     Material.GREEN_BANNER to OnTopOf,
                     Material.HORN_CORAL to OnTopOf,
                     Material.HORN_CORAL_FAN to OnTopOf,
@@ -219,6 +218,7 @@ private object Blocks13 : VersionBlocks {
             mapOf(
                 Material.valueOf("SIGN") to OnTopOf, // For values that have been removed from the current build target, reference them by string
                 Material.valueOf("WALL_SIGN") to Behind,
+                Material.valueOf("GRASS") to OnTopOf,
             )
         )
         blocks.putAll(pre16PressurePlates())
@@ -262,7 +262,13 @@ private object Blocks14 : VersionBlocks {
     }
 
     override fun versionBlocks(): EnumMap<Material, FindDependentBlock> {
-        return pre16PressurePlates()
+        val blocks = EnumMap<Material, FindDependentBlock>(
+            mapOf(
+                Material.valueOf("GRASS") to OnTopOf,
+            )
+        )
+        blocks.putAll(pre16PressurePlates())
+        return blocks
     }
 }
 
@@ -273,7 +279,13 @@ private object Blocks15 : VersionBlocks {
     override val version = 15
 
     override fun versionBlocks(): EnumMap<Material, FindDependentBlock> {
-        return pre16PressurePlates()
+        val blocks = EnumMap<Material, FindDependentBlock>(
+            mapOf(
+                Material.valueOf("GRASS") to OnTopOf,
+            )
+        )
+        blocks.putAll(pre16PressurePlates())
+        return blocks
     }
 
     override fun versionTags(): Array<Pair<Tag<Material>, FindDependentBlock>> {
@@ -318,6 +330,12 @@ private object Blocks16 : VersionBlocks {
             Pair(Tag.CARPETS, OnTopOf),
         )
     }
+
+    override fun versionBlocks(): EnumMap<Material, FindDependentBlock>? {
+        return EnumMap<Material, FindDependentBlock>(mapOf(
+            Material.valueOf("GRASS") to OnTopOf,
+        ))
+    }
 }
 
 @AutoService(VersionBlocks::class)
@@ -350,10 +368,30 @@ private object Blocks17 : VersionBlocks {
             Pair(Tag.CARPETS, OnTopOf),
         )
     }
+
+    override fun versionBlocks(): EnumMap<Material, FindDependentBlock>? {
+        return EnumMap<Material, FindDependentBlock>(mapOf(
+            Material.valueOf("GRASS") to OnTopOf,
+        ))
+    }
 }
 
 @AutoService(VersionBlocks::class)
 class Blocks17Proxy : VersionBlocks by Blocks17
+
+private object Blocks18 : VersionBlocks {
+    override val version = 18
+
+    override fun versionBlocks(): EnumMap<Material, FindDependentBlock>? {
+        return EnumMap<Material, FindDependentBlock>(mapOf(
+            Material.valueOf("GRASS") to OnTopOf,
+        ))
+    }
+}
+
+@AutoService(VersionBlocks::class)
+class Blocks18Proxy : VersionBlocks by Blocks18
+
 
 private object Blocks19 : VersionBlocks {
     override val version = 19
@@ -371,6 +409,12 @@ private object Blocks19 : VersionBlocks {
                 Pair(Tag.WOOL_CARPETS, OnTopOf)
             )
         }
+
+    override fun versionBlocks(): EnumMap<Material, FindDependentBlock>? {
+        return EnumMap<Material, FindDependentBlock>(mapOf(
+            Material.valueOf("GRASS") to OnTopOf,
+        ))
+    }
 }
 
 @AutoService(VersionBlocks::class)
@@ -381,12 +425,20 @@ private object Blocks20 : VersionBlocks {
     override val version = 20
     override val blocks: EnumMap<Material, FindDependentBlock>
         get() {
+            // Darn you Mojang! Why couldn't you wait to 1.21?
+            val grassEnum = try {
+                Material.valueOf("GRASS")
+            } catch (e: IllegalArgumentException) {
+                Material.valueOf("SHORT_GRASS")
+            }
+
             return EnumMap<Material, FindDependentBlock>(
                 mapOf(
                     Material.PITCHER_PLANT to OnTopOf,
                     Material.PINK_PETALS to OnTopOf,
                     Material.TORCHFLOWER to OnTopOf,
-                    Material.TORCHFLOWER_CROP to OnTopOf
+                    Material.TORCHFLOWER_CROP to OnTopOf,
+                    grassEnum to OnTopOf
                 )
             )
         }

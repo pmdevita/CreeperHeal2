@@ -6,6 +6,7 @@ author: pmdevita
 softdepend:
   - Movecraft
   - Factions
+  - Towny
 
 commands:
   creeperheal:

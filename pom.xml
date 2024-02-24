@@ -14,7 +14,7 @@
         <!--        <spigot.version>1.14.4</spigot.version>-->
         <!--        <spigot.version>1.13.2</spigot.version>-->
         <!--        <spigot.version>1.16.5</spigot.version>-->
-        <spigot.version>1.20.1</spigot.version>
+        <spigot.version>1.20.4</spigot.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.compiler.incremental>false</kotlin.compiler.incremental>
         <auto-service.version>1.1.1</auto-service.version>
@@ -41,6 +41,10 @@
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
+        </repository>
+        <repository>
+            <id>glaremasters repo</id>
+            <url>https://repo.glaremasters.me/repository/towny/</url>
         </repository>
         <repository>
             <id>FactionsRepo</id>
@@ -99,6 +103,12 @@
             <version>1.6.9.5-U0.6.31</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.palmergames.bukkit.towny</groupId>
+            <artifactId>towny</artifactId>
+            <version>0.100.1.0</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -147,14 +157,14 @@
                     <dependency>
                         <groupId>dev.zacsweers.autoservice</groupId>
                         <artifactId>auto-service-ksp</artifactId>
-                        <version>1.0.0</version>
+                        <version>1.1.0</version>
                     </dependency>
                 </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.10.1</version>
+                <version>3.12.1</version>
                 <executions>
                     <execution>
                         <id>default-compile</id>
@@ -194,7 +204,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.4</version>
+                <version>3.5.2</version>
                 <configuration>
                     <relocations>
                         <relocation>
@@ -251,17 +261,6 @@
             </plugin>
         </plugins>
     </build>
-    <reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.6.3</version>
-                <configuration>
-                </configuration>
-            </plugin>
-        </plugins>
-    </reporting>
 
     <distributionManagement>
         <repository>
