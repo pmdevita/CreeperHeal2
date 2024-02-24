@@ -8,6 +8,32 @@ This plugin is meant to be a spiritual successor to the original CreeperHeal plu
 https://github.com/nitnelave/CreeperHeal. Thanks to [nitnelave](https://github.com/nitnelave/) 
 for the original idea and name!
 
+Features:
+- Support for every normal explosion type and custom ones
+- Smart block replacement 
+- Multi-threaded optimizations
+- Support for Factions, Movecraft, Cannons, and more
+- Lots of configuration options
+
+## What is smart block replacement?
+
+CreeperHeal2 always repairs blocks in a "safe" order. For example, if you had a sign attached to 
+the side of a block, CreeperHeal2 will always replace the block before the sign, ensuring the sign 
+is never in an invalid state where it could be "popped" by a block update.
+
+CreeperHeal2 also detects any blocks that would be destroyed or otherwise affected by an explosion. 
+Taking the example of the block and sign again, if only the block was in the explosion, normally the 
+sign would pop off once the block was removed. CreeperHeal2 will automatically detect this and save 
+the sign.
+
+CreeperHeal2 also detects if two explosions happen next to each other. With the sign and block example, 
+if both were involved in two side-by-side explosions, there's a chance the sign's explosion would restore 
+it before the block's! CreeperHeal2 solves this issue by merging all nearby explosions, allowing them 
+to restore in a proper order together.
+
+The result of all of this is that CreeperHeal2 is able to save and restore nearly any structure perfectly! 
+Give it a try!
+
 # Setup/Installation
 
 Download the latest release and place it in your plugins folder. The config.yml is generated the first 
