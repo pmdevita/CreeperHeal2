@@ -10,7 +10,8 @@ for the original idea and name!
 
 Features:
 - Support for every normal explosion type and custom ones
-- Smart block replacement 
+- Smart block replacement
+- Support for all blocks and entity blocks
 - Multi-threaded optimizations
 - Support for Factions, Movecraft, Cannons, and more
 - Lots of configuration options

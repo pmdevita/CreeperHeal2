@@ -69,8 +69,6 @@ class Explosion() {
                             }
                             // spawn the item naturally in the world at the blocks location
                             block.world.dropItemNaturally(block.location, item)
-                            // Had a lot of trouble just calling inventory.clear() but this works
-                            state.inventory.remove(item)
                         }
                         if (explodedBlock.state is Container) {
                             explodedBlock.state.snapshotInventory.clear()
