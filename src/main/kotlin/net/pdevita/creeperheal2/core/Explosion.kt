@@ -71,7 +71,12 @@ class Explosion() {
                             block.world.dropItemNaturally(block.location, item)
                         }
                         if (explodedBlock.state is Container) {
-                            explodedBlock.state.snapshotInventory.clear()
+                            try {
+                                explodedBlock.state.snapshotInventory.clear()
+                            } catch (e: NullPointerException) {
+                                this.plugin.logger.severe("NullPointerException when trying to clear an inventory! This is bad and should never happen! Report this issue!")
+                                this.plugin.logger.severe(e.stackTraceToString())
+                            }
                             state.update()
                         }
                     }
