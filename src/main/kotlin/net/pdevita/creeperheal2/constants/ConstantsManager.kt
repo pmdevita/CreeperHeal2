@@ -9,7 +9,7 @@ class ConstantsManager(plugin: CreeperHeal2) {
     val version: Pair<Int, Int> = getServerVersion()
     val gravityBlocks: HashSet<Material> = GravityBlocks().getBlocks(version)
     val dependentBlocks: DependentBlocks = DependentBlocks(version, plugin)
-    val multiBlocks: MultiBlocks = MultiBlocks(version)
+    val multiBlocks: MultiBlocks = MultiBlocks(version, plugin)
 
     private fun getServerVersion(): Pair<Int, Int> {
         var version = Bukkit.getBukkitVersion()

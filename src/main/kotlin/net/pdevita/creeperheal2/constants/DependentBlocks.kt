@@ -200,7 +200,6 @@ private object Blocks13 : VersionBlocks {
     override val tags: Array<Pair<Tag<Material>, FindDependentBlock>>
         get() {
             return arrayOf(
-                Pair(Tag.DOORS, OnTopOf),
                 Pair(Tag.RAILS, OnTopOf),
                 Pair(Tag.SAPLINGS, OnTopOf),
                 Pair(Tag.BUTTONS, Behind)
