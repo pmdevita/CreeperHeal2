@@ -70,6 +70,10 @@ class CreeperHeal2 : JavaPlugin() {
 
         val newBlockList = LinkedList(blockList.filter { settings.blockList.allowMaterial(it.type) })
 
+        if (newBlockList.isEmpty()) {
+            return null
+        }
+
         // Mask out blocks used in external plugins
         compatibilityManager.maskBlocksFromExplosion(newBlockList)
 
