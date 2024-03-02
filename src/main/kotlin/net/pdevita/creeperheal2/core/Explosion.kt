@@ -69,6 +69,9 @@ class Explosion() {
                             }
                             // spawn the item naturally in the world at the blocks location
                             block.world.dropItemNaturally(block.location, item)
+                            // I don't know why, I shouldn't have to know why, but if we don't
+                            // remove every single item from inventory AND clear, it won't work
+                            state.inventory.remove(item)
                         }
                         if (explodedBlock.state is Container) {
                             try {
