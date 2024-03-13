@@ -51,7 +51,7 @@ class Commands(private val plugin: CreeperHeal2): CommandExecutor {
                     finishedPost
                 }
                 GlobalScope.launch(Dispatchers.minecraft) {
-                    sender.sendMessage("Explosion $i: $status")
+                    sender.sendMessage("Explosion $i (${explosion.boundary}): $status")
                 }
             }
         }
