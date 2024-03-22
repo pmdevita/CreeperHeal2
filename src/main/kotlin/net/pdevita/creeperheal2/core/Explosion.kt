@@ -429,7 +429,7 @@ class Explosion() {
                 // If we are cancelling, exit, otherwise, keep going
                 if (!cancelReplace.get()) {
                     delayJob = async(Dispatchers.async) {
-                        delay((plugin.settings.general.betweenBlocksDelay / 20 * 1000).toLong())
+                        delay((plugin.settings.general.betweenBlocksDelay / 20.0 * 1000).toLong())
                     }
                     delayJob!!.join()
                     // Delay is kinda long, could be good to check again
@@ -454,7 +454,7 @@ class Explosion() {
                 }
                 if (!cancelReplace.get()) {
                     delayJob = async(Dispatchers.async) {
-                        delay((plugin.settings.general.betweenBlocksDelay / 20 * 1000).toLong())
+                        delay((plugin.settings.general.betweenBlocksDelay / 20.0 * 1000).toLong())
                     }
                     delayJob!!.join()
                     // Delay is kinda long, could be good to check again
