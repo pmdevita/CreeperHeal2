@@ -18,10 +18,12 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
       - run: |
+          ls -la
+          ls -la .mvn
           echo "-ssettings.gh.xml" > .mvn/maven.config
+          cat .mvn/maven.config
           sed -i 's/<build>/<build><finalName>creeperheal2<\/finalName>/' pom.xml
           sed -i 's/<artifactId>CreeperHeal2<\/artifactId>/<artifactId>creeperheal2<\/artifactId>/' pom.xml
-          cat pom.xml
       - name: Publish package
         run: |
           mvn versions:set "-DnewVersion=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)-SNAPSHOT"
