@@ -5,6 +5,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.pdevita.creeperheal2.CreeperHeal2
 import net.pdevita.creeperheal2.utils.async
+import org.bukkit.Location
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
@@ -16,7 +17,7 @@ class ExplosionManager(val plugin: CreeperHeal2) {
     private val addedExplosions = ConcurrentLinkedQueue<Explosion>()
     private val removedExplosions = ConcurrentLinkedQueue<Explosion>()
 
-    fun add(explosion: Explosion) {
+    internal fun add(explosion: Explosion) {
         addedExplosions.add(explosion)
         GlobalScope.launch (Dispatchers.async) {
             synchronized(addedExplosions) {
@@ -34,7 +35,7 @@ class ExplosionManager(val plugin: CreeperHeal2) {
         }
     }
 
-    fun remove(explosion: Explosion) {
+    internal fun remove(explosion: Explosion) {
         removedExplosions.add(explosion)
         GlobalScope.launch (Dispatchers.async) {
             synchronized(removedExplosions) {
@@ -82,7 +83,7 @@ class ExplosionManager(val plugin: CreeperHeal2) {
         }
     }
 
-    fun merge() {
+    internal fun merge() {
         explosionsLock.withLock {
             if (explosions.size < 2) {
                 return@withLock
@@ -132,4 +133,12 @@ class ExplosionManager(val plugin: CreeperHeal2) {
         }
     }
 
+    fun isLocationInExplosion(loc: Location): Boolean {
+        for (explosion in explosions) {
+            if (explosion.boundary?.inBoundary(loc) == true) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

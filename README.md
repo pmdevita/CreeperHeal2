@@ -92,8 +92,8 @@ again.
 ### Adding compatibility with another plugin
 
 CreeperHeal2 now broadcasts a new event called CHExplosionEvent 
-[Dokka](https://pmdevita.github.io/CreeperHeal2/dokka/-creeper-heal2/net.pdevita.creeperheal2.events/-c-h-explosion-event/index.html) 
-[Javadocs](https://pmdevita.github.io/CreeperHeal2/javadoc/net/pdevita/creeperheal2/events/CHExplosionEvent.html). 
+[Dokka](https://pmdevita.github.io/CreeperHeal2/dokka/-creeper-heal2/net.pdevita.creeperheal2.events/-c-h-explosion-event/index.html)
+[Javadocs](https://pmdevita.github.io/CreeperHeal2/javadoc/net/pdevita/creeperheal2/events/CHExplosionEvent.html) 
 Plugins can listen to this event and remove any blocks they don't want CreeperHeal2 touching.
 
 If you need help, feel free to reach out in discussions or the issues. I also occasionally check the 
