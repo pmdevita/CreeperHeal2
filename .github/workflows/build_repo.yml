@@ -11,17 +11,18 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
       - run: |
+          ls -la
+          ls -la .mvn
           echo "-ssettings.gh.xml" > .mvn/maven.config
           cat .mvn/maven.config
           sed -i 's/<build>/<build><finalName>creeperheal2<\/finalName>/' pom.xml
           sed -i 's/<artifactId>CreeperHeal2<\/artifactId>/<artifactId>creeperheal2<\/artifactId>/' pom.xml
-          cat pom.xml
       - name: Publish package
         run: mvn --batch-mode deploy -Djar.finalName=myCustomName
         env:
