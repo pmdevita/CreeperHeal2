@@ -1,4 +1,4 @@
-name: CI
+name: Development Build
 
 on: [workflow_dispatch, push, pull_request]
 
@@ -14,12 +14,6 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
           cache: 'maven'
-    - name: Cache Maven packages
-      uses: actions/cache@v3
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2
-        restore-keys: ${{ runner.os }}-m2
     - name: Extract Git short hash
       id: githash
       shell: bash
@@ -29,15 +23,8 @@ jobs:
       id: maven-project
       shell: bash
       run: echo ::set-output name=version::$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
-    - name: maven-settings
-      uses: s4u/maven-settings-action@v2.8.0
-      with:
-        servers: '[{"id": "github", "username": "dummy", "password": "${GITHUB_TOKEN_REF}"}]'
-        githubServer: false
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
-      env:
-        GITHUB_TOKEN_REF: ${{ secrets.GITHUB_TOKEN }}
+      run: mvn -B package
     - name: Stage jar
       run: mkdir staging && cp target/CreeperHeal2*.jar staging && mv staging/CreeperHeal2*.jar staging/CreeperHeal2-dev-${{ steps.githash.outputs.sha_short }}.jar
     - name: check staging
