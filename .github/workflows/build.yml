@@ -8,23 +8,25 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Set up JDK 17
+    - name: Set up JDK 19
       uses: actions/setup-java@v3
       with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '19'
           cache: 'maven'
     - name: Extract Git short hash
       id: githash
       shell: bash
       run: |
         echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
     - name: Extract Maven project version
       id: maven-project
       shell: bash
       run: echo ::set-output name=version::$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
     - name: Build with Maven
       run: mvn -B package
+
     - name: Stage jar
       run: mkdir staging && cp target/CreeperHeal2*.jar staging && mv staging/CreeperHeal2*.jar staging/CreeperHeal2-dev-${{ steps.githash.outputs.sha_short }}.jar
     - name: check staging
