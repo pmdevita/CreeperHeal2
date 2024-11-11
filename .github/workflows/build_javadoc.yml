@@ -2,6 +2,9 @@ name: Deploy Javadoc
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - master
   release:
     types: [created]
 
@@ -25,7 +28,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v3
         with:
-          java-version: '17'
+          java-version: '19'
           distribution: 'temurin'
           cache: 'maven'
       - run: |

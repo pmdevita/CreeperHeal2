@@ -81,7 +81,7 @@
         <dependency>
             <groupId>net.countercraft</groupId>
             <artifactId>movecraft</artifactId>
-            <version>8.0.0_beta-1</version>
+            <version>8.0.0_beta-5</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
